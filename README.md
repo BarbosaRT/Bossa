@@ -13,8 +13,8 @@
 ![Player](./assets/markdown/Screenshot_2.jpg "Player")  
 
 # Features:
-- ## Dark And Light Theme
-- ## Add A Song
-- ## Change The Player Style
-- ## Loop Option
-- ## Random Play Option
+- ### Dark And Light Theme
+- ### Add A Song
+- ### Change The Player Style
+- ### Loop Option
+- ### Random Play Option
