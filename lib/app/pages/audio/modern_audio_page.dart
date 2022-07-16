@@ -4,18 +4,18 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:bossa/app/controllers/audio_controller.dart';
 import 'package:flutter/material.dart';
 
-class Style2AudioPage extends StatefulWidget {
+class ModernAudioPage extends StatefulWidget {
   final List songs;
   int index;
 
-  Style2AudioPage({Key? key, required this.songs, required this.index})
+  ModernAudioPage({Key? key, required this.songs, required this.index})
       : super(key: key);
 
   @override
-  State<Style2AudioPage> createState() => _Style2AudioPageState();
+  State<ModernAudioPage> createState() => _ModernAudioPageState();
 }
 
-class _Style2AudioPageState extends State<Style2AudioPage> {
+class _ModernAudioPageState extends State<ModernAudioPage> {
   static late AudioPlayer advancedPlayer;
   late AudioController audioController;
   @override

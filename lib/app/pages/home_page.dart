@@ -1,18 +1,18 @@
 import 'dart:io';
 
-import 'package:bossa/app/pages/audio/style2_audio_page.dart';
+import 'package:bossa/app/pages/audio/modern_audio_page.dart';
 import 'package:flutter/material.dart';
 import 'package:bossa/app/components/app_tabs.dart';
-import 'package:bossa/app/pages/audio/style1_audio_page.dart';
+import 'package:bossa/app/pages/audio/classic_audio_page.dart';
 
 class SelectedScreen {
-  static String style1 = 'Style1';
-  static String style2 = 'Style2';
+  static String classic = 'Classic';
+  static String modern = 'Modern';
 }
 
 // ignore: must_be_immutable
 class HomePage extends StatefulWidget {
-  String selectedScreen = SelectedScreen.style2;
+  String selectedScreen = SelectedScreen.modern;
   List songs = [];
 
   HomePage({Key? key}) : super(key: key);
@@ -41,11 +41,11 @@ class _HomePageState extends State<HomePage>
   }
 
   Widget nextScreen(BuildContext buildContext, int index) {
-    if (widget.selectedScreen == 'Style1') {
-      return Style1AudioPage(songs: widget.songs, index: index);
+    if (widget.selectedScreen == 'Classic') {
+      return ClassicAudioPage(songs: widget.songs, index: index);
     }
 
-    return Style2AudioPage(
+    return ModernAudioPage(
       songs: widget.songs,
       index: index,
     );

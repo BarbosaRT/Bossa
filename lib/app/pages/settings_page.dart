@@ -72,9 +72,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(widgetColor)),
                   onPressed: () {
-                    widget.appController.homeStyle(SelectedScreen.style1);
+                    widget.appController.homeStyle(SelectedScreen.classic);
                   },
-                  child: Text('1', style: headline3)),
+                  child: Text('Classic', style: headline3)),
               const SizedBox(
                 width: 10,
               ),
@@ -82,9 +82,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(widgetColor)),
                   onPressed: () {
-                    widget.appController.homeStyle(SelectedScreen.style2);
+                    widget.appController.homeStyle(SelectedScreen.modern);
                   },
-                  child: Text('2', style: headline3))
+                  child: Text('Modern', style: headline3))
             ],
           ),
           Text(
