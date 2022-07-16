@@ -2,15 +2,15 @@
 
 ## A Music Player Made With Flutter
 
-![Icon](./assets/images/Icon.png "Icon")  
+![Icon](./github/markdown/Icon.png "Icon")  
 
-![Main Screen](./assets/markdown/Screenshot_3.jpg "Main Screen")   
-
-
-![Add Songs](./assets/markdown/Screenshot_1.jpg "Add Songs")   
+![Main Screen](./github/markdown/Screenshot_3.jpg "Main Screen")   
 
 
-![Player](./assets/markdown/Screenshot_2.jpg "Player")  
+![Add Songs](./github/markdown/Screenshot_1.jpg "Add Songs")   
+
+
+![Player](./github/markdown/Screenshot_2.jpg "Player")  
 
 # Features:
 - ### Dark And Light Theme

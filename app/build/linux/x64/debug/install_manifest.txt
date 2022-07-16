@@ -1,0 +1,12 @@
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/bossa
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/data/icudtl.dat
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/lib/libflutter_linux_gtk.so
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/lib/libaudioplayers_linux_plugin.so
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/data/flutter_assets/FontManifest.json
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/data/flutter_assets/fonts/MaterialIcons-Regular.otf
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/data/flutter_assets/AssetManifest.json
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/data/flutter_assets/NOTICES.Z
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/data/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/data/flutter_assets/version.json
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/data/flutter_assets/shaders/ink_sparkle.frag
+/home/ru/Projetos/dart/bossa/build/linux/x64/debug/bundle/data/flutter_assets/kernel_blob.bin
