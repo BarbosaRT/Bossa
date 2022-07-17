@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:bossa/app/colors/app_colors.dart';
 import 'package:bossa/app/controllers/home_controller.dart';
 import 'package:bossa/app/pages/file_page.dart';
-import 'package:bossa/app/pages/home_page.dart';
 import 'package:bossa/app/pages/loading_page.dart';
 import 'package:bossa/app/pages/settings_page.dart';
 import 'package:flutter/material.dart';
