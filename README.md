@@ -13,6 +13,6 @@
 
 # Info:
 
-main - source for the current build
-merge - for QA
-dev - for development
+main - source for the current build  
+merge - for QA  
+dev - for development  
