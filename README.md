@@ -10,3 +10,9 @@
 - ### Change The Player Style
 - ### Loop Option
 - ### Random Play Option
+
+# Info:
+
+main - source for the current build  
+merge - for QA  
+dev - for development  
