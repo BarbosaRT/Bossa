@@ -1,0 +1,28 @@
+{
+    "logs": [
+        {
+            "outputFile": "/home/ru/Projetos/dart/bossa/app/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-night-v8/values-night-v8.xml",
+            "map": [
+                {
+                    "source": "/home/ru/Projetos/dart/bossa/app/android/app/src/main/res/values-night/styles.xml",
+                    "from": {
+                        "startLines": "3,14",
+                        "startColumns": "4,4",
+                        "startOffsets": "172,817",
+                        "endLines": "7,17",
+                        "endColumns": "12,12",
+                        "endOffsets": "475,1052"
+                    },
+                    "to": {
+                        "startLines": "2,7",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,363",
+                        "endLines": "6,10",
+                        "endColumns": "12,12",
+                        "endOffsets": "358,598"
+                    }
+                }
+            ]
+        }
+    ]
+}
