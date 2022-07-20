@@ -1,4 +1,4 @@
-#Sat Jul 16 16:41:30 BRT 2022
-base.0=/home/ru/Projetos/dart/bossa/build/app/intermediates/dex/debug/mergeDexDebug/classes.dex
+#Tue Jul 19 22:25:53 BRT 2022
+base.0=/home/ru/Projetos/dart/bossa/app/build/app/intermediates/dex/debug/mergeDexDebug/classes.dex
 renamed.0=classes.dex
 path.0=classes.dex

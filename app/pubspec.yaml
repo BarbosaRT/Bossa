@@ -27,13 +27,22 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  audioplayers: ^1.0.1
-  cupertino_icons: ^1.0.5
-  dotted_border: ^2.0.0+2
-  file_picker: ^4.6.1
   flutter:
     sdk: flutter
+  
+  cupertino_icons: ^1.0.5
+  
+  provider: ^6.0.2
+
   path_provider: ^2.0.11
+
+  audioplayers: ^1.0.1
+
+  dotted_border: ^2.0.0+2
+
+  file_picker: ^4.6.1
+
+  csv: ^5.0.1
 
 dev_dependencies:
   flutter_lints: ^2.0.0

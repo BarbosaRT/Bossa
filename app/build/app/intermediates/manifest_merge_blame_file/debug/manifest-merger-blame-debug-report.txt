@@ -13,23 +13,23 @@
 13         to allow setting breakpoints, to provide hot reload, etc.
 14    -->
 15    <uses-permission android:name="android.permission.INTERNET" />
-15-->/home/ru/Projetos/dart/bossa/android/app/src/debug/AndroidManifest.xml:7:5-66
-15-->/home/ru/Projetos/dart/bossa/android/app/src/debug/AndroidManifest.xml:7:22-64
+15-->/home/ru/Projetos/dart/bossa/app/android/app/src/debug/AndroidManifest.xml:7:5-66
+15-->/home/ru/Projetos/dart/bossa/app/android/app/src/debug/AndroidManifest.xml:7:22-64
 16    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-16-->[:file_picker] /home/ru/Projetos/dart/bossa/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:9:5-80
-16-->[:file_picker] /home/ru/Projetos/dart/bossa/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:9:22-77
+16-->[:file_picker] /home/ru/Projetos/dart/bossa/app/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:9:5-80
+16-->[:file_picker] /home/ru/Projetos/dart/bossa/app/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:9:22-77
 17
 18    <queries>
-18-->[:file_picker] /home/ru/Projetos/dart/bossa/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:11:5-17:15
+18-->[:file_picker] /home/ru/Projetos/dart/bossa/app/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:11:5-17:15
 19        <intent>
-19-->[:file_picker] /home/ru/Projetos/dart/bossa/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:12:9-16:18
+19-->[:file_picker] /home/ru/Projetos/dart/bossa/app/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:12:9-16:18
 20            <action android:name="android.intent.action.GET_CONTENT" />
-20-->[:file_picker] /home/ru/Projetos/dart/bossa/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:13:13-72
-20-->[:file_picker] /home/ru/Projetos/dart/bossa/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:13:21-69
+20-->[:file_picker] /home/ru/Projetos/dart/bossa/app/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:13:13-72
+20-->[:file_picker] /home/ru/Projetos/dart/bossa/app/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:13:21-69
 21
 22            <data android:mimeType="*/*" />
-22-->[:file_picker] /home/ru/Projetos/dart/bossa/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:15:13-44
-22-->[:file_picker] /home/ru/Projetos/dart/bossa/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:15:19-41
+22-->[:file_picker] /home/ru/Projetos/dart/bossa/app/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:15:13-44
+22-->[:file_picker] /home/ru/Projetos/dart/bossa/app/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:15:19-41
 23        </intent>
 24    </queries>
 25

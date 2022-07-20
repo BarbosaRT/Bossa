@@ -7,5 +7,6 @@
     </style>
     <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
+        <item name="android:defaultFocusHighlightEnabled">false</item>
     </style>
 </resources>

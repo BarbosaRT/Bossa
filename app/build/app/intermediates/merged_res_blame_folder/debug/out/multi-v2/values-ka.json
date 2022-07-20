@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "/home/ru/Projetos/dart/bossa/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-ka/values-ka.xml",
+            "outputFile": "/home/ru/Projetos/dart/bossa/app/build/app/intermediates/incremental/mergeDebugResources/merged.dir/values-ka/values-ka.xml",
             "map": [
                 {
                     "source": "/home/ru/.gradle/caches/transforms-3/5e083c06c9925c2309f02468fc66e376/transformed/core-1.7.0/res/values-ka/values-ka.xml",
