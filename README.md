@@ -14,5 +14,4 @@
 # Info:
 
 main - source for the current build  
-merge - for QA  
 dev - for development  
