@@ -98,10 +98,8 @@ class _FilePageState extends State<FilePage>
                                               ]),
                                           tabs: const [
                                             AppTabs(
-                                                backgroundColor: Colors.blue,
                                                 text: 'File'),
                                             AppTabs(
-                                                backgroundColor: Colors.blueAccent,
                                                 text: 'Info'),
                                           ])),
                                 ),

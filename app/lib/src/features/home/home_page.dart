@@ -43,20 +43,6 @@ class _HomePageState extends State<HomePage>
               body: Column(
                 children: [
                   const MenuItems(),
-                  const SizedBox(height: 10),
-                  // Your Songs
-                  Container(
-                    margin: const EdgeInsets.only(left: 20),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Your Songs',
-                          style: headline2,
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 1),
                   //
                   // Menu Buttons
                   //
