@@ -4,14 +4,9 @@
 
 ![Banner](./github/markdown/banner.png "Banner")  
 
-# Features:
-- ### Dark And Light Theme
-- ### Add A Song
-- ### Change The Player Style
-- ### Loop Option
-- ### Random Play Option
-
 # Info:
 
 main - source for the current build  
 dev - for development  
+
+[Changelog](https://github.com/BarbosaRT/Bossa/wiki)
