@@ -41,8 +41,8 @@ class SongUrlParser {
   }
 
   Future<String> parseSongUrlToInvidious(String url) async {
-    List<dynamic> invidiousInstances = await getHttp(apiUrl);
-    String info = invidiousInstances[0][1]['uri'];
+    List<dynamic> invidiousInstances = await getHttp(apiUrl) as List<dynamic>;
+    String info = (invidiousInstances[0][1]['uri']).toString();
     return '$info/watch?v=$url';
   }
 }

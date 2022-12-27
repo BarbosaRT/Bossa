@@ -1,3 +1,4 @@
+import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bossa/models/song_model.dart';
@@ -12,8 +13,6 @@ void main() {
         url: 'https://youtu.be/NgYoUsdETRw',
         path: 'path1');
 
-    songDataManager.init();
-
     test('test if adds song', () {
       songDataManager.addSong(song1);
     });
@@ -27,7 +26,7 @@ void main() {
 
     test('test if loadSong returns null when id is invalid', () async {
       songDataManager.deleteAll();
-      songDataManager.init();
+      dataManagerInstance.init();
       final List<SongModel> loadedSong1 = await songDataManager.loadSongs();
       expect(loadedSong1, []);
     });

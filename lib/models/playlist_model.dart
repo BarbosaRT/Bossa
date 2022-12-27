@@ -11,7 +11,7 @@ class PlaylistModel {
       required this.icon,
       required this.songs});
 
-  factory PlaylistModel.fromMap(Map<String, dynamic> map) {
+  factory PlaylistModel.fromMap(Map<dynamic, dynamic> map) {
     return PlaylistModel(
       id: map['id'] as int,
       title: map['title'] as String,
