@@ -2,8 +2,8 @@ class SongModel {
   int id = 0;
   String title = '';
   String icon = '';
-  String? url = '';
-  String? path = '';
+  String url = '';
+  String path = '';
   SongModel({
     required this.id,
     required this.title,
@@ -21,8 +21,8 @@ class SongModel {
       id: map['id'] as int,
       title: map['title'] as String,
       icon: map['icon'] as String,
-      url: map['url'] != null ? map['url'] as String : null,
-      path: map['path'] != null ? map['path'] as String : null,
+      url: map['url'] != null ? map['url'] as String : '',
+      path: map['path'] != null ? map['path'] as String : '',
     );
   }
 

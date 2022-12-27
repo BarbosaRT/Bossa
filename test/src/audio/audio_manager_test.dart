@@ -6,7 +6,7 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     AudioManager audioManager = JustAudioManager();
     String testSongUrl =
-        'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+        'http://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a';
 
     test('load audio from URL', () async {
       // Test loading audio from a URL
