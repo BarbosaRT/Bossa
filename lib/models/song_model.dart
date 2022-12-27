@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 class SongModel {
   int id = 0;
   String title = '';
@@ -16,23 +13,7 @@ class SongModel {
   });
 
   String toSQL() {
-    return '(DEFAULT, $title, $icon, $url, $path)';
-  }
-
-  SongModel copyWith({
-    int? id,
-    String? title,
-    String? icon,
-    String? url,
-    String? path,
-  }) {
-    return SongModel(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      icon: icon ?? this.icon,
-      url: url ?? this.url,
-      path: path ?? this.path,
-    );
+    return "('$title', '$icon', '$url', '$path')";
   }
 
   factory SongModel.fromMap(Map<dynamic, dynamic> map) {
@@ -43,5 +24,25 @@ class SongModel {
       url: map['url'] != null ? map['url'] as String : null,
       path: map['path'] != null ? map['path'] as String : null,
     );
+  }
+
+  @override
+  bool operator ==(covariant SongModel other) {
+    if (identical(this, other)) return true;
+
+    return other.id == id &&
+        other.title == title &&
+        other.icon == icon &&
+        other.url == url &&
+        other.path == path;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        title.hashCode ^
+        icon.hashCode ^
+        url.hashCode ^
+        path.hashCode;
   }
 }

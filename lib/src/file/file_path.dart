@@ -8,9 +8,13 @@ abstract class FilePath {
 }
 
 class FilePathImpl extends FilePath {
+  String _aplicationDocumentsDirectory = '';
   @override
   Future<String> getDocumentsDirectory() async {
-    Directory output = await getApplicationDocumentsDirectory();
-    return output.path;
+    if (_aplicationDocumentsDirectory.isEmpty) {
+      Directory output = await getApplicationDocumentsDirectory();
+      _aplicationDocumentsDirectory = output.path;
+    }
+    return _aplicationDocumentsDirectory;
   }
 }
