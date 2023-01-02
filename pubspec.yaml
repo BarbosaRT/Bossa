@@ -39,7 +39,10 @@ dependencies:
   flutter_modular: ^5.0.3
   # file_picker: ^5.2.4
   path_provider: ^2.0.11
+
   sqflite_common_ffi: ^2.2.0
+  sqflite_common: ^2.4.0+2
+  
   http: ^0.13.5
   just_audio: ^0.9.30
   just_audio_mpv: ^0.1.6

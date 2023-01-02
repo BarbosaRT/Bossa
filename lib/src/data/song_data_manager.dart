@@ -18,8 +18,8 @@ class SongDataManager {
 
   void removeSong(SongModel song) async {
     //Remove from playlists
-    dataManagerInstance.executeDatabaseCommand(
-        'DELETE FROM playlists_songs WHERE playlists_songs.idSongs = ${song.id};');
+    // dataManagerInstance.executeDatabaseCommand(
+    //     'DELETE FROM playlists_songs WHERE playlists_songs.idSongs = ${song.id};');
     dataManagerInstance.executeDatabaseCommand(
         'DELETE FROM songs WHERE songs.id = ${song.id};');
   }
