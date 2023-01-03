@@ -23,13 +23,12 @@ class SongDataManager {
 
   void removeSong(SongModel song) async {
     var database = await dataManagerInstance.database();
-    //Remove from playlists
     database.delete('playlist_songs',
         where: 'playlists_songs.idSongs = ?', whereArgs: [song.id]);
     database.delete('songs', where: 'songs.id = ?', whereArgs: [song.id]);
   }
 
-  Future<List<SongModel>> loadSongs() async {
+  Future<List<SongModel>> loadAllSongs() async {
     var database = await dataManagerInstance.database();
     List<Map<String, dynamic>> results =
         await database.query('songs', orderBy: "id");

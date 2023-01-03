@@ -8,9 +8,16 @@ void main() {
     String testSongUrl =
         'http://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a';
 
+    test('returns null Duration when not playing', () async {
+      expect(audioManager.getDuration(), isNull);
+    });
+
     test('load audio from URL', () async {
-      // Test loading audio from a URL
       audioManager.load(testSongUrl);
+    });
+
+    test('dont load audio from a wrong URL', () async {
+      audioManager.load('.testurl');
     });
 
     // test('load audio from file path', () async {
@@ -19,7 +26,6 @@ void main() {
     // });
 
     test('play and pause audio', () async {
-      // Test playing and pausing audio
       audioManager.load(testSongUrl);
       audioManager.play();
       expect(audioManager.isPlaying(), isTrue);
@@ -28,7 +34,6 @@ void main() {
     });
 
     test('seek to specific position', () async {
-      // Test seeking to a specific position in the audio
       audioManager.load(testSongUrl);
       audioManager.play();
       Duration? position = audioManager.getPosition();
@@ -40,7 +45,6 @@ void main() {
     });
 
     test('stop audio', () async {
-      // Test stopping audio
       audioManager.load(testSongUrl);
       audioManager.play();
       audioManager.stop();

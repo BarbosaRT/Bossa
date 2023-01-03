@@ -29,7 +29,7 @@ class _TestPageState extends State<TestPage> {
   @override
   void initState() {
     super.initState();
-    songDataManager.loadSongs().then((value) {
+    songDataManager.loadAllSongs().then((value) {
       setState(() {
         songs = value.toList();
       });

@@ -11,12 +11,20 @@ class PlaylistModel {
       required this.icon,
       required this.songs});
 
-  factory PlaylistModel.fromMap(Map<dynamic, dynamic> map) {
+  factory PlaylistModel.fromMap(Map map) {
     return PlaylistModel(
       id: map['id'] as int,
       title: map['title'] as String,
       icon: map['icon'] as String,
-      songs: map['songs'] as List<SongModel>,
+      songs: [],
     );
+  }
+
+  Map<String, dynamic> toSql() {
+    return <String, dynamic>{
+      'id': id,
+      'title': title,
+      'icon': icon,
+    };
   }
 }

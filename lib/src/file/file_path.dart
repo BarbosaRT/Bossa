@@ -3,8 +3,14 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 abstract class FilePath {
-  String get getWorkingDirectory => '${getDocumentsDirectory()}/bossa';
-  Future<String> getDocumentsDirectory();
+  Future<String> getWorkingDirectory() async {
+    String workingDirectory = await getWorkingDirectory();
+    return '$workingDirectory/bossa';
+  }
+
+  Future<String> getDocumentsDirectory() async {
+    throw Exception('Function getDocumentsDirectory() not implemented');
+  }
 }
 
 class FilePathImpl extends FilePath {

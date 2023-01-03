@@ -12,12 +12,13 @@ class DataManager {
 
   DataManager({required this.filePath});
 
-  String get _databasePath {
-    return '${filePath.getWorkingDirectory}/database.db';
+  Future<String> get _databasePath async {
+    String workingDirectory = await filePath.getWorkingDirectory();
+    return '$workingDirectory/database.db';
   }
 
   static Future<void> createTables(sql.Database database) async {
-    // dataManagerInstance.executeDatabaseCommand('PRAGMA encoding="UTF-8";');
+    await database.execute('PRAGMA encoding="UTF-8";');
     await database.execute("""CREATE TABLE IF NOT EXISTS songs(
       id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
       title text,
@@ -45,7 +46,7 @@ class DataManager {
   Future<sql.Database> database() async {
     if (_db != null) return _db!;
     _db = await sql.openDatabase(
-      _databasePath,
+      await _databasePath,
       version: 1,
       onCreate: (sql.Database openDatabase, int version) async {
         await createTables(openDatabase);

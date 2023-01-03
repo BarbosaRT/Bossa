@@ -12,7 +12,7 @@ class SongModel {
     required this.path,
   });
 
-  factory SongModel.fromMap(Map<String, dynamic> map) {
+  factory SongModel.fromMap(Map map) {
     return SongModel(
       id: map['id'] as int,
       title: map['title'] as String,

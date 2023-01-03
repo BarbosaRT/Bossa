@@ -26,14 +26,14 @@ void main() {
 
     test('test if loadSongs loads songs', () async {
       songDataManager.addSong(song1);
-      final List<SongModel> loadedSong1 = await songDataManager.loadSongs();
+      final List<SongModel> loadedSong1 = await songDataManager.loadAllSongs();
       expect(loadedSong1, isNotNull);
       expect(loadedSong1.isEmpty, false);
     });
 
-    test('test if loadSong returns null when id is invalid', () async {
+    test('test if loadSong returns a empty list when list is empty', () async {
       songDataManager.deleteAll();
-      final List<SongModel> loadedSong1 = await songDataManager.loadSongs();
+      final List<SongModel> loadedSong1 = await songDataManager.loadAllSongs();
       expect(loadedSong1, []);
     });
 
