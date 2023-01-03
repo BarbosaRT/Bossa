@@ -1,10 +1,17 @@
-import 'package:bossa/src/data/data_manager.dart';
+import 'dart:io';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bossa/models/song_model.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   group('SongDataManager', () {
+    if (Platform.isWindows || Platform.isLinux) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+
     final songDataManager = SongDataManager();
     final song1 = SongModel(
         id: 2,
@@ -26,7 +33,6 @@ void main() {
 
     test('test if loadSong returns null when id is invalid', () async {
       songDataManager.deleteAll();
-      dataManagerInstance.init();
       final List<SongModel> loadedSong1 = await songDataManager.loadSongs();
       expect(loadedSong1, []);
     });

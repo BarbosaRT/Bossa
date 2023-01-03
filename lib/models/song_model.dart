@@ -12,17 +12,13 @@ class SongModel {
     required this.path,
   });
 
-  String toSQL() {
-    return "('$title', '$icon', '$url', '$path')";
-  }
-
-  factory SongModel.fromMap(Map<dynamic, dynamic> map) {
+  factory SongModel.fromMap(Map<String, dynamic> map) {
     return SongModel(
       id: map['id'] as int,
       title: map['title'] as String,
       icon: map['icon'] as String,
-      url: map['url'] != null ? map['url'] as String : '',
-      path: map['path'] != null ? map['path'] as String : '',
+      url: map['url'] as String,
+      path: map['path'] as String,
     );
   }
 
@@ -44,5 +40,31 @@ class SongModel {
         icon.hashCode ^
         url.hashCode ^
         path.hashCode;
+  }
+
+  SongModel copyWith({
+    int? id,
+    String? title,
+    String? icon,
+    String? url,
+    String? path,
+  }) {
+    return SongModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      icon: icon ?? this.icon,
+      url: url ?? this.url,
+      path: path ?? this.path,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'title': title,
+      'icon': icon,
+      'url': url,
+      'path': path,
+    };
   }
 }

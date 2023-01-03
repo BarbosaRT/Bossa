@@ -1,37 +1,43 @@
 import 'dart:async';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/models/song_model.dart';
-//import 'package:bossa/src/data/song_url_parser.dart';
+import 'package:bossa/src/data/song_url_parser.dart';
+
 import 'package:flutter/foundation.dart';
+import 'package:sqflite/sqflite.dart' as sql;
 
 class SongDataManager {
   @visibleForTesting
-  void deleteAll() {
-    dataManagerInstance.executeDatabaseCommand('DROP TABLE IF EXISTS songs;');
+  void deleteAll() async {
+    var database = await dataManagerInstance.database();
+    database.delete('songs', where: 'id >= 0');
   }
 
   void addSong(SongModel song) async {
-    // song.url = SongUrlParser().parseSongUrlToSave(song.url);
-    dataManagerInstance.executeDatabaseCommand(
-        'INSERT INTO songs (title, icon, url, path) VALUES ${song.toSQL()};');
+    song.url = SongUrlParser().parseSongUrlToSave(song.url);
+
+    var database = await dataManagerInstance.database();
+    database.insert('songs', song.toMap(),
+        conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
 
   void removeSong(SongModel song) async {
+    var database = await dataManagerInstance.database();
     //Remove from playlists
-    // dataManagerInstance.executeDatabaseCommand(
-    //     'DELETE FROM playlists_songs WHERE playlists_songs.idSongs = ${song.id};');
-    dataManagerInstance.executeDatabaseCommand(
-        'DELETE FROM songs WHERE songs.id = ${song.id};');
+    database.delete('playlist_songs',
+        where: 'playlists_songs.idSongs = ?', whereArgs: [song.id]);
+    database.delete('songs', where: 'songs.id = ?', whereArgs: [song.id]);
   }
 
   Future<List<SongModel>> loadSongs() async {
-    List<Map> results =
-        await dataManagerInstance.executeQuery('SELECT * FROM songs');
+    var database = await dataManagerInstance.database();
+    List<Map<String, dynamic>> results =
+        await database.query('songs', orderBy: "id");
 
     List<SongModel> output = [];
-    for (Map result in results) {
+    for (Map<String, dynamic> result in results) {
       SongModel song = SongModel.fromMap(result);
-      // song.url = await SongUrlParser().parseSongUrlToInvidious(song.url);
+      song.url = await SongUrlParser().parseSongUrlToInvidious(song.url);
       output.add(song);
     }
     return output;
