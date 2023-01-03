@@ -78,9 +78,9 @@ void main() {
       playlistDataManager.deleteFromPlaylist(song1, playlist1);
       List<PlaylistModel> loadedPlaylists2 =
           await playlistDataManager.loadPlaylists();
-
-      expect(loadedPlaylists2.length, loadedPlaylists.length - 1);
-      expect(loadedPlaylists2[0].songs[0], []);
+      
+      expect(loadedPlaylists[0].songs.isNotEmpty, true);
+      expect(loadedPlaylists2[0].songs.isEmpty, true);
     });
 
     test('test if deletePlaylist delete a playlist', () {

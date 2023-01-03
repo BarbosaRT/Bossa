@@ -23,7 +23,7 @@ class PlaylistDataManager {
   void deleteFromPlaylist(SongModel song, PlaylistModel playlist) async {
     var database = await dataManagerInstance.database();
     database.delete('playlists_songs',
-        where: 'playlists_songs.idPlaylist = ? and playlists_songs.idSongs = ?',
+        where: 'playlists_songs.idPlaylist = ? and playlists_songs.idSong = ?',
         whereArgs: [playlist.id, song.id]);
   }
 

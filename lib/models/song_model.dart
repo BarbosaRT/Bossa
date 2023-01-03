@@ -42,22 +42,6 @@ class SongModel {
         path.hashCode;
   }
 
-  SongModel copyWith({
-    int? id,
-    String? title,
-    String? icon,
-    String? url,
-    String? path,
-  }) {
-    return SongModel(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      icon: icon ?? this.icon,
-      url: url ?? this.url,
-      path: path ?? this.path,
-    );
-  }
-
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
