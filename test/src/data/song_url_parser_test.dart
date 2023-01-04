@@ -12,5 +12,11 @@ void main() {
       String result = await songUrlParser.parseSongUrlToInvidious(song.url);
       expect(result, 'https://yewtu.be/watch?v=NgYoUsdETRw');
     });
+
+    test('Test if it can parse the songs to save', () async {
+      String url = 'https://youtu.be/dQw4w9WgXcQ';
+      String result = songUrlParser.parseSongUrlToSave(url);
+      expect(result, 'dQw4w9WgXcQ');
+    });
   });
 }

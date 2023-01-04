@@ -12,37 +12,42 @@ class PlaylistDataManager {
     database.delete('playlists');
   }
 
-  void deletePlaylist(PlaylistModel playlist) async {
-    var database = await dataManagerInstance.database();
-    database.delete('playlists_songs',
-        where: 'playlist_songs.idPlaylist = ?', whereArgs: [playlist.id]);
-    database.delete('playlists',
-        where: 'playlists.id = ?', whereArgs: [playlist.id]);
-  }
-
-  void deleteFromPlaylist(SongModel song, PlaylistModel playlist) async {
-    var database = await dataManagerInstance.database();
-    database.delete('playlists_songs',
-        where: 'playlists_songs.idPlaylist = ? and playlists_songs.idSong = ?',
-        whereArgs: [playlist.id, song.id]);
-  }
-
-  void appendToPlaylist(SongModel song, PlaylistModel playlist) async {
-    var database = await dataManagerInstance.database();
-    var values = {'idPlaylist': playlist.id, 'idSong': song.id};
-    database.insert('playlists_songs', values,
-        conflictAlgorithm: sql.ConflictAlgorithm.replace);
-  }
-
   void addPlaylist(PlaylistModel playlist) async {
     var database = await dataManagerInstance.database();
     database.insert('playlists', playlist.toSql(),
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
 
+  void deletePlaylist(PlaylistModel playlist) async {
+    var database = await dataManagerInstance.database();
+    database.delete('playlists_songs',
+        where: 'playlists_songs.idPlaylist = ?', whereArgs: [playlist.id]);
+    database.delete('playlists',
+        where: 'playlists.id = ?', whereArgs: [playlist.id]);
+  }
+
+  void editPlaylist(PlaylistModel editedPlaylist) async {
+    var database = await dataManagerInstance.database();
+    database.update('playlists', editedPlaylist.toSql(),
+        where: 'playlists.id = ?', whereArgs: [editedPlaylist.id]);
+  }
+
+  Future<List<PlaylistModel>> loadPlaylists() async {
+    var database = await dataManagerInstance.database();
+    List<Map> playlistsFromQuery = await database.query('playlists');
+    List<PlaylistModel> playlists = [];
+
+    for (Map playlistFromQuery in playlistsFromQuery) {
+      PlaylistModel playlist = PlaylistModel.fromMap(playlistFromQuery);
+      playlist.songs = await _loadSongsFromPlaylist(playlist);
+      playlists.add(playlist);
+    }
+
+    return playlists;
+  }
+
   Future<List<SongModel>> _loadSongsFromPlaylist(PlaylistModel playlist) async {
     var database = await dataManagerInstance.database();
-    //Tests if query works
 
     List<Map> songsFromPlaylist = await database.rawQuery("""
     SELECT s.id, s.title, s.icon, s.url, s.path from songs as s 
@@ -58,17 +63,17 @@ class PlaylistDataManager {
     return output;
   }
 
-  Future<List<PlaylistModel>> loadPlaylists() async {
+  void deleteFromPlaylist(SongModel song, PlaylistModel playlist) async {
     var database = await dataManagerInstance.database();
-    List<Map> playlistsFromQuery = await database.query('playlists');
-    List<PlaylistModel> playlists = [];
+    database.delete('playlists_songs',
+        where: 'playlists_songs.idPlaylist = ? and playlists_songs.idSong = ?',
+        whereArgs: [playlist.id, song.id]);
+  }
 
-    for (Map playlistFromQuery in playlistsFromQuery) {
-      PlaylistModel playlist = PlaylistModel.fromMap(playlistFromQuery);
-      playlist.songs = await _loadSongsFromPlaylist(playlist);
-      playlists.add(playlist);
-    }
-
-    return playlists;
+  void appendToPlaylist(SongModel song, PlaylistModel playlist) async {
+    var database = await dataManagerInstance.database();
+    var values = {'idPlaylist': playlist.id, 'idSong': song.id};
+    database.insert('playlists_songs', values,
+        conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
 }

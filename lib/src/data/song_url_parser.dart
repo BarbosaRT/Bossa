@@ -21,20 +21,21 @@ class SongUrlParser {
     }
   }
 
-  bool isSongFromYoutube(String url) {
+  bool isSongFromYoutube(String input) {
     bool output = false;
     for (String url in youtubeUrls) {
-      bool aux = url.contains(url);
+      bool aux = input.contains(url);
       output = aux ? aux : output;
     }
     return output;
   }
 
-  String parseSongUrlToSave(String url) {
-    String output = url.toString();
-    if (isSongFromYoutube(url)) {
+  String parseSongUrlToSave(String input) {
+    String output = input.toString();
+
+    if (isSongFromYoutube(input)) {
       for (String url in youtubeUrls) {
-        output.replaceAll(url, '');
+        output = output.replaceAll(url, '');
       }
     }
     return output.substring(0, 11);

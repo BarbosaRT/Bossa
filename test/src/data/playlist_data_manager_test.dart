@@ -78,13 +78,39 @@ void main() {
       playlistDataManager.deleteFromPlaylist(song1, playlist1);
       List<PlaylistModel> loadedPlaylists2 =
           await playlistDataManager.loadPlaylists();
-      
+
       expect(loadedPlaylists[0].songs.isNotEmpty, true);
       expect(loadedPlaylists2[0].songs.isEmpty, true);
     });
 
-    test('test if deletePlaylist delete a playlist', () {
+    test('test if deletePlaylist delete a playlist', () async {
+      playlistDataManager.deleteAll();
+
+      playlistDataManager.addPlaylist(playlist1);
+      List<PlaylistModel> loadedPlaylists =
+          await playlistDataManager.loadPlaylists();
+
       playlistDataManager.deletePlaylist(playlist1);
+      List<PlaylistModel> loadedPlaylists2 =
+          await playlistDataManager.loadPlaylists();
+
+      expect(loadedPlaylists2.isEmpty, true);
+      expect(loadedPlaylists2.length, loadedPlaylists.length - 1);
+    });
+
+    test('test if editPlaylist edit a playlist', () async {
+      final playlist2 =
+          PlaylistModel(id: 1, title: 'Song 1', icon: 'icon1', songs: []);
+      playlistDataManager.deleteAll();
+      playlistDataManager.addPlaylist(playlist2);
+
+      playlist2.title = 'EditedTitle';
+
+      playlistDataManager.editPlaylist(playlist2);
+      List<PlaylistModel> loadedPlaylists2 =
+          await playlistDataManager.loadPlaylists();
+
+      expect(loadedPlaylists2[0].title == 'EditedTitle', true);
     });
   });
 }
