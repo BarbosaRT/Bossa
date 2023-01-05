@@ -6,22 +6,31 @@ abstract class AudioManager {
   void pause();
   void stop();
   void seek(Duration position);
+  void dispose();
   bool isPlaying();
-  Duration? getPosition();
-  Duration? getDuration();
+  Duration getPosition();
+  Stream<Duration> getPositionStream();
+  Stream<Duration?> getDuration();
 }
+
+JustAudioManager justAudioManagerInstance = JustAudioManager();
 
 class JustAudioManager implements AudioManager {
   final player = AudioPlayer();
 
   @override
-  Duration? getDuration() {
-    return player.duration;
+  Duration getPosition() {
+    return player.position;
   }
 
   @override
-  Duration getPosition() {
-    return player.position;
+  Stream<Duration?> getDuration() {
+    return player.durationStream;
+  }
+
+  @override
+  Stream<Duration> getPositionStream() {
+    return player.positionStream;
   }
 
   @override
@@ -40,7 +49,7 @@ class JustAudioManager implements AudioManager {
   @override
   void load(String path) {
     if (validUrl(path)) {
-      player.setUrl(path);
+      player.setUrl(path, preload: false);
     } else {
       player.setFilePath(path);
     }
@@ -64,5 +73,10 @@ class JustAudioManager implements AudioManager {
   @override
   void stop() {
     player.stop();
+  }
+
+  @override
+  void dispose() {
+    player.dispose();
   }
 }

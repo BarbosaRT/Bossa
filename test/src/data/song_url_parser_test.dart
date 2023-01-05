@@ -8,9 +8,9 @@ void main() {
     SongModel song = SongModel(
         id: 0, title: 'title', icon: 'icon', url: 'NgYoUsdETRw', path: 'path');
 
-    test('Test if it can parse the songs to an invidious instance', () async {
-      String result = await songUrlParser.parseSongUrlToInvidious(song.url);
-      expect(result, 'https://yewtu.be/watch?v=NgYoUsdETRw');
+    test('Test if it can parse the songs to play', () async {
+      String result = await songUrlParser.parseSongUrlToPlay(song.url);
+      expect(result, 'https://yewtu.be/embed/NgYoUsdETRw?raw=1');
     });
 
     test('Test if it can parse the songs to save', () async {

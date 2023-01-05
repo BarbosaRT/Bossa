@@ -4,7 +4,6 @@ import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/song_url_parser.dart';
 
 import 'package:flutter/foundation.dart';
-import 'package:sqflite/sqflite.dart' as sql;
 
 class SongDataManager {
   @visibleForTesting
@@ -17,8 +16,8 @@ class SongDataManager {
     song.url = SongUrlParser().parseSongUrlToSave(song.url);
 
     var database = await dataManagerInstance.database();
-    database.insert('songs', song.toMap(),
-        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    database.rawInsert(
+        'INSERT INTO songs(title, icon, url, path) VALUES("${song.title}","${song.icon}","${song.url}","${song.path}")');
   }
 
   void removeSong(SongModel song) async {
@@ -30,8 +29,9 @@ class SongDataManager {
 
   void editSong(SongModel editedSong) async {
     var database = await dataManagerInstance.database();
-    database.update('songs', editedSong.toMap(),
-        where: 'songs.id = ?', whereArgs: [editedSong.id]);
+    editedSong.url = SongUrlParser().parseSongUrlToSave(editedSong.url);
+    database.rawUpdate(
+        'UPDATE songs SET title = "${editedSong.title}", icon = "${editedSong.icon}", url = "${editedSong.url}", path = "${editedSong.path}" WHERE id = "${editedSong.id}"');
   }
 
   Future<List<SongModel>> loadAllSongs() async {
@@ -42,7 +42,7 @@ class SongDataManager {
     List<SongModel> output = [];
     for (Map<String, dynamic> result in results) {
       SongModel song = SongModel.fromMap(result);
-      song.url = await SongUrlParser().parseSongUrlToInvidious(song.url);
+      song.url = await SongUrlParser().parseSongUrlToPlay(song.url);
       output.add(song);
     }
     return output;

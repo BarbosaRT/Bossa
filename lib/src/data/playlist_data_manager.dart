@@ -14,8 +14,14 @@ class PlaylistDataManager {
 
   void addPlaylist(PlaylistModel playlist) async {
     var database = await dataManagerInstance.database();
-    database.insert('playlists', playlist.toSql(),
-        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    database.rawInsert(
+        'INSERT INTO playlists(title, icon) VALUES("${playlist.title}", "${playlist.icon}")');
+
+    // Insert Songs into playlist
+    var playlists = await loadPlaylists();
+    for (SongModel song in playlist.songs) {
+      appendToPlaylist(song, playlists[playlists.length - 1]);
+    }
   }
 
   void deletePlaylist(PlaylistModel playlist) async {
@@ -57,7 +63,7 @@ class PlaylistDataManager {
     List<SongModel> output = [];
     for (Map result in songsFromPlaylist) {
       SongModel song = SongModel.fromMap(result);
-      song.url = await SongUrlParser().parseSongUrlToInvidious(song.url);
+      song.url = await SongUrlParser().parseSongUrlToPlay(song.url);
       output.add(SongModel.fromMap(result));
     }
     return output;

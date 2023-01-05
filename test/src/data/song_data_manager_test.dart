@@ -62,7 +62,8 @@ void main() {
       songDataManager.removeSong(song1);
       final List<SongModel> loadedSongs2 = await songDataManager.loadAllSongs();
 
-      expect(loadedSongs1.length - 1, loadedSongs2.length);
+      expect(loadedSongs2.length, loadedSongs1.length - 1);
+      expect(loadedSongs2.length, 0);
     });
 
     test('editSong', () async {

@@ -40,8 +40,8 @@ void main() {
       expect(position, isNotNull);
 
       Duration duration = const Duration(seconds: 10);
-      audioManager.seek(position! + duration);
-      expect(audioManager.getPosition(), equals(position + duration));
+      audioManager.seek(position + duration);
+      expect(audioManager.getPositionStream(), equals(position + duration));
     });
 
     test('stop audio', () async {
@@ -49,7 +49,7 @@ void main() {
       audioManager.play();
       audioManager.stop();
       expect(audioManager.isPlaying(), isFalse);
-      expect(audioManager.getPosition(), Duration.zero);
+      expect(audioManager.getPositionStream(), Duration.zero);
     });
   });
 }

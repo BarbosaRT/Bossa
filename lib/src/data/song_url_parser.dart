@@ -1,6 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+class HttpRequest {
+  http.Client client = http.Client();
+
+  Future<dynamic> retriveFromUrl(String link) async {
+    try {
+      var response = jsonDecode((await client.get(Uri.parse(link))).body);
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+}
+
 class SongUrlParser {
   String apiUrl =
       'https://api.invidious.io/instances.json?pretty=1&sort_by=type,users';
@@ -9,17 +22,6 @@ class SongUrlParser {
     'https://www.youtube.com/watch?v=',
     'https://youtu.be/'
   ];
-
-  http.Client client = http.Client();
-
-  Future<dynamic> getHttp(String link) async {
-    try {
-      var response = jsonDecode((await client.get(Uri.parse(link))).body);
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
 
   bool isSongFromYoutube(String input) {
     bool output = false;
@@ -41,9 +43,10 @@ class SongUrlParser {
     return output.substring(0, 11);
   }
 
-  Future<String> parseSongUrlToInvidious(String url) async {
-    List<dynamic> invidiousInstances = await getHttp(apiUrl) as List<dynamic>;
+  Future<String> parseSongUrlToPlay(String url) async {
+    List<dynamic> invidiousInstances =
+        await HttpRequest().retriveFromUrl(apiUrl) as List<dynamic>;
     String info = (invidiousInstances[0][1]['uri']).toString();
-    return '$info/watch?v=$url';
+    return '$info/embed/$url?raw=1';
   }
 }
