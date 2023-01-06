@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
+import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:bossa/src/ui/test/song_container.dart';
 import 'package:flutter/material.dart';
 
@@ -53,11 +54,9 @@ class _PlaylistContainerState extends State<PlaylistContainer> {
                   height: 80,
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: FileImage(
-                        File(widget.playlist.icon),
-                      ),
-                    ),
+                        fit: BoxFit.cover,
+                        image: ImageParser.getImageProviderFromString(
+                            widget.playlist.icon)),
                   ),
                 ),
               ),

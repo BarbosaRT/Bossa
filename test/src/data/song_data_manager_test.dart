@@ -82,5 +82,9 @@ void main() {
 
       expect(loadedSongs2[0].title == 'EditedSong', true);
     });
+
+    test('getLastAddedSong', () {
+      //songDataManager.deleteAll();
+    });
   });
 }

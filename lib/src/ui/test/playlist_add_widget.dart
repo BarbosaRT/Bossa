@@ -120,7 +120,7 @@ class _PlaylistAddWidgetState extends State<PlaylistAddWidget> {
     }
 
     return SizedBox(
-      width: 600,
+      width: 500,
       height: 160,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,7 +202,7 @@ class _PlaylistAddWidgetState extends State<PlaylistAddWidget> {
             ),
           ),
           //
-          // Add Song Button
+          // Add Playlist Button
           //
           Flexible(
             flex: 1,
@@ -310,7 +310,7 @@ class _PlaylistAddWidgetState extends State<PlaylistAddWidget> {
             ),
           ),
           Flexible(
-            flex: 2,
+            flex: 1,
             child: SizedBox(
               height: 200,
               child: Column(

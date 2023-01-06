@@ -1,3 +1,4 @@
+import 'package:bossa/src/url/url_parser.dart';
 import 'package:just_audio/just_audio.dart';
 
 abstract class AudioManager {
@@ -38,17 +39,9 @@ class JustAudioManager implements AudioManager {
     return player.playing;
   }
 
-  bool validUrl(String path) {
-    try {
-      return (Uri.parse(path)).isAbsolute;
-    } catch (e) {
-      return false;
-    }
-  }
-
   @override
   void load(String path) {
-    if (validUrl(path)) {
+    if (UrlParser.validUrl(path)) {
       player.setUrl(path, preload: false);
     } else {
       player.setFilePath(path);

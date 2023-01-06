@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
+import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:flutter/material.dart';
 
 class SongContainer extends StatefulWidget {
@@ -67,9 +68,8 @@ class _SongContainerState extends State<SongContainer> {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         fit: BoxFit.cover,
-                        image: FileImage(
-                          File(widget.song.icon),
-                        ),
+                        image: ImageParser.getImageProviderFromString(
+                            widget.song.icon),
                       ),
                     ),
                   ),

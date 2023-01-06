@@ -47,4 +47,14 @@ class SongDataManager {
     }
     return output;
   }
+
+  Future<SongModel> loadLastAddedSong() async {
+    var database = await dataManagerInstance.database();
+    List<Map<String, dynamic>> result =
+        await database.rawQuery('SELECT * FROM songs ORDER BY id DESC LIMIT 1');
+
+    SongModel output = SongModel.fromMap(result[0]);
+    output.url = await SongUrlParser().parseSongUrlToPlay(output.url);
+    return output;
+  }
 }

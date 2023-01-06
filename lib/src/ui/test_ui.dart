@@ -3,6 +3,7 @@ import 'package:bossa/src/ui/test/playlist_add_widget.dart';
 import 'package:bossa/src/ui/test/playlist_container.dart';
 import 'package:bossa/src/ui/test/song_add_widget.dart';
 import 'package:bossa/src/ui/test/song_container.dart';
+import 'package:bossa/src/ui/test/youtube_add_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
@@ -122,6 +123,16 @@ class _TestPageState extends State<TestPage> {
                   crossAxisCount: 2,
                   children: playlistContainers,
                 ),
+              ),
+            ),
+            Positioned(
+              top: 10,
+              left: 1000,
+              child: YoutubeAddWidget(
+                callback: () {
+                  loadSongs();
+                  loadPlaylists();
+                },
               ),
             )
           ],
