@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
+import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:bossa/src/ui/test/song_container.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +9,15 @@ import 'package:flutter/material.dart';
 class PlaylistContainer extends StatefulWidget {
   final PlaylistModel playlist;
   final void Function() callback;
-  const PlaylistContainer(
-      {super.key, required this.playlist, required this.callback});
+  final void Function() editCallback;
+  final void Function() deleteAllCallback;
+  const PlaylistContainer({
+    super.key,
+    required this.playlist,
+    required this.callback,
+    required this.editCallback,
+    required this.deleteAllCallback,
+  });
 
   @override
   State<PlaylistContainer> createState() => _PlaylistContainerState();
@@ -19,65 +25,103 @@ class PlaylistContainer extends StatefulWidget {
 
 class _PlaylistContainerState extends State<PlaylistContainer> {
   final playlistDataManager = PlaylistDataManager();
+  final songDataManager = SongDataManager();
+
   @override
   Widget build(BuildContext context) {
+    ButtonStyle buttonStyle = ButtonStyle(
+        backgroundColor: MaterialStateProperty.all(Colors.amber),
+        overlayColor: MaterialStateProperty.all(Colors.amber));
+
     List<SongContainer> songContainers = [];
+    List<SongModel> songs = [];
     for (SongModel song in widget.playlist.songs) {
+      songs.add(song);
       songContainers.add(
         SongContainer(
           song: song,
-          callback: () {
-            //loadSongs();
-          },
-          editCallback: () {
-            //songAddKey.currentState?.insertSongToBeAdded(song);
-          },
+          callback: () {},
+          editCallback: () {},
         ),
       );
     }
 
-    TextStyle headline1 = const TextStyle(color: Colors.white, fontSize: 13);
+    TextStyle headline1 = const TextStyle(color: Colors.white, fontSize: 12);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
         height: 200,
         width: 400,
         color: Colors.blueAccent,
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: ImageParser.getImageProviderFromString(
-                            widget.playlist.icon)),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Flexible(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: ImageParser.getImageProviderFromString(
+                                widget.playlist.icon)),
+                      ),
+                    ),
                   ),
-                ),
+                  Flexible(
+                      child: Text(widget.playlist.title, style: headline1)),
+                  Flexible(
+                    child: Row(
+                      children: [
+                        ElevatedButton(
+                          style: buttonStyle,
+                          onPressed: () {
+                            playlistDataManager.deletePlaylist(widget.playlist);
+                            widget.callback();
+                          },
+                          child: const Icon(Icons.delete),
+                        ),
+                        ElevatedButton(
+                          style: buttonStyle,
+                          onPressed: () {
+                            widget.editCallback();
+                          },
+                          child: const Icon(Icons.edit),
+                        ),
+                        ElevatedButton(
+                          style: buttonStyle,
+                          onPressed: () {
+                            for (SongModel song in songs) {
+                              songDataManager.removeSong(song);
+                            }
+                          },
+                          child: Text('Delete All', style: headline1),
+                        ),
+                        ElevatedButton(
+                          style: buttonStyle,
+                          onPressed: () {},
+                          child: const Icon(Icons.play_arrow),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              Text(widget.playlist.title, style: headline1),
-              ElevatedButton(
-                onPressed: () {
-                  playlistDataManager.deletePlaylist(widget.playlist);
-                  widget.callback();
-                },
-                child: const Icon(Icons.delete),
-              )
-            ],
-          ),
-          SizedBox(
-            height: 200,
-            width: 200,
-            child: ListView(
-              children: songContainers,
             ),
-          )
-        ]),
+            SizedBox(
+              height: 200,
+              width: 200,
+              child: ListView(
+                children: songContainers,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -17,8 +17,8 @@ void main() {
     test('Test convertYoutubePlaylist() method', () async {
       YoutubeToPlaylist converter = YoutubeToPlaylist();
       PlaylistModel playlist = await converter.convertYoutubePlaylist(
-          'https://www.youtube.com/playlist?list=PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI');
-      expect(playlist.songs.length, 200);
-    });
+          'https://www.youtube.com/playlist?list=OLAK5uy_kO0UfLxZQ-bsJRSQUTtmhMX4HCIrraBxM');
+      expect(playlist.songs.length, 10);
+    }, timeout: const Timeout(Duration(minutes: 1)));
   });
 }

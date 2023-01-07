@@ -19,13 +19,14 @@ class TestPage extends StatefulWidget {
 
 class _TestPageState extends State<TestPage> {
   final songDataManager = SongDataManager();
+  GlobalKey<SongAddWidgetState> songAddKey = GlobalKey();
   List<SongModel> songs = [];
 
   final playlistDataManager = PlaylistDataManager();
+  GlobalKey<PlaylistAddWidgetState> playlistAddKey = GlobalKey();
   List<PlaylistModel> playlists = [];
 
   final manager = JustAudioManager();
-  GlobalKey<SongAddWidgetState> songAddKey = GlobalKey();
   bool editing = false;
 
   @override
@@ -57,7 +58,7 @@ class _TestPageState extends State<TestPage> {
             loadSongs();
           },
           editCallback: () {
-            songAddKey.currentState?.insertSongToBeAdded(song);
+            songAddKey.currentState?.insertSongToBeEdited(song);
           },
         ),
       );
@@ -70,6 +71,10 @@ class _TestPageState extends State<TestPage> {
           callback: () {
             loadPlaylists();
           },
+          editCallback: () {
+            playlistAddKey.currentState?.insertPlaylistToBeEdited(playlist);
+          },
+          deleteAllCallback: () {},
           playlist: playlist,
         ),
       );
@@ -106,8 +111,9 @@ class _TestPageState extends State<TestPage> {
             ),
             Positioned(
               top: 10,
-              left: 500,
+              left: 400,
               child: PlaylistAddWidget(
+                key: playlistAddKey,
                 callback: () {
                   loadPlaylists();
                 },
@@ -117,10 +123,9 @@ class _TestPageState extends State<TestPage> {
               top: 200,
               left: 400,
               child: SizedBox(
-                width: 700,
-                height: 180,
-                child: GridView.count(
-                  crossAxisCount: 2,
+                width: 500,
+                height: 300,
+                child: ListView(
                   children: playlistContainers,
                 ),
               ),

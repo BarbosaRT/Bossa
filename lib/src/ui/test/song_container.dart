@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';

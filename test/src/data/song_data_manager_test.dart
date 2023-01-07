@@ -54,12 +54,21 @@ void main() {
     });
 
     test('removeSong', () async {
+      SongModel song3 = SongModel(
+          id: 2,
+          title: 'Song 2',
+          icon: 'icon2',
+          url: 'https://youtu.be/NgYoUsdETRw',
+          path: 'path3');
+
       songDataManager.deleteAll();
 
-      songDataManager.addSong(song1);
+      songDataManager.addSong(song3);
       final List<SongModel> loadedSongs1 = await songDataManager.loadAllSongs();
 
-      songDataManager.removeSong(song1);
+      song3 = loadedSongs1[loadedSongs1.length - 1];
+
+      songDataManager.removeSong(song3);
       final List<SongModel> loadedSongs2 = await songDataManager.loadAllSongs();
 
       expect(loadedSongs2.length, loadedSongs1.length - 1);

@@ -24,7 +24,7 @@ class SongAddWidgetState extends State<SongAddWidget> {
   SongModel songToBeAdded =
       SongModel(id: 1, title: '', icon: '', url: '', path: '');
 
-  void insertSongToBeAdded(SongModel song) {
+  void insertSongToBeEdited(SongModel song) {
     songToBeAdded = SongModel.fromMap(song.toMap());
     _titleController.text = songToBeAdded.title;
     _linkController.text = songToBeAdded.url;
@@ -45,7 +45,7 @@ class SongAddWidgetState extends State<SongAddWidget> {
     TextStyle blackHeadline1 = headline1.copyWith(color: Colors.black);
 
     return SizedBox(
-      width: 500,
+      width: 400,
       height: 120,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,7 +203,6 @@ class SongAddWidgetState extends State<SongAddWidget> {
             ),
           ),
           Flexible(
-            flex: 2,
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

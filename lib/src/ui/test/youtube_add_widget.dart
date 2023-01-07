@@ -51,14 +51,16 @@ class _YoutubeAddWidgetState extends State<YoutubeAddWidget> {
                 Flexible(
                   child: ElevatedButton(
                     onPressed: () async {
+                      setState(() {
+                        added = true;
+                      });
+
                       PlaylistModel playlist =
                           await youtubeToPlaylist.convertYoutubePlaylist(url);
                       playlistDataManager.addPlaylist(playlist);
                       widget.callback();
-                      setState(() {
-                        added = true;
-                      });
-                      Future.delayed(const Duration(seconds: 1)).then(
+
+                      Future.delayed(const Duration(seconds: 10)).then(
                         (value) {
                           setState(() {
                             added = false;

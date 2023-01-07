@@ -22,9 +22,9 @@ class SongDataManager {
 
   void removeSong(SongModel song) async {
     var database = await dataManagerInstance.database();
-    database.delete('playlists_songs',
-        where: 'playlists_songs.idSong = ?', whereArgs: [song.id]);
-    database.delete('songs', where: 'songs.id = ?', whereArgs: [song.id]);
+    database.rawDelete(
+        'DELETE FROM playlists_songs WHERE playlists_songs.idSong = ${song.id}');
+    database.rawDelete('DELETE FROM songs WHERE songs.id = ${song.id}');
   }
 
   void editSong(SongModel editedSong) async {

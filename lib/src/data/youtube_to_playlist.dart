@@ -2,7 +2,6 @@ import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_url_parser.dart';
-import 'package:bossa/src/url/url_parser.dart';
 
 class YoutubeToPlaylist {
   final SongDataManager _songDataManager = SongDataManager();
@@ -25,7 +24,9 @@ class YoutubeToPlaylist {
 
   Future<PlaylistModel> convertYoutubePlaylist(String url) async {
     String invidiousInstance = await _getInvidiousApiInstance();
-    String parsedUrl = url.substring(url.length - 34, url.length);
+    String parsedUrl = url.replaceAll('youtube.com/playlist?list=', '');
+    parsedUrl = parsedUrl.replaceAll('https://www.', '');
+
     Map<String, dynamic> result = await HttpRequest()
             .retriveFromUrl('$invidiousInstance/api/v1/playlists/$parsedUrl')
         as Map<String, dynamic>;
@@ -34,6 +35,7 @@ class YoutubeToPlaylist {
     for (Map<String, dynamic> video in result['videos']) {
       if (video['title'] == '[Private video]') continue;
       String title = video['title'] as String;
+      title = title.replaceAll('"', "'");
 
       String url = video['videoId'] as String;
       url = SongUrlParser().parseSongUrlToSave(url);

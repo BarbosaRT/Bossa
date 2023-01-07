@@ -44,16 +44,31 @@ void main() {
     });
 
     test('test if adds song to playlist', () async {
+      PlaylistModel playlist2 =
+          PlaylistModel(id: 1, title: 'Song 1', icon: 'icon1', songs: []);
+
+      SongModel song2 = SongModel(
+          id: 1,
+          title: 'Song 1',
+          icon: 'icon1',
+          url: 'https://youtu.be/NgYoUsdETRw',
+          path: 'path1');
+
       playlistDataManager.deleteAll();
       songDataManager.deleteAll();
 
-      playlistDataManager.addPlaylist(playlist1);
-      songDataManager.addSong(song1);
+      playlistDataManager.addPlaylist(playlist2);
+      songDataManager.addSong(song2);
 
-      playlistDataManager.appendToPlaylist(song1, playlist1);
+      // Correct the ids
+      playlist2 = await playlistDataManager.loadLastAddedPlaylist();
+      song2 = await songDataManager.loadLastAddedSong();
+
+      playlistDataManager.appendToPlaylist(song2, playlist2);
+
       List<PlaylistModel> loadedPlaylists =
           await playlistDataManager.loadPlaylists();
-      expect(loadedPlaylists[0].songs[0], song1);
+      expect(loadedPlaylists[0].songs[0].id, song2.id);
     });
 
     test('test if loadPlaylists returns a empty list when list is empty',
@@ -65,17 +80,31 @@ void main() {
     });
 
     test('test if removes song from playlist', () async {
+      PlaylistModel playlist2 =
+          PlaylistModel(id: 1, title: 'Song 1', icon: 'icon1', songs: []);
+
+      SongModel song2 = SongModel(
+          id: 1,
+          title: 'Song 1',
+          icon: 'icon1',
+          url: 'https://youtu.be/NgYoUsdETRw',
+          path: 'path1');
+
       playlistDataManager.deleteAll();
       songDataManager.deleteAll();
 
-      playlistDataManager.addPlaylist(playlist1);
-      songDataManager.addSong(song1);
+      playlistDataManager.addPlaylist(playlist2);
+      songDataManager.addSong(song2);
 
-      playlistDataManager.appendToPlaylist(song1, playlist1);
+      // Correct the ids
+      playlist2 = await playlistDataManager.loadLastAddedPlaylist();
+      song2 = await songDataManager.loadLastAddedSong();
+
+      playlistDataManager.appendToPlaylist(song2, playlist2);
       List<PlaylistModel> loadedPlaylists =
           await playlistDataManager.loadPlaylists();
 
-      playlistDataManager.deleteFromPlaylist(song1, playlist1);
+      playlistDataManager.deleteFromPlaylist(song2, playlist2);
       List<PlaylistModel> loadedPlaylists2 =
           await playlistDataManager.loadPlaylists();
 
@@ -84,13 +113,19 @@ void main() {
     });
 
     test('test if deletePlaylist delete a playlist', () async {
+      PlaylistModel playlist2 =
+          PlaylistModel(id: 1, title: 'Song 1', icon: 'icon1', songs: []);
+
       playlistDataManager.deleteAll();
 
-      playlistDataManager.addPlaylist(playlist1);
+      playlistDataManager.addPlaylist(playlist2);
       List<PlaylistModel> loadedPlaylists =
           await playlistDataManager.loadPlaylists();
 
-      playlistDataManager.deletePlaylist(playlist1);
+      // Correct the ids
+      playlist2 = loadedPlaylists[0];
+
+      playlistDataManager.deletePlaylist(playlist2);
       List<PlaylistModel> loadedPlaylists2 =
           await playlistDataManager.loadPlaylists();
 

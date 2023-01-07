@@ -3,13 +3,13 @@ import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/song_url_parser.dart';
 import 'package:flutter/widgets.dart';
-import 'package:sqflite/sqflite.dart' as sql;
 
 class PlaylistDataManager {
   @visibleForTesting
   void deleteAll() async {
     var database = await dataManagerInstance.database();
     database.delete('playlists');
+    database.delete('playlists_songs');
   }
 
   void addPlaylist(PlaylistModel playlist) async {
@@ -36,6 +36,14 @@ class PlaylistDataManager {
     var database = await dataManagerInstance.database();
     database.update('playlists', editedPlaylist.toSql(),
         where: 'playlists.id = ?', whereArgs: [editedPlaylist.id]);
+  }
+
+  Future<PlaylistModel> loadLastAddedPlaylist() async {
+    var database = await dataManagerInstance.database();
+    List<Map<String, dynamic>> result = await database
+        .rawQuery('SELECT * FROM playlists ORDER BY id DESC LIMIT 1');
+
+    return PlaylistModel.fromMap(result[0]);
   }
 
   Future<List<PlaylistModel>> loadPlaylists() async {
@@ -79,7 +87,8 @@ class PlaylistDataManager {
   void appendToPlaylist(SongModel song, PlaylistModel playlist) async {
     var database = await dataManagerInstance.database();
     var values = {'idPlaylist': playlist.id, 'idSong': song.id};
-    database.insert('playlists_songs', values,
-        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    await database.transaction((transaction) async {
+      await transaction.insert('playlists_songs', values);
+    });
   }
 }

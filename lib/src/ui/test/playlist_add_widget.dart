@@ -48,10 +48,10 @@ class PlaylistAddWidget extends StatefulWidget {
   });
 
   @override
-  State<PlaylistAddWidget> createState() => _PlaylistAddWidgetState();
+  State<PlaylistAddWidget> createState() => PlaylistAddWidgetState();
 }
 
-class _PlaylistAddWidgetState extends State<PlaylistAddWidget> {
+class PlaylistAddWidgetState extends State<PlaylistAddWidget> {
   final playlistDataManager = PlaylistDataManager();
   final songDataManager = SongDataManager();
   List<SongModel> songs = [];
@@ -65,8 +65,8 @@ class _PlaylistAddWidgetState extends State<PlaylistAddWidget> {
   PlaylistModel playlistToBeAdded =
       PlaylistModel(id: 0, title: 'title', icon: '', songs: []);
 
-  void insertPlaylistToBeAdded(PlaylistModel song) {
-    playlistToBeAdded = PlaylistModel.fromMap(playlistToBeAdded.toSql());
+  void insertPlaylistToBeEdited(PlaylistModel playlist) {
+    playlistToBeAdded = playlist;
     _titleController.text = playlistToBeAdded.title;
     setState(() {
       editing = true;
@@ -120,7 +120,7 @@ class _PlaylistAddWidgetState extends State<PlaylistAddWidget> {
     }
 
     return SizedBox(
-      width: 500,
+      width: 600,
       height: 160,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,17 +313,15 @@ class _PlaylistAddWidgetState extends State<PlaylistAddWidget> {
             flex: 1,
             child: SizedBox(
               height: 200,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Playlist to be Added', style: headline1),
-                    Text('Title: ${playlistToBeAdded.title}', style: headline1),
-                    Text('Icon: ${playlistToBeAdded.icon}', style: headline1),
-                    Text('Songs: $songsTitles', style: headline1),
-                    playlistAdded
-                        ? Text('Playlist added', style: headline1)
-                        : Container(),
-                  ]),
+              child: ListView(children: [
+                Text('Playlist to be Added', style: headline1),
+                Text('Title: ${playlistToBeAdded.title}', style: headline1),
+                Text('Icon: ${playlistToBeAdded.icon}', style: headline1),
+                Text('Songs: $songsTitles', style: headline1),
+                playlistAdded
+                    ? Text('Playlist added', style: headline1)
+                    : Container(),
+              ]),
             ),
           )
         ],
