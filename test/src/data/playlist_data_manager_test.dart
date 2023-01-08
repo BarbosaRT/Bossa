@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:bossa/models/playlist_model.dart';
+import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,16 +15,11 @@ void main() {
       databaseFactory = databaseFactoryFfi;
     }
 
-    final playlistDataManager = PlaylistDataManager();
+    final playlistDataManager =
+        PlaylistDataManager(localDataManagerInstance: testDataManagerInstance);
     final songDataManager = SongDataManager();
     final playlist1 =
         PlaylistModel(id: 1, title: 'Song 1', icon: 'icon1', songs: []);
-    final song1 = SongModel(
-        id: 1,
-        title: 'Song 1',
-        icon: 'icon1',
-        url: 'https://youtu.be/NgYoUsdETRw',
-        path: 'path1');
 
     test('test if creates playlists', () async {
       playlistDataManager.deleteAll();

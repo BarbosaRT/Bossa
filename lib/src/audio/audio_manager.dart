@@ -2,12 +2,12 @@ import 'package:bossa/src/url/url_parser.dart';
 import 'package:just_audio/just_audio.dart';
 
 abstract class AudioManager {
-  void load(String path);
+  Future<void> load(String path);
   void play();
   void pause();
   void stop();
   void seek(Duration position);
-  void dispose();
+  Future<void> dispose();
   bool isPlaying();
   Duration getPosition();
   Stream<Duration> getPositionStream();
@@ -40,11 +40,11 @@ class JustAudioManager implements AudioManager {
   }
 
   @override
-  void load(String path) {
+  Future<void> load(String path) async {
     if (UrlParser.validUrl(path)) {
-      player.setUrl(path, preload: false);
+      await player.setUrl(path, preload: false);
     } else {
-      player.setFilePath(path);
+      await player.setFilePath(path);
     }
   }
 
@@ -69,7 +69,7 @@ class JustAudioManager implements AudioManager {
   }
 
   @override
-  void dispose() {
-    player.dispose();
+  Future<void> dispose() async {
+    await player.dispose();
   }
 }

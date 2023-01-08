@@ -1,5 +1,6 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:file_picker/file_picker.dart';
@@ -52,7 +53,8 @@ class PlaylistAddWidget extends StatefulWidget {
 }
 
 class PlaylistAddWidgetState extends State<PlaylistAddWidget> {
-  final playlistDataManager = PlaylistDataManager();
+  final playlistDataManager =
+      PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
   final songDataManager = SongDataManager();
   List<SongModel> songs = [];
 
@@ -88,6 +90,8 @@ class PlaylistAddWidgetState extends State<PlaylistAddWidget> {
   @override
   Widget build(BuildContext context) {
     TextStyle headline1 = const TextStyle(color: Colors.white, fontSize: 13);
+    TextStyle blackHeadline2 =
+        const TextStyle(color: Colors.black, fontSize: 8);
     TextStyle blackHeadline1 = headline1.copyWith(color: Colors.black);
 
     List<DropdownMenuItem<SongModel>> dropdownList = [];
@@ -170,7 +174,7 @@ class PlaylistAddWidgetState extends State<PlaylistAddWidget> {
                     children: [
                       DropdownButton<SongModel>(
                         value: selectedSong,
-                        style: blackHeadline1,
+                        style: blackHeadline2,
                         dropdownColor: Colors.amber,
                         onChanged: (value) {
                           setState(() {

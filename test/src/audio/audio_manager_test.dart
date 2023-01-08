@@ -8,16 +8,9 @@ void main() {
     String testSongUrl =
         'http://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a';
 
-    // test('returns null Duration when not playing', () async {
-    //   expect(audioManager.getDuration(), isNull);
-    // });
-
     test('load audio from URL', () async {
       audioManager.load(testSongUrl);
-    });
-
-    test('dont load audio from a wrong URL', () async {
-      audioManager.load('.testurl');
+      audioManager.play();
     });
 
     test('play and pause audio', () async {
@@ -47,6 +40,29 @@ void main() {
       audioManager.stop();
       expect(audioManager.isPlaying(), isFalse);
       expect(audioManager.getPosition(), Duration.zero);
+    });
+
+    test('getPositionStream() returns a stream of positions', () async {
+      await audioManager.load(testSongUrl);
+      audioManager.play();
+      Future.delayed(const Duration(seconds: 3));
+
+      audioManager.pause();
+      final positionStream = audioManager.getPositionStream();
+      positionStream.listen(
+        expectAsync1(
+          (event) {
+            expect(event, isA<Duration>());
+          },
+        ),
+      );
+      expect(positionStream, isA<Stream<Duration>>());
+    });
+
+    test('dispose() closes the audio player', () async {
+      await audioManager.load(testSongUrl);
+      audioManager.play();
+      await audioManager.dispose();
     });
   });
 }

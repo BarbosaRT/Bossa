@@ -24,8 +24,10 @@ class YoutubeToPlaylist {
 
   Future<PlaylistModel> convertYoutubePlaylist(String url) async {
     String invidiousInstance = await _getInvidiousApiInstance();
+
     String parsedUrl = url.replaceAll('youtube.com/playlist?list=', '');
-    parsedUrl = parsedUrl.replaceAll('https://www.', '');
+    parsedUrl = parsedUrl.replaceAll('https://', '');
+    parsedUrl = parsedUrl.replaceAll('www.', '');
 
     Map<String, dynamic> result = await HttpRequest()
             .retriveFromUrl('$invidiousInstance/api/v1/playlists/$parsedUrl')

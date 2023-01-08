@@ -1,3 +1,4 @@
+import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/ui/test/playlist_add_widget.dart';
 import 'package:bossa/src/ui/test/playlist_container.dart';
@@ -22,7 +23,8 @@ class _TestPageState extends State<TestPage> {
   GlobalKey<SongAddWidgetState> songAddKey = GlobalKey();
   List<SongModel> songs = [];
 
-  final playlistDataManager = PlaylistDataManager();
+  final playlistDataManager =
+      PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
   GlobalKey<PlaylistAddWidgetState> playlistAddKey = GlobalKey();
   List<PlaylistModel> playlists = [];
 

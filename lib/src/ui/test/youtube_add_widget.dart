@@ -1,4 +1,5 @@
 import 'package:bossa/models/playlist_model.dart';
+import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/youtube_to_playlist.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,8 @@ class YoutubeAddWidget extends StatefulWidget {
 class _YoutubeAddWidgetState extends State<YoutubeAddWidget> {
   final TextEditingController textEditingController = TextEditingController();
   final YoutubeToPlaylist youtubeToPlaylist = YoutubeToPlaylist();
-  final PlaylistDataManager playlistDataManager = PlaylistDataManager();
+  final PlaylistDataManager playlistDataManager =
+      PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
   String url = '';
   bool added = false;
 
@@ -60,7 +62,7 @@ class _YoutubeAddWidgetState extends State<YoutubeAddWidget> {
                       playlistDataManager.addPlaylist(playlist);
                       widget.callback();
 
-                      Future.delayed(const Duration(seconds: 10)).then(
+                      await Future.delayed(const Duration(seconds: 10)).then(
                         (value) {
                           setState(() {
                             added = false;

@@ -15,7 +15,8 @@ void main() {
       databaseFactory = databaseFactoryFfi;
     }
 
-    final playlistDataManager = PlaylistDataManager();
+    final playlistDataManager =
+        PlaylistDataManager(localDataManagerInstance: testDataManagerInstance);
     final songDataManager = SongDataManager();
     final playlist =
         PlaylistModel(id: 1, title: 'Song 1', icon: 'icon1', songs: []);
@@ -35,5 +36,5 @@ void main() {
       playlistDataManager.addPlaylist(playlist);
       playlistDataManager.appendToPlaylist(song, playlist);
     });
-});
+  });
 }

@@ -1,5 +1,7 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
@@ -24,8 +26,10 @@ class PlaylistContainer extends StatefulWidget {
 }
 
 class _PlaylistContainerState extends State<PlaylistContainer> {
-  final playlistDataManager = PlaylistDataManager();
+  final playlistDataManager =
+      PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
   final songDataManager = SongDataManager();
+  final justPlaylistManager = JustPlaylistManager();
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +108,10 @@ class _PlaylistContainerState extends State<PlaylistContainer> {
                         ),
                         ElevatedButton(
                           style: buttonStyle,
-                          onPressed: () {},
+                          onPressed: () async {
+                            await justPlaylistManager
+                                .setPlaylist(widget.playlist);
+                          },
                           child: const Icon(Icons.play_arrow),
                         ),
                       ],
