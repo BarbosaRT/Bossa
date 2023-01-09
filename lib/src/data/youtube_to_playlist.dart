@@ -1,10 +1,12 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_url_parser.dart';
 
 class YoutubeToPlaylist {
-  final SongDataManager _songDataManager = SongDataManager();
+  final SongDataManager _songDataManager =
+      SongDataManager(localDataManagerInstance: dataManagerInstance);
 
   Future<String> _getInvidiousApiInstance() async {
     String apiUrl =

@@ -11,9 +11,10 @@ abstract class AudioManager {
   bool isPlaying();
   Duration getPosition();
   Stream<Duration> getPositionStream();
-  Stream<Duration?> getDuration();
+  Stream<Duration?> getDurationStream();
 }
 
+AudioManager audioManagerInstance = JustAudioManager();
 JustAudioManager justAudioManagerInstance = JustAudioManager();
 
 class JustAudioManager implements AudioManager {
@@ -25,7 +26,7 @@ class JustAudioManager implements AudioManager {
   }
 
   @override
-  Stream<Duration?> getDuration() {
+  Stream<Duration?> getDurationStream() {
     return player.durationStream;
   }
 

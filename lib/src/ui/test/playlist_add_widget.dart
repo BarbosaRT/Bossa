@@ -55,7 +55,8 @@ class PlaylistAddWidget extends StatefulWidget {
 class PlaylistAddWidgetState extends State<PlaylistAddWidget> {
   final playlistDataManager =
       PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
-  final songDataManager = SongDataManager();
+  final songDataManager =
+      SongDataManager(localDataManagerInstance: dataManagerInstance);
   List<SongModel> songs = [];
 
   bool playlistAdded = false;
@@ -96,11 +97,16 @@ class PlaylistAddWidgetState extends State<PlaylistAddWidget> {
 
     List<DropdownMenuItem<SongModel>> dropdownList = [];
     for (SongModel song in songs) {
+      String title = song.title;
+      if (title.length > 35) {
+        title = '${title.substring(0, 35)}...';
+      }
+
       dropdownList.add(
         DropdownMenuItem<SongModel>(
           value: song,
           child: Text(
-            song.title,
+            title,
             style: headline1,
           ),
         ),
@@ -110,7 +116,13 @@ class PlaylistAddWidgetState extends State<PlaylistAddWidget> {
     List<String> songsTitles = [];
     List<PlaylistSongContainer> songsInPlaylist = [];
     for (SongModel song in playlistToBeAdded.songs) {
-      songsTitles.add(song.title);
+      String title = song.title;
+      if (title.length > 35) {
+        title = '${title.substring(0, 35)}...';
+      }
+      song.title = title;
+
+      songsTitles.add(title);
       songsInPlaylist.add(
         PlaylistSongContainer(
           song: song,

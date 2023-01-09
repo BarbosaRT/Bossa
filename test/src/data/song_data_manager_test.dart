@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bossa/models/song_model.dart';
@@ -12,7 +13,8 @@ void main() {
       databaseFactory = databaseFactoryFfi;
     }
 
-    final songDataManager = SongDataManager();
+    final songDataManager =
+        SongDataManager(localDataManagerInstance: testDataManagerInstance);
     final song1 = SongModel(
         id: 1,
         title: 'Song 1',
@@ -92,8 +94,12 @@ void main() {
       expect(loadedSongs2[0].title == 'EditedSong', true);
     });
 
-    test('getLastAddedSong', () {
-      //songDataManager.deleteAll();
+    test('getLastAddedSong', () async {
+      songDataManager.deleteAll();
+      songDataManager.addSong(song1);
+      songDataManager.addSong(song2);
+      final SongModel loadedSong1 = await songDataManager.loadLastAddedSong();
+      expect(loadedSong1.title, song2.title);
     });
   });
 }

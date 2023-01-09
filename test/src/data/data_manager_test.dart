@@ -17,7 +17,8 @@ void main() {
 
     final playlistDataManager =
         PlaylistDataManager(localDataManagerInstance: testDataManagerInstance);
-    final songDataManager = SongDataManager();
+    final songDataManager =
+        SongDataManager(localDataManagerInstance: testDataManagerInstance);
     final playlist =
         PlaylistModel(id: 1, title: 'Song 1', icon: 'icon1', songs: []);
     final song = SongModel(

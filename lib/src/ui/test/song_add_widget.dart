@@ -1,4 +1,5 @@
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,8 @@ class SongAddWidget extends StatefulWidget {
 }
 
 class SongAddWidgetState extends State<SongAddWidget> {
-  final songDataManager = SongDataManager();
+  final songDataManager =
+      SongDataManager(localDataManagerInstance: dataManagerInstance);
   bool songAdded = false;
   bool editing = false;
   final TextEditingController _titleController = TextEditingController();

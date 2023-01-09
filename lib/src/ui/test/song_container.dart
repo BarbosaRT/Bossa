@@ -1,5 +1,6 @@
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
+import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:flutter/material.dart';
@@ -20,8 +21,9 @@ class SongContainer extends StatefulWidget {
 }
 
 class _SongContainerState extends State<SongContainer> {
-  final audioManager = justAudioManagerInstance;
-  final songDataManager = SongDataManager();
+  final audioManager = audioManagerInstance;
+  final songDataManager =
+      SongDataManager(localDataManagerInstance: dataManagerInstance);
 
   @override
   void initState() {
@@ -150,7 +152,7 @@ class _SongContainerState extends State<SongContainer> {
             ),
             Flexible(
               child: StreamBuilder<Duration?>(
-                stream: audioManager.getDuration(),
+                stream: audioManager.getDurationStream(),
                 builder: (context, stream) {
                   double max = stream.data == null
                       ? 2

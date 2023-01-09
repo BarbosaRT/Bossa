@@ -19,7 +19,8 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
-  final songDataManager = SongDataManager();
+  final songDataManager =
+      SongDataManager(localDataManagerInstance: dataManagerInstance);
   GlobalKey<SongAddWidgetState> songAddKey = GlobalKey();
   List<SongModel> songs = [];
 
@@ -87,62 +88,69 @@ class _TestPageState extends State<TestPage> {
       body: SizedBox(
         width: screenSize.width,
         height: screenSize.height,
-        child: Stack(
-          children: [
-            Positioned(
-              top: 10,
-              left: 10,
-              child: SongAddWidget(
-                key: songAddKey,
-                callback: () {
-                  loadSongs();
-                },
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Stack(
+            children: [
+              const SizedBox(
+                width: 1280,
+                height: 720,
               ),
-            ),
-            Positioned(
-              top: 140,
-              child: SizedBox(
-                width: 400,
-                height: 250,
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  padding: EdgeInsets.zero,
-                  children: songContainers,
+              Positioned(
+                top: 10,
+                left: 10,
+                child: SongAddWidget(
+                  key: songAddKey,
+                  callback: () {
+                    loadSongs();
+                  },
                 ),
               ),
-            ),
-            Positioned(
-              top: 10,
-              left: 400,
-              child: PlaylistAddWidget(
-                key: playlistAddKey,
-                callback: () {
-                  loadPlaylists();
-                },
-              ),
-            ),
-            Positioned(
-              top: 200,
-              left: 400,
-              child: SizedBox(
-                width: 500,
-                height: 300,
-                child: ListView(
-                  children: playlistContainers,
+              Positioned(
+                top: 140,
+                child: SizedBox(
+                  width: 400,
+                  height: 250,
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    padding: EdgeInsets.zero,
+                    children: songContainers,
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              top: 10,
-              left: 1000,
-              child: YoutubeAddWidget(
-                callback: () {
-                  loadSongs();
-                  loadPlaylists();
-                },
+              Positioned(
+                top: 10,
+                left: 400,
+                child: PlaylistAddWidget(
+                  key: playlistAddKey,
+                  callback: () {
+                    loadPlaylists();
+                  },
+                ),
               ),
-            )
-          ],
+              Positioned(
+                top: 200,
+                left: 400,
+                child: SizedBox(
+                  width: 500,
+                  height: 300,
+                  child: ListView(
+                    children: playlistContainers,
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 10,
+                left: 1000,
+                child: YoutubeAddWidget(
+                  callback: () {
+                    loadSongs();
+                    loadPlaylists();
+                  },
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

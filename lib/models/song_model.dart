@@ -4,22 +4,22 @@ class SongModel {
   String icon = '';
   String url = '';
   String path = '';
+
   SongModel({
     required this.id,
     required this.title,
     required this.icon,
     required this.url,
-    required this.path,
+    this.path = '',
   });
 
   factory SongModel.fromMap(Map map) {
     return SongModel(
-      id: map['id'] as int,
-      title: map['title'] as String,
-      icon: map['icon'] as String,
-      url: map['url'] as String,
-      path: map['path'] as String,
-    );
+        id: map['id'] as int,
+        title: map['title'] as String,
+        icon: map['icon'] as String,
+        url: map['url'] as String,
+        path: map['path'] as String);
   }
 
   @override

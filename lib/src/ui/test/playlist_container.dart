@@ -28,7 +28,8 @@ class PlaylistContainer extends StatefulWidget {
 class _PlaylistContainerState extends State<PlaylistContainer> {
   final playlistDataManager =
       PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
-  final songDataManager = SongDataManager();
+  final songDataManager =
+      SongDataManager(localDataManagerInstance: dataManagerInstance);
   final justPlaylistManager = JustPlaylistManager();
 
   @override

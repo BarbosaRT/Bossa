@@ -1,41 +1,49 @@
 import 'dart:async';
-import 'package:bossa/src/data/data_manager.dart';
-import 'package:bossa/models/song_model.dart';
-import 'package:bossa/src/data/song_url_parser.dart';
-
 import 'package:flutter/foundation.dart';
 
+import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/data/data_manager.dart';
+import 'package:bossa/src/data/song_url_parser.dart';
+
 class SongDataManager {
+  final DataManager localDataManagerInstance;
+  SongDataManager({
+    required this.localDataManagerInstance,
+  });
+
   @visibleForTesting
   void deleteAll() async {
-    var database = await dataManagerInstance.database();
+    var database = await localDataManagerInstance.database();
     database.delete('songs', where: 'id >= 0');
   }
 
   void addSong(SongModel song) async {
     song.url = SongUrlParser().parseSongUrlToSave(song.url);
 
-    var database = await dataManagerInstance.database();
-    database.rawInsert(
-        'INSERT INTO songs(title, icon, url, path) VALUES("${song.title}","${song.icon}","${song.url}","${song.path}")');
+    var database = await localDataManagerInstance.database();
+    database.rawInsert('''INSERT INTO songs(title, icon, url, path) 
+      VALUES("${song.title}","${song.icon}","${song.url}","${song.path}")''');
   }
 
   void removeSong(SongModel song) async {
-    var database = await dataManagerInstance.database();
+    var database = await localDataManagerInstance.database();
     database.rawDelete(
         'DELETE FROM playlists_songs WHERE playlists_songs.idSong = ${song.id}');
     database.rawDelete('DELETE FROM songs WHERE songs.id = ${song.id}');
   }
 
   void editSong(SongModel editedSong) async {
-    var database = await dataManagerInstance.database();
+    var database = await localDataManagerInstance.database();
     editedSong.url = SongUrlParser().parseSongUrlToSave(editedSong.url);
-    database.rawUpdate(
-        'UPDATE songs SET title = "${editedSong.title}", icon = "${editedSong.icon}", url = "${editedSong.url}", path = "${editedSong.path}" WHERE id = "${editedSong.id}"');
+
+    database.rawUpdate('''UPDATE songs SET title = "${editedSong.title}", 
+        icon = "${editedSong.icon}", url = "${editedSong.url}", 
+        path = "${editedSong.path}" 
+        WHERE id = "${editedSong.id}"''');
   }
 
   Future<List<SongModel>> loadAllSongs() async {
-    var database = await dataManagerInstance.database();
+    var database = await localDataManagerInstance.database();
     List<Map<String, dynamic>> results =
         await database.query('songs', orderBy: "id");
 
@@ -49,7 +57,7 @@ class SongDataManager {
   }
 
   Future<SongModel> loadLastAddedSong() async {
-    var database = await dataManagerInstance.database();
+    var database = await localDataManagerInstance.database();
     List<Map<String, dynamic>> result =
         await database.rawQuery('SELECT * FROM songs ORDER BY id DESC LIMIT 1');
 
