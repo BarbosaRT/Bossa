@@ -1,4 +1,4 @@
-import 'package:bossa/src/ui/test_ui.dart';
+import 'package:bossa/src/ui/test/test_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 

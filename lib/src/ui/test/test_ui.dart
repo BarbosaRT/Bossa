@@ -144,8 +144,8 @@ class _TestPageState extends State<TestPage> {
                 ),
               ),
               Positioned(
-                top: 10,
-                left: 1000,
+                top: 200,
+                left: 10,
                 child: YoutubeAddWidget(
                   callback: () {
                     loadSongs();

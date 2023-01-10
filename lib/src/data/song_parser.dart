@@ -51,7 +51,7 @@ class SongParser {
       await DioDownloadService(filePath: FilePathImpl())
           .download(song.url, '${song.title}.m4a');
       String workingDirectory = await FilePathImpl().getDocumentsDirectory();
-      song.path = '$workingDirectory/${song.title}.m4a';
+      song.path = '$workingDirectory/songs/${song.title}.m4a';
     }
     return song;
   }

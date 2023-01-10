@@ -31,7 +31,8 @@ class DioDownloadService implements DownloadService {
 
     var stream = youtube.videos.streamsClient.get(streamInfo);
 
-    var file = File('$workingDirectory/$fileName');
+    await Directory('$workingDirectory/songs').create();
+    var file = File('$workingDirectory/songs/$fileName');
     var fileStream = file.openWrite();
 
     await stream.pipe(fileStream);

@@ -72,7 +72,7 @@ class JustPlaylistManager implements PlaylistAudioManager {
     }
 
     playlistAudioSource = ConcatenatingAudioSource(
-      useLazyPreparation: false,
+      useLazyPreparation: true,
       shuffleOrder: DefaultShuffleOrder(),
       children: songs,
     );

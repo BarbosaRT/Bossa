@@ -19,13 +19,13 @@ void main() {
       databaseFactory = databaseFactoryFfi;
     }
     test('Test convertYoutubePlaylist() method', () async {
-      YoutubeToPlaylist converter = YoutubeToPlaylist(
+      YoutubeParser converter = YoutubeParser(
           songDataManager: SongDataManager(
               localDataManagerInstance: testDataManagerInstance,
               downloadService: DioDownloadService(filePath: FilePathImpl())));
       PlaylistModel playlist = await converter.convertYoutubePlaylist(
-          'https://www.youtube.com/playlist?list=OLAK5uy_kO0UfLxZQ-bsJRSQUTtmhMX4HCIrraBxM');
-      expect(playlist.songs.length, 10);
-    }, timeout: const Timeout(Duration(minutes: 1)));
+          'https://www.youtube.com/playlist?list=PLXUeUBhvfMh8ivldygLkBMnXhSCH84nEu');
+      expect(playlist.songs.length, 13);
+    }, timeout: const Timeout(Duration(minutes: 5)));
   });
 }
