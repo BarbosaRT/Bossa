@@ -2,11 +2,18 @@ import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
-import 'package:bossa/src/data/song_url_parser.dart';
+import 'package:bossa/src/data/song_parser.dart';
+import 'package:bossa/src/file/file_path.dart';
+import 'package:bossa/src/url/download_service.dart';
 
 class YoutubeToPlaylist {
-  final SongDataManager _songDataManager =
-      SongDataManager(localDataManagerInstance: dataManagerInstance);
+  SongDataManager? songDataManager;
+
+  YoutubeToPlaylist({this.songDataManager}) {
+    songDataManager = SongDataManager(
+        localDataManagerInstance: dataManagerInstance,
+        downloadService: DioDownloadService(filePath: FilePathImpl()));
+  }
 
   Future<String> _getInvidiousApiInstance() async {
     String apiUrl =
@@ -42,7 +49,7 @@ class YoutubeToPlaylist {
       title = title.replaceAll('"', "'");
 
       String url = video['videoId'] as String;
-      url = SongUrlParser().parseSongUrlToSave(url);
+      url = 'https://youtu.be/$url';
 
       String icon = '';
       List<dynamic> thumbnails = video['videoThumbnails'] as List<dynamic>;
@@ -54,9 +61,10 @@ class YoutubeToPlaylist {
 
       SongModel song =
           SongModel(id: 0, title: title, icon: icon, url: url, path: '');
-      _songDataManager.addSong(song);
+      song = await SongParser().parseSongBeforeSave(song);
+      songDataManager!.addSong(song);
 
-      SongModel retrivedSong = await _songDataManager.loadLastAddedSong();
+      SongModel retrivedSong = await songDataManager!.loadLastAddedSong();
       songs.add(retrivedSong);
     }
 

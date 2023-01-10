@@ -43,7 +43,7 @@ class JustAudioManager implements AudioManager {
   @override
   Future<void> load(String path) async {
     if (UrlParser.validUrl(path)) {
-      await player.setUrl(path, preload: false);
+      await player.setUrl(path, preload: true);
     } else {
       await player.setFilePath(path);
     }

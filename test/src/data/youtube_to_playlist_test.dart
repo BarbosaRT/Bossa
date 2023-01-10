@@ -1,7 +1,11 @@
 import 'dart:io';
 
 import 'package:bossa/models/playlist_model.dart';
+import 'package:bossa/src/data/data_manager.dart';
+import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/youtube_to_playlist.dart';
+import 'package:bossa/src/file/file_path.dart';
+import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite/sqflite.dart';
@@ -15,7 +19,10 @@ void main() {
       databaseFactory = databaseFactoryFfi;
     }
     test('Test convertYoutubePlaylist() method', () async {
-      YoutubeToPlaylist converter = YoutubeToPlaylist();
+      YoutubeToPlaylist converter = YoutubeToPlaylist(
+          songDataManager: SongDataManager(
+              localDataManagerInstance: testDataManagerInstance,
+              downloadService: DioDownloadService(filePath: FilePathImpl())));
       PlaylistModel playlist = await converter.convertYoutubePlaylist(
           'https://www.youtube.com/playlist?list=OLAK5uy_kO0UfLxZQ-bsJRSQUTtmhMX4HCIrraBxM');
       expect(playlist.songs.length, 10);

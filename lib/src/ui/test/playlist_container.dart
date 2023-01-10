@@ -4,8 +4,10 @@ import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
+import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:bossa/src/ui/test/song_container.dart';
+import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter/material.dart';
 
 class PlaylistContainer extends StatefulWidget {
@@ -28,15 +30,18 @@ class PlaylistContainer extends StatefulWidget {
 class _PlaylistContainerState extends State<PlaylistContainer> {
   final playlistDataManager =
       PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
-  final songDataManager =
-      SongDataManager(localDataManagerInstance: dataManagerInstance);
+  final songDataManager = SongDataManager(
+      localDataManagerInstance: dataManagerInstance,
+      downloadService: DioDownloadService(filePath: FilePathImpl()));
   final justPlaylistManager = JustPlaylistManager();
 
   @override
   Widget build(BuildContext context) {
     ButtonStyle buttonStyle = ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(Colors.amber),
-        overlayColor: MaterialStateProperty.all(Colors.amber));
+      backgroundColor: MaterialStateProperty.all(Colors.amber),
+      overlayColor: MaterialStateProperty.all(Colors.amber),
+      padding: MaterialStateProperty.all(EdgeInsets.zero),
+    );
 
     List<SongContainer> songContainers = [];
     List<SongModel> songs = [];
@@ -83,20 +88,29 @@ class _PlaylistContainerState extends State<PlaylistContainer> {
                   Flexible(
                     child: Row(
                       children: [
-                        ElevatedButton(
-                          style: buttonStyle,
-                          onPressed: () {
-                            playlistDataManager.deletePlaylist(widget.playlist);
-                            widget.callback();
-                          },
-                          child: const Icon(Icons.delete),
+                        SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
+                              playlistDataManager
+                                  .deletePlaylist(widget.playlist);
+                              widget.callback();
+                            },
+                            child: const Icon(Icons.delete),
+                          ),
                         ),
-                        ElevatedButton(
-                          style: buttonStyle,
-                          onPressed: () {
-                            widget.editCallback();
-                          },
-                          child: const Icon(Icons.edit),
+                        SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () {
+                              widget.editCallback();
+                            },
+                            child: const Icon(Icons.edit),
+                          ),
                         ),
                         ElevatedButton(
                           style: buttonStyle,
@@ -107,13 +121,29 @@ class _PlaylistContainerState extends State<PlaylistContainer> {
                           },
                           child: Text('Delete All', style: headline1),
                         ),
-                        ElevatedButton(
-                          style: buttonStyle,
-                          onPressed: () async {
-                            await justPlaylistManager
-                                .setPlaylist(widget.playlist);
-                          },
-                          child: const Icon(Icons.play_arrow),
+                        SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () async {
+                              await justPlaylistManager
+                                  .setPlaylist(widget.playlist);
+                              justPlaylistManager.player.play();
+                            },
+                            child: const Icon(Icons.play_arrow),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: ElevatedButton(
+                            style: buttonStyle,
+                            onPressed: () async {
+                              justPlaylistManager.player.pause();
+                            },
+                            child: const Icon(Icons.pause),
+                          ),
                         ),
                       ],
                     ),

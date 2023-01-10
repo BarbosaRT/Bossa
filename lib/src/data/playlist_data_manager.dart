@@ -1,4 +1,3 @@
-import 'package:bossa/src/data/song_url_parser.dart';
 import 'package:flutter/widgets.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
@@ -76,7 +75,6 @@ class PlaylistDataManager {
     List<SongModel> output = [];
     for (Map result in songsFromPlaylist) {
       SongModel song = SongModel.fromMap(result);
-      song.url = await SongUrlParser().parseSongUrlToPlay(song.url);
       output.add(song);
     }
     return output;

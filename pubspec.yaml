@@ -20,8 +20,12 @@ dependencies:
   sqflite: ^2.2.2
   
   http: ^0.13.5
+  html: ^0.15.1 
+  permission_handler: ^8.3.0
+  
   just_audio: ^0.9.30
   just_audio_mpv: ^0.1.6
+  youtube_explode_dart: ^1.10.4
 
 dev_dependencies:
   flutter_test:

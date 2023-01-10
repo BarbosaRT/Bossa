@@ -1,6 +1,9 @@
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
+import 'package:bossa/src/data/song_parser.dart';
+import 'package:bossa/src/file/file_path.dart';
+import 'package:bossa/src/url/download_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -16,8 +19,9 @@ class SongAddWidget extends StatefulWidget {
 }
 
 class SongAddWidgetState extends State<SongAddWidget> {
-  final songDataManager =
-      SongDataManager(localDataManagerInstance: dataManagerInstance);
+  final songDataManager = SongDataManager(
+      localDataManagerInstance: dataManagerInstance,
+      downloadService: DioDownloadService(filePath: FilePathImpl()));
   bool songAdded = false;
   bool editing = false;
   final TextEditingController _titleController = TextEditingController();
@@ -48,7 +52,7 @@ class SongAddWidgetState extends State<SongAddWidget> {
 
     return SizedBox(
       width: 400,
-      height: 120,
+      height: 160,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -110,6 +114,18 @@ class SongAddWidgetState extends State<SongAddWidget> {
                     alignment: Alignment.centerLeft,
                     color: Colors.white,
                     child: Text(
+                      songToBeAdded.path,
+                      style: blackHeadline1,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: Container(
+                    width: 400,
+                    height: 50,
+                    alignment: Alignment.centerLeft,
+                    color: Colors.white,
+                    child: Text(
                       songToBeAdded.icon,
                       style: blackHeadline1,
                     ),
@@ -136,8 +152,10 @@ class SongAddWidgetState extends State<SongAddWidget> {
                     height: 40,
                     color: Colors.blue,
                     child: TextButton(
-                      onPressed: () {
+                      onPressed: () async {
                         songAdded = true;
+                        songToBeAdded = await SongParser()
+                            .parseSongBeforeSave(songToBeAdded);
                         editing
                             ? songDataManager.editSong(songToBeAdded)
                             : songDataManager.addSong(songToBeAdded);
@@ -174,6 +192,39 @@ class SongAddWidgetState extends State<SongAddWidget> {
                     ),
                   ),
                   //
+                  // Path
+                  //
+                  Container(
+                    width: 150,
+                    height: 40,
+                    color: Colors.orange,
+                    child: TextButton(
+                      onPressed: () async {
+                        FilePickerResult? result = await FilePicker.platform
+                            .pickFiles(
+                                type: FileType.custom,
+                                allowedExtensions: [
+                              'mp4',
+                              'mp3',
+                              'flac',
+                              'wav',
+                              'm4a'
+                            ]);
+
+                        if (result != null) {
+                          PlatformFile file = result.files.first;
+                          setState(() {
+                            songToBeAdded.path = file.path!;
+                          });
+                        }
+                      },
+                      child: Text(
+                        'Add Path',
+                        style: headline1,
+                      ),
+                    ),
+                  ),
+                  //
                   // Icon
                   //
                   Container(
@@ -205,18 +256,14 @@ class SongAddWidgetState extends State<SongAddWidget> {
             ),
           ),
           Flexible(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Song to be Added', style: headline1),
-                  Text('Title: ${songToBeAdded.title}', style: headline1),
-                  Text('Icon: ${songToBeAdded.icon}', style: headline1),
-                  Text('Url: ${songToBeAdded.url}', style: headline1),
-                  Text('Path: ${songToBeAdded.path}', style: headline1),
-                  songAdded
-                      ? Text('Song added', style: headline1)
-                      : Container(),
-                ]),
+            child: ListView(children: [
+              Text('Song to be Added', style: headline1),
+              Text('Title: ${songToBeAdded.title}', style: headline1),
+              Text('Icon: ${songToBeAdded.icon}', style: headline1),
+              Text('Url: ${songToBeAdded.url}', style: headline1),
+              Text('Path: ${songToBeAdded.path}', style: headline1),
+              songAdded ? Text('Song added', style: headline1) : Container(),
+            ]),
           )
         ],
       ),

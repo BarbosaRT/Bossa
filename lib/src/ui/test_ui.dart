@@ -1,10 +1,12 @@
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
+import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/ui/test/playlist_add_widget.dart';
 import 'package:bossa/src/ui/test/playlist_container.dart';
 import 'package:bossa/src/ui/test/song_add_widget.dart';
 import 'package:bossa/src/ui/test/song_container.dart';
 import 'package:bossa/src/ui/test/youtube_add_widget.dart';
+import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter/material.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
@@ -19,8 +21,9 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
-  final songDataManager =
-      SongDataManager(localDataManagerInstance: dataManagerInstance);
+  final songDataManager = SongDataManager(
+      localDataManagerInstance: dataManagerInstance,
+      downloadService: DioDownloadService(filePath: FilePathImpl()));
   GlobalKey<SongAddWidgetState> songAddKey = GlobalKey();
   List<SongModel> songs = [];
 
@@ -108,6 +111,7 @@ class _TestPageState extends State<TestPage> {
               ),
               Positioned(
                 top: 140,
+                left: 870,
                 child: SizedBox(
                   width: 400,
                   height: 250,
@@ -129,8 +133,8 @@ class _TestPageState extends State<TestPage> {
                 ),
               ),
               Positioned(
-                top: 200,
-                left: 400,
+                top: 180,
+                left: 370,
                 child: SizedBox(
                   width: 500,
                   height: 300,

@@ -67,12 +67,12 @@ class JustPlaylistManager implements PlaylistAudioManager {
     List<AudioSource> songs = [];
 
     for (SongModel song in playlist.songs) {
-      String path = song.url.isEmpty ? song.path : song.url;
+      String path = song.path.isEmpty ? song.url : song.path;
       songs.add(getAudioSourceFromString(path));
     }
 
     playlistAudioSource = ConcatenatingAudioSource(
-      useLazyPreparation: true,
+      useLazyPreparation: false,
       shuffleOrder: DefaultShuffleOrder(),
       children: songs,
     );

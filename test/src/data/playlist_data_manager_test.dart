@@ -3,6 +3,8 @@ import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
+import 'package:bossa/src/file/file_path.dart';
+import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:sqflite/sqflite.dart';
@@ -17,8 +19,9 @@ void main() {
 
     final playlistDataManager =
         PlaylistDataManager(localDataManagerInstance: testDataManagerInstance);
-    final songDataManager =
-        SongDataManager(localDataManagerInstance: testDataManagerInstance);
+    final songDataManager = SongDataManager(
+        localDataManagerInstance: testDataManagerInstance,
+        downloadService: DioDownloadService(filePath: FilePathImpl()));
     final playlist1 =
         PlaylistModel(id: 1, title: 'Song 1', icon: 'icon1', songs: []);
 

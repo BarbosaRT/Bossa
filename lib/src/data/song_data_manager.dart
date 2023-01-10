@@ -1,15 +1,15 @@
 import 'dart:async';
+import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter/foundation.dart';
-
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/data_manager.dart';
-import 'package:bossa/src/data/song_url_parser.dart';
 
 class SongDataManager {
   final DataManager localDataManagerInstance;
-  SongDataManager({
-    required this.localDataManagerInstance,
-  });
+  final DownloadService downloadService;
+
+  SongDataManager(
+      {required this.localDataManagerInstance, required this.downloadService});
 
   @visibleForTesting
   void deleteAll() async {
@@ -18,11 +18,9 @@ class SongDataManager {
   }
 
   void addSong(SongModel song) async {
-    song.url = SongUrlParser().parseSongUrlToSave(song.url);
-
     var database = await localDataManagerInstance.database();
-    database.rawInsert('''INSERT INTO songs(title, icon, url, path) 
-      VALUES("${song.title}","${song.icon}","${song.url}","${song.path}")''');
+    await database.rawInsert(
+        'INSERT INTO songs(title, icon, url, path) VALUES("${song.title}","${song.icon}","${song.url}","${song.path}")');
   }
 
   void removeSong(SongModel song) async {
@@ -34,7 +32,6 @@ class SongDataManager {
 
   void editSong(SongModel editedSong) async {
     var database = await localDataManagerInstance.database();
-    editedSong.url = SongUrlParser().parseSongUrlToSave(editedSong.url);
 
     database.rawUpdate('''UPDATE songs SET title = "${editedSong.title}", 
         icon = "${editedSong.icon}", url = "${editedSong.url}", 
@@ -50,7 +47,6 @@ class SongDataManager {
     List<SongModel> output = [];
     for (Map<String, dynamic> result in results) {
       SongModel song = SongModel.fromMap(result);
-      song.url = await SongUrlParser().parseSongUrlToPlay(song.url);
       output.add(song);
     }
     return output;
@@ -62,7 +58,6 @@ class SongDataManager {
         await database.rawQuery('SELECT * FROM songs ORDER BY id DESC LIMIT 1');
 
     SongModel output = SongModel.fromMap(result[0]);
-    output.url = await SongUrlParser().parseSongUrlToPlay(output.url);
     return output;
   }
 }

@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/file/file_path.dart';
+import 'package:bossa/src/url/download_service.dart';
 import 'package:http/http.dart' as http;
 
 class HttpRequest {
@@ -14,7 +17,7 @@ class HttpRequest {
   }
 }
 
-class SongUrlParser {
+class SongParser {
   String apiUrl =
       'https://api.invidious.io/instances.json?pretty=1&sort_by=type,users';
 
@@ -32,7 +35,7 @@ class SongUrlParser {
     return output;
   }
 
-  String parseSongUrlToSave(String input) {
+  String parseYoutubeSongUrl(String input) {
     String output = input.toString();
 
     if (isSongFromYoutube(input)) {
@@ -43,10 +46,13 @@ class SongUrlParser {
     return output.substring(0, 11);
   }
 
-  Future<String> parseSongUrlToPlay(String url) async {
-    List<dynamic> invidiousInstances =
-        await HttpRequest().retriveFromUrl(apiUrl) as List<dynamic>;
-    String info = (invidiousInstances[0][1]['uri']).toString();
-    return '$info/embed/$url?raw=1';
+  Future<SongModel> parseSongBeforeSave(SongModel song) async {
+    if (SongParser().isSongFromYoutube(song.url)) {
+      await DioDownloadService(filePath: FilePathImpl())
+          .download(song.url, '${song.title}.m4a');
+      String workingDirectory = await FilePathImpl().getDocumentsDirectory();
+      song.path = '$workingDirectory/${song.title}.m4a';
+    }
+    return song;
   }
 }

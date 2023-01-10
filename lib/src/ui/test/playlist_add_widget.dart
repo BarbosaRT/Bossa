@@ -3,6 +3,8 @@ import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
+import 'package:bossa/src/file/file_path.dart';
+import 'package:bossa/src/url/download_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -55,8 +57,9 @@ class PlaylistAddWidget extends StatefulWidget {
 class PlaylistAddWidgetState extends State<PlaylistAddWidget> {
   final playlistDataManager =
       PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
-  final songDataManager =
-      SongDataManager(localDataManagerInstance: dataManagerInstance);
+  final songDataManager = SongDataManager(
+      localDataManagerInstance: dataManagerInstance,
+      downloadService: DioDownloadService(filePath: FilePathImpl()));
   List<SongModel> songs = [];
 
   bool playlistAdded = false;
@@ -328,7 +331,7 @@ class PlaylistAddWidgetState extends State<PlaylistAddWidget> {
           Flexible(
             flex: 1,
             child: SizedBox(
-              height: 200,
+              height: 120,
               child: ListView(children: [
                 Text('Playlist to be Added', style: headline1),
                 Text('Title: ${playlistToBeAdded.title}', style: headline1),
