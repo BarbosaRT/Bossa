@@ -5,7 +5,6 @@ import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
 import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/url/download_service.dart';
-import 'package:html/parser.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class YoutubeParser {

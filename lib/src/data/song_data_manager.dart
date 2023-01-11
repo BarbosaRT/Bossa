@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:bossa/src/data/song_parser.dart';
 import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:bossa/models/song_model.dart';
@@ -23,8 +25,20 @@ class SongDataManager {
         'INSERT INTO songs(title, icon, url, path) VALUES("${song.title}","${song.icon}","${song.url}","${song.path}")');
   }
 
+  Future<void> deleteFile(String path) async {
+    try {
+      await File(path).delete();
+    } catch (e) {
+      return;
+    }
+  }
+
   void removeSong(SongModel song) async {
     var database = await localDataManagerInstance.database();
+    if (SongParser().isSongFromYoutube(song.url)) {
+      deleteFile(song.path);
+    }
+
     database.rawDelete(
         'DELETE FROM playlists_songs WHERE playlists_songs.idSong = ${song.id}');
     database.rawDelete('DELETE FROM songs WHERE songs.id = ${song.id}');

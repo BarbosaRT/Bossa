@@ -1,14 +1,17 @@
-import 'package:bossa/src/ui/test/test_ui.dart';
+import 'package:bossa/src/color/color_controller.dart';
+import 'package:bossa/src/ui/file/song_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class AppModule extends Module {
   @override
-  List<Bind> get binds => [];
+  List<Bind> get binds => [
+        Bind((i) => ColorController()),
+      ];
 
   @override
   List<ModularRoute> get routes => [
-        ChildRoute('/', child: (context, args) => const TestPage()),
+        ChildRoute('/', child: (context, args) => const SongAddPage()),
       ];
 }
 
