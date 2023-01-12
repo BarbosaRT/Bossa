@@ -21,8 +21,9 @@ class SongDataManager {
 
   void addSong(SongModel song) async {
     var database = await localDataManagerInstance.database();
-    await database.rawInsert(
-        'INSERT INTO songs(title, icon, url, path) VALUES("${song.title}","${song.icon}","${song.url}","${song.path}")');
+    await database
+        .rawInsert('''INSERT INTO songs(title, icon, url, path, author) 
+        VALUES("${song.title}","${song.icon}","${song.url}","${song.path}", "${song.author}")''');
   }
 
   Future<void> deleteFile(String path) async {
@@ -49,7 +50,7 @@ class SongDataManager {
 
     database.rawUpdate('''UPDATE songs SET title = "${editedSong.title}", 
         icon = "${editedSong.icon}", url = "${editedSong.url}", 
-        path = "${editedSong.path}" 
+        path = "${editedSong.path}, author = "${editedSong.author}" 
         WHERE id = "${editedSong.id}"''');
   }
 

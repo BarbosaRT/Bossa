@@ -4,6 +4,7 @@ class SongModel {
   String icon = '';
   String url = '';
   String path = '';
+  String author = '';
 
   SongModel({
     required this.id,
@@ -11,6 +12,7 @@ class SongModel {
     required this.icon,
     required this.url,
     this.path = '',
+    this.author = '',
   });
 
   factory SongModel.fromMap(Map map) {
@@ -19,7 +21,8 @@ class SongModel {
         title: map['title'] as String,
         icon: map['icon'] as String,
         url: map['url'] as String,
-        path: map['path'] as String);
+        path: map['path'] as String,
+        author: map['author'] as String);
   }
 
   @override
@@ -30,7 +33,8 @@ class SongModel {
         other.title == title &&
         other.icon == icon &&
         other.url == url &&
-        other.path == path;
+        other.path == path &&
+        other.author == author;
   }
 
   @override
@@ -39,7 +43,8 @@ class SongModel {
         title.hashCode ^
         icon.hashCode ^
         url.hashCode ^
-        path.hashCode;
+        path.hashCode ^
+        author.hashCode;
   }
 
   Map<String, dynamic> toMap() {
@@ -49,6 +54,7 @@ class SongModel {
       'icon': icon,
       'url': url,
       'path': path,
+      'author': author,
     };
   }
 }

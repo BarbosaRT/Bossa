@@ -20,8 +20,11 @@ class SongAddWidget extends StatefulWidget {
 
 class SongAddWidgetState extends State<SongAddWidget> {
   final songDataManager = SongDataManager(
-      localDataManagerInstance: dataManagerInstance,
-      downloadService: DioDownloadService(filePath: FilePathImpl()));
+    localDataManagerInstance: dataManagerInstance,
+    downloadService: DioDownloadService(
+      filePath: FilePathImpl(),
+    ),
+  );
   bool songAdded = false;
   bool editing = false;
   final TextEditingController _titleController = TextEditingController();

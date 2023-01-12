@@ -26,7 +26,9 @@ dependencies:
   just_audio: ^0.9.30
   just_audio_mpv: ^0.1.6
   youtube_explode_dart: ^1.10.4
+  
   font_awesome_flutter: ^10.3.0
+  google_fonts: ^3.0.1
   
 dev_dependencies:
   flutter_test:
@@ -51,8 +53,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
-    - assets/images/
+  assets: 
+    - assets/images/disc.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
