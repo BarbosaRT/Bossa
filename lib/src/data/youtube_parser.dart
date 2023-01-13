@@ -28,7 +28,8 @@ class YoutubeParser {
 
     String title = video.title.replaceAll('"', "'");
 
-    SongModel song = SongModel(id: 0, title: title, icon: icon, url: url);
+    SongModel song = SongModel(
+        id: 0, title: title, icon: icon, url: url, author: video.author);
     song = await SongParser().parseSongBeforeSave(song);
     yt.close();
     return song;
