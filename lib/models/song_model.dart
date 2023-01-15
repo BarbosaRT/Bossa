@@ -16,13 +16,18 @@ class SongModel {
   });
 
   factory SongModel.fromMap(Map map) {
+    String author = '';
+    if (map['author'] != null) {
+      author = map['author'] as String;
+    }
+
     return SongModel(
         id: map['id'] as int,
         title: map['title'] as String,
         icon: map['icon'] as String,
         url: map['url'] as String,
         path: map['path'] as String,
-        author: map['author'] as String);
+        author: author);
   }
 
   @override

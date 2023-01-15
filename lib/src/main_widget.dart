@@ -1,7 +1,11 @@
 import 'package:asuka/asuka.dart';
 import 'package:bossa/src/color/color_controller.dart';
-import 'package:bossa/src/ui/file/song_add_page.dart';
+import 'package:bossa/src/data/data_manager.dart';
+import 'package:bossa/src/data/playlist_data_manager.dart';
+import 'package:bossa/src/data/song_data_manager.dart';
+import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -9,6 +13,23 @@ class AppModule extends Module {
   @override
   List<Bind> get binds => [
         Bind((i) => ColorController()),
+        Bind((i) => FilePathImpl()),
+        Bind(
+          (i) => DioDownloadService(
+            filePath: i(),
+          ),
+        ),
+        Bind(
+          (i) => SongDataManager(
+            localDataManagerInstance: dataManagerInstance,
+            downloadService: i(),
+          ),
+        ),
+        Bind(
+          (i) => PlaylistDataManager(
+            localDataManagerInstance: dataManagerInstance,
+          ),
+        ),
       ];
 
   @override

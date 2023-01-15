@@ -8,6 +8,9 @@ class ImageParser {
     if (UrlParser.validUrl(image)) {
       return NetworkImage(image);
     }
+    if (image.contains('assets/images')) {
+      return AssetImage(image);
+    }
     return FileImage(File(image));
   }
 }

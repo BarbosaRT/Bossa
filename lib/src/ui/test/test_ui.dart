@@ -1,9 +1,9 @@
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/file/file_path.dart';
-import 'package:bossa/src/ui/test/playlist_add_widget.dart';
+import 'package:bossa/src/ui/test/test_playlist_add_widget.dart';
 import 'package:bossa/src/ui/test/playlist_container.dart';
-import 'package:bossa/src/ui/test/song_add_widget.dart';
+import 'package:bossa/src/ui/test/test_song_add_widget.dart';
 import 'package:bossa/src/ui/test/song_container.dart';
 import 'package:bossa/src/ui/test/youtube_add_widget.dart';
 import 'package:bossa/src/url/download_service.dart';
@@ -24,12 +24,12 @@ class _TestPageState extends State<TestPage> {
   final songDataManager = SongDataManager(
       localDataManagerInstance: dataManagerInstance,
       downloadService: DioDownloadService(filePath: FilePathImpl()));
-  GlobalKey<SongAddWidgetState> songAddKey = GlobalKey();
+  GlobalKey<TestSongAddWidgetState> songAddKey = GlobalKey();
   List<SongModel> songs = [];
 
   final playlistDataManager =
       PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
-  GlobalKey<PlaylistAddWidgetState> playlistAddKey = GlobalKey();
+  GlobalKey<TestPlaylistAddWidgetState> playlistAddKey = GlobalKey();
   List<PlaylistModel> playlists = [];
 
   final manager = JustAudioManager();
@@ -102,7 +102,7 @@ class _TestPageState extends State<TestPage> {
               Positioned(
                 top: 10,
                 left: 10,
-                child: SongAddWidget(
+                child: TestSongAddWidget(
                   key: songAddKey,
                   callback: () {
                     loadSongs();
@@ -125,7 +125,7 @@ class _TestPageState extends State<TestPage> {
               Positioned(
                 top: 10,
                 left: 400,
-                child: PlaylistAddWidget(
+                child: TestPlaylistAddWidget(
                   key: playlistAddKey,
                   callback: () {
                     loadPlaylists();

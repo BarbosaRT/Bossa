@@ -43,18 +43,18 @@ class _PlaylistSongContainerState extends State<PlaylistSongContainer> {
   }
 }
 
-class PlaylistAddWidget extends StatefulWidget {
+class TestPlaylistAddWidget extends StatefulWidget {
   final void Function() callback;
-  const PlaylistAddWidget({
+  const TestPlaylistAddWidget({
     super.key,
     required this.callback,
   });
 
   @override
-  State<PlaylistAddWidget> createState() => PlaylistAddWidgetState();
+  State<TestPlaylistAddWidget> createState() => TestPlaylistAddWidgetState();
 }
 
-class PlaylistAddWidgetState extends State<PlaylistAddWidget> {
+class TestPlaylistAddWidgetState extends State<TestPlaylistAddWidget> {
   final playlistDataManager =
       PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
   final songDataManager = SongDataManager(

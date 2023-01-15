@@ -1,27 +1,24 @@
 import 'dart:io';
-
+import 'package:asuka/asuka.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
-import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
-import 'package:bossa/src/file/file_path.dart';
-import 'package:bossa/src/url/download_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class SongAddPage extends StatefulWidget {
+class SongAddWidget extends StatefulWidget {
   final void Function() callback;
-  const SongAddPage({super.key, required this.callback});
+  const SongAddWidget({super.key, required this.callback});
 
   @override
-  State<SongAddPage> createState() => _SongAddPageState();
+  State<SongAddWidget> createState() => _SongAddWidgetState();
 }
 
-class _SongAddPageState extends State<SongAddPage> {
+class _SongAddWidgetState extends State<SongAddWidget> {
   static String defaultIcon = 'assets/images/disc.png';
   static double x = 30.0;
   final titleTextController = TextEditingController();
@@ -44,13 +41,6 @@ class _SongAddPageState extends State<SongAddPage> {
       url: 'url',
       path: '',
       author: 'author');
-
-  final songDataManager = SongDataManager(
-    localDataManagerInstance: dataManagerInstance,
-    downloadService: DioDownloadService(
-      filePath: FilePathImpl(),
-    ),
-  );
 
   void saveIcon() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -80,11 +70,14 @@ class _SongAddPageState extends State<SongAddPage> {
 
   @override
   Widget build(BuildContext context) {
+    final songDataManager = Modular.get<SongDataManager>();
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
     final accentColor = colorController.currentScheme.accentColor;
     final contrastColor = colorController.currentScheme.contrastColor;
+    final backgroundAccent = colorController.currentScheme.backgroundAccent;
+    final backgroundColor = colorController.currentScheme.backgroundColor;
 
     ButtonStyle saveButtonStyle = ButtonStyle(
       backgroundColor: MaterialStateProperty.all(accentColor),
@@ -121,6 +114,34 @@ class _SongAddPageState extends State<SongAddPage> {
         padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
         child: Column(
           children: [
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  width: size.width,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      topRight: Radius.circular(15),
+                    ),
+                    color: backgroundColor,
+                  ),
+                  child: Container(
+                    width: size.width - x,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: backgroundAccent,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: x / 3,
+            ),
             Row(
               children: [
                 Center(

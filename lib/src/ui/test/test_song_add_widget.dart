@@ -7,18 +7,18 @@ import 'package:bossa/src/url/download_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
-class SongAddWidget extends StatefulWidget {
+class TestSongAddWidget extends StatefulWidget {
   final void Function() callback;
-  const SongAddWidget({
+  const TestSongAddWidget({
     super.key,
     required this.callback,
   });
 
   @override
-  State<SongAddWidget> createState() => SongAddWidgetState();
+  State<TestSongAddWidget> createState() => TestSongAddWidgetState();
 }
 
-class SongAddWidgetState extends State<SongAddWidget> {
+class TestSongAddWidgetState extends State<TestSongAddWidget> {
   final songDataManager = SongDataManager(
     localDataManagerInstance: dataManagerInstance,
     downloadService: DioDownloadService(
