@@ -24,14 +24,22 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   static double x = 30.0;
+  double iconSize = 25;
 
   List<SongModel> songs = [];
   List<PlaylistModel> playlists = [];
+
+  final TextEditingController songTextController = TextEditingController();
+  final TextEditingController playlistTextController = TextEditingController();
+
+  final popupStyle = GoogleFonts.poppins(
+      color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal);
 
   @override
   void initState() {
     super.initState();
     loadSongs();
+    loadPlaylists();
   }
 
   void loadSongs() async {
@@ -47,20 +55,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget addWidget({
-    required void Function(String url) urlAdd,
     required String addText,
     required String fromYoutubeText,
     required String fromFileText,
     required Widget addWidget,
+    required Widget urlWidget,
+    void Function()? whenExit,
   }) {
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
     final backgroundColor = colorController.currentScheme.backgroundColor;
     final backgroundAccent = colorController.currentScheme.backgroundAccent;
-
-    final popupStyle = GoogleFonts.poppins(
-        color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal);
 
     return ElevatedButton(
       onPressed: () {
@@ -92,34 +98,31 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           builder: (context) {
-                            String url = '';
-                            final urlTextController = TextEditingController();
-
                             return SizedBox(
                               width: size.width,
                               height: 100,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: x),
-                                child: Column(
-                                  children: [
-                                    SizedBox(
-                                      height: x / 3,
-                                    ),
-                                    Center(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Container(
-                                          width: size.width,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                const BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                            color: backgroundColor,
+                              child: Column(
+                                children: [
+                                  Center(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                        whenExit?.call();
+                                      },
+                                      child: Container(
+                                        width: size.width,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
                                           ),
+                                          color: backgroundColor,
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: x / 2,
+                                              horizontal: x / 2),
                                           child: Container(
                                             width: size.width - x,
                                             height: 10,
@@ -132,39 +135,12 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: x / 2,
-                                    ),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: TextField(
-                                            controller: urlTextController,
-                                            decoration: InputDecoration(
-                                                hintText: 'Url',
-                                                hintStyle: popupStyle),
-                                            style: popupStyle,
-                                            onChanged: (value) {
-                                              url = value.toString();
-                                            },
-                                            onSubmitted: (value) {
-                                              url = value.toString();
-                                            },
-                                          ),
-                                        ),
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            urlAdd(url);
-                                          },
-                                          child: const FaIcon(
-                                            FontAwesomeIcons.plus,
-                                            size: 30,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                  Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: x),
+                                      child: urlWidget),
+                                ],
                               ),
                             );
                           },
@@ -210,6 +186,57 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget contentContainer(
+      {required String icon,
+      required void Function() remove,
+      required void Function() onTap}) {
+    final colorController = Modular.get<ColorController>();
+    final backgroundColor = colorController.currentScheme.backgroundColor;
+    return Padding(
+      padding: EdgeInsets.only(right: x / 3),
+      child: GestureDetector(
+        onTap: onTap,
+        onLongPress: () {
+          Asuka.showModalBottomSheet(
+            backgroundColor: backgroundColor,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
+              ),
+            ),
+            builder: (context) {
+              return Row(
+                children: [
+                  SizedBox(
+                    width: x / 2,
+                  ),
+                  ElevatedButton(
+                    onPressed: remove,
+                    child: FaIcon(
+                      FontAwesomeIcons.trash,
+                      size: iconSize,
+                    ),
+                  ),
+                  SizedBox(
+                    width: x / 2,
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: Image(
+          image: ImageParser.getImageProviderFromString(
+            icon,
+          ),
+          width: 100,
+          height: 100,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -219,7 +246,6 @@ class _HomePageState extends State<HomePage> {
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
     final backgroundColor = colorController.currentScheme.backgroundColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
 
     final textStyle = GoogleFonts.poppins(
         color: contrastColor, fontSize: 28, fontWeight: FontWeight.normal);
@@ -227,10 +253,8 @@ class _HomePageState extends State<HomePage> {
     final headerStyle = GoogleFonts.poppins(
         color: contrastColor, fontSize: 28, fontWeight: FontWeight.bold);
 
-    final popupStyle = GoogleFonts.poppins(
-        color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal);
-
     final buttonStyle = ButtonStyle(
+      padding: MaterialStateProperty.all(EdgeInsets.zero),
       overlayColor: MaterialStateProperty.all(Colors.transparent),
       foregroundColor: MaterialStateProperty.all(Colors.transparent),
       shadowColor: MaterialStateProperty.all(Colors.transparent),
@@ -239,48 +263,27 @@ class _HomePageState extends State<HomePage> {
 
     List<Widget> songContainers = [];
     for (SongModel song in songs) {
+      List<SongModel> songsForPlaylist = songs.toList();
+      songsForPlaylist.remove(song);
+      songsForPlaylist.insert(0, song);
+
       songContainers.add(
-        GestureDetector(
-          onLongPress: () {
-            Asuka.showModalBottomSheet(
-              backgroundColor: backgroundColor,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                ),
-              ),
-              builder: (context) {
-                return Row(
-                  children: [
-                    SizedBox(
-                      width: x / 2,
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        songDataManager.removeSong(song);
-                        loadSongs();
-                      },
-                      child: const FaIcon(
-                        FontAwesomeIcons.trash,
-                        size: 30,
-                      ),
-                    ),
-                    SizedBox(
-                      width: x / 2,
-                    ),
-                  ],
-                );
-              },
+        contentContainer(
+          onTap: () {
+            Modular.to.pushReplacementNamed(
+              '/player',
+              arguments: PlaylistModel(
+                  id: 0,
+                  title: 'Todas as Músicas',
+                  icon: song.icon,
+                  songs: songsForPlaylist),
             );
           },
-          child: Image(
-            image: ImageParser.getImageProviderFromString(
-              song.icon,
-            ),
-            width: 100,
-            height: 100,
-          ),
+          icon: song.icon,
+          remove: () async {
+            songDataManager.removeSong(song);
+            loadSongs();
+          },
         ),
       );
     }
@@ -288,219 +291,117 @@ class _HomePageState extends State<HomePage> {
     List<Widget> playlistContainers = [];
     for (PlaylistModel playlist in playlists) {
       playlistContainers.add(
-        GestureDetector(
-          onLongPress: () {
-            Asuka.showModalBottomSheet(
-              backgroundColor: backgroundColor,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                ),
-              ),
-              builder: (context) {
-                return Row(
-                  children: [
-                    SizedBox(
-                      width: x / 2,
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        playlistDataManager.deletePlaylist(playlist);
-                        loadPlaylists();
-                      },
-                      child: const FaIcon(
-                        FontAwesomeIcons.trash,
-                        size: 30,
-                      ),
-                    ),
-                    SizedBox(
-                      width: x / 2,
-                    ),
-                  ],
-                );
-              },
+        contentContainer(
+          onTap: () {
+            Modular.to.pushReplacementNamed(
+              '/player',
+              arguments: playlist,
             );
           },
-          child: Image(
-            image: ImageParser.getImageProviderFromString(
-              playlist.icon,
-            ),
-            width: 100,
-            height: 100,
-          ),
+          icon: playlist.icon,
+          remove: () async {
+            playlistDataManager.deletePlaylist(playlist);
+            loadPlaylists();
+          },
         ),
       );
     }
 
     final addSongWidget = addWidget(
-        addWidget: SizedBox(
-          width: size.width,
-          height: 240,
-          child: SongAddWidget(
-            callback: loadSongs,
-          ),
+      addWidget: SizedBox(
+        width: size.width,
+        height: 250,
+        child: SongAddWidget(
+          callback: loadSongs,
         ),
-        urlAdd: (url) async {
-          final youtubeParser = YoutubeParser(songDataManager: songDataManager);
-          SongModel song = await youtubeParser.convertYoutubeSong(url);
-          songDataManager.addSong(song);
-        },
-        fromYoutubeText: 'Song From Youtube',
-        fromFileText: 'Song from File',
-        addText: 'Add Song');
-
-    final addPlaylistWidget = addWidget(
-        addWidget: SizedBox(
-          width: size.width,
-          height: 320,
-          child: PlaylistAddWidget(
-            callback: loadPlaylists,
-          ),
-        ),
-        urlAdd: (url) async {
-          final youtubeParser = YoutubeParser(songDataManager: songDataManager);
-          SongModel song = await youtubeParser.convertYoutubeSong(url);
-          songDataManager.addSong(song);
-        },
-        fromYoutubeText: 'Playlist From Youtube',
-        fromFileText: 'Create a New Playlist',
-        addText: 'Add Playlist');
-
-    final adPlaylistWidget = ElevatedButton(
-      onPressed: () {
-        Asuka.showModalBottomSheet(
-          backgroundColor: backgroundColor,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(15),
-              topRight: Radius.circular(15),
+      ),
+      whenExit: () {
+        songTextController.text = '';
+      },
+      fromYoutubeText: 'Song From Youtube',
+      fromFileText: 'Song from File',
+      addText: 'Add Song',
+      urlWidget: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: songTextController,
+              decoration:
+                  InputDecoration(hintText: 'Url', hintStyle: popupStyle),
+              style: popupStyle,
+              onChanged: (value) {
+                songTextController.text = value.toString();
+              },
+              onSubmitted: (value) {
+                songTextController.text = value.toString();
+              },
             ),
           ),
-          builder: (context) {
-            return SizedBox(
-              width: size.width,
-              height: 100,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: x),
-                child: Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Asuka.showModalBottomSheet(
-                          isDismissible: false,
-                          backgroundColor: backgroundColor,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15),
-                            ),
-                          ),
-                          builder: (context) {
-                            String url = '';
-                            final urlTextController = TextEditingController();
+          ElevatedButton(
+            onPressed: () async {
+              final youtubeParser =
+                  YoutubeParser(songDataManager: songDataManager);
+              String url = songTextController.text.toString();
+              SongModel song = await youtubeParser.convertYoutubeSong(url);
+              songDataManager.addSong(song);
+              loadSongs();
+            },
+            child: FaIcon(
+              FontAwesomeIcons.plus,
+              size: iconSize,
+            ),
+          ),
+        ],
+      ),
+    );
 
-                            return SizedBox(
-                              width: size.width,
-                              height: 120,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: x),
-                                child: Column(
-                                  children: [
-                                    Center(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Container(
-                                          width: size.width - x,
-                                          height: 10,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(15),
-                                            color: backgroundAccent,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 5,
-                                    ),
-                                    TextField(
-                                      controller: urlTextController,
-                                      decoration: InputDecoration(
-                                          hintText: 'Url',
-                                          hintStyle: popupStyle,
-                                          border: InputBorder.none),
-                                      style: popupStyle,
-                                      onChanged: (value) {
-                                        url = value.toString();
-                                      },
-                                      onSubmitted: (value) {
-                                        url = value.toString();
-                                      },
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () async {
-                                        final youtubeParser = YoutubeParser(
-                                            songDataManager: songDataManager);
-                                        SongModel song = await youtubeParser
-                                            .convertYoutubeSong(url);
-                                        songDataManager.addSong(song);
-                                      },
-                                      child: const FaIcon(
-                                        FontAwesomeIcons.plus,
-                                        size: 30,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      child: Text(
-                        'Playlist from Youtube',
-                        style: popupStyle,
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Asuka.showModalBottomSheet(
-                          backgroundColor: backgroundColor,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15),
-                            ),
-                          ),
-                          builder: (context) {
-                            return SizedBox(
-                              width: size.width,
-                              height: 300,
-                              child: PlaylistAddWidget(
-                                callback: loadPlaylists,
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      child: Text(
-                        'Create a New Playlist',
-                        style: popupStyle,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
+    final addPlaylistWidget = addWidget(
+      addWidget: SizedBox(
+        width: size.width,
+        height: 320,
+        child: PlaylistAddWidget(
+          callback: loadPlaylists,
+        ),
+      ),
+      whenExit: () {
+        playlistTextController.text = '';
       },
-      child: Text(
-        'Add Playlist',
-        style: popupStyle,
+      fromYoutubeText: 'Playlist From Youtube',
+      fromFileText: 'Create a New Playlist',
+      addText: 'Add Playlist',
+      urlWidget: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: playlistTextController,
+              decoration:
+                  InputDecoration(hintText: 'Url', hintStyle: popupStyle),
+              style: popupStyle,
+              onChanged: (value) {
+                playlistTextController.text = value.toString();
+              },
+              onSubmitted: (value) {
+                playlistTextController.text = value.toString();
+              },
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final youtubeParser =
+                  YoutubeParser(songDataManager: songDataManager);
+
+              PlaylistModel playlist = await youtubeParser
+                  .convertYoutubePlaylist(playlistTextController.text);
+
+              playlistDataManager.addPlaylist(playlist);
+              playlistTextController.text = '';
+            },
+            child: FaIcon(
+              FontAwesomeIcons.plus,
+              size: iconSize,
+            ),
+          ),
+        ],
       ),
     );
 
@@ -523,10 +424,12 @@ class _HomePageState extends State<HomePage> {
               //
               // Plus Button
               //
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton(
+              Positioned(
+                right: x / 2,
+                child: SizedBox(
+                  width: 3 * iconSize / 2,
+                  height: 3 * iconSize / 2,
+                  child: ElevatedButton(
                     style: buttonStyle,
                     onPressed: () {
                       Asuka.showModalBottomSheet(
@@ -557,10 +460,10 @@ class _HomePageState extends State<HomePage> {
                     child: FaIcon(
                       FontAwesomeIcons.plus,
                       color: contrastColor,
-                      size: 30,
+                      size: iconSize,
                     ),
                   ),
-                ],
+                ),
               ),
               //
               // Home List
@@ -673,52 +576,63 @@ class _HomePageState extends State<HomePage> {
                           ),
                           Expanded(
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(
+                                SizedBox(
+                                  width: 3 * iconSize / 2,
+                                  height: 3 * iconSize / 2,
                                   child: ElevatedButton(
-                                    style: buttonStyle.copyWith(
-                                      alignment: Alignment.centerLeft,
-                                    ),
+                                    style: buttonStyle,
                                     onPressed: () {},
                                     child: FaIcon(
                                       FontAwesomeIcons.house,
                                       color: contrastColor,
-                                      size: 30,
+                                      size: iconSize,
                                     ),
                                   ),
                                 ),
-                                Expanded(
+                                SizedBox(
+                                  width: 3 * iconSize / 2,
+                                  height: 3 * iconSize / 2,
                                   child: ElevatedButton(
                                     style: buttonStyle,
                                     onPressed: () {},
                                     child: FaIcon(
                                       FontAwesomeIcons.magnifyingGlass,
                                       color: contrastColor,
-                                      size: 30,
+                                      size: iconSize,
                                     ),
                                   ),
                                 ),
-                                Expanded(
+                                SizedBox(
+                                  width: 3 * iconSize / 2,
+                                  height: 3 * iconSize / 2,
                                   child: ElevatedButton(
                                     style: buttonStyle,
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      //playlistDataManager.deleteAll();
+                                      loadPlaylists();
+                                    },
                                     child: FaIcon(
                                       FontAwesomeIcons.list,
                                       color: contrastColor,
-                                      size: 30,
+                                      size: iconSize,
                                     ),
                                   ),
                                 ),
-                                Expanded(
+                                SizedBox(
+                                  width: 3 * iconSize / 2,
+                                  height: 3 * iconSize / 2,
                                   child: ElevatedButton(
-                                    style: buttonStyle.copyWith(
-                                      alignment: Alignment.centerRight,
-                                    ),
-                                    onPressed: () {},
+                                    style: buttonStyle,
+                                    onPressed: () {
+                                      //songDataManager.deleteAll();
+                                      loadSongs();
+                                    },
                                     child: FaIcon(
                                       FontAwesomeIcons.gear,
                                       color: contrastColor,
-                                      size: 30,
+                                      size: iconSize,
                                     ),
                                   ),
                                 ),

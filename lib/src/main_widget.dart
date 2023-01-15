@@ -1,10 +1,12 @@
 import 'package:asuka/asuka.dart';
+import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/ui/player/player_page.dart';
 import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -37,6 +39,12 @@ class AppModule extends Module {
         ChildRoute(
           '/',
           child: (context, args) => const HomePage(),
+        ),
+        ChildRoute(
+          '/player',
+          child: (context, args) => PlayerPage(
+            playlist: args.data as PlaylistModel,
+          ),
         ),
       ];
 }

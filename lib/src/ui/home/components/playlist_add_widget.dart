@@ -2,11 +2,8 @@ import 'dart:io';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
-import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
-import 'package:bossa/src/file/file_path.dart';
-import 'package:bossa/src/url/download_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -191,180 +188,185 @@ class _PlaylistAddWidgetState extends State<PlaylistAddWidget> {
         ),
       );
     }
-
+    // EdgeInsets.only(top: x / 2, left: x / 2, right: x / 2),
     return SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
-      child: Padding(
-        padding: EdgeInsets.only(top: x / 2, left: x / 2, right: x / 2),
-        child: SizedBox(
-          height: 320,
-          child: Stack(
-            children: [
-              SizedBox(
-                height: 320,
-                child: Column(
-                  children: [
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Container(
+      child: SizedBox(
+        height: 320,
+        child: Column(
+          children: [
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  width: size.width,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      topRight: Radius.circular(15),
+                    ),
+                    color: backgroundColor,
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        vertical: x / 2, horizontal: x / 2),
+                    child: Container(
+                      width: size.width - x,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: backgroundAccent,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: x / 2, right: x / 2),
+              child: Stack(
+                children: [
+                  SizedBox(
+                    height: 280,
+                    child: Column(
+                      children: [
+                        SizedBox(
                           width: size.width,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15),
-                            ),
-                            color: backgroundColor,
-                          ),
-                          child: Container(
-                            width: size.width - x,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: backgroundAccent,
-                            ),
+                          height: x * 2,
+                          child: TextField(
+                            controller: titleTextController,
+                            decoration: InputDecoration(
+                                hintText: 'Title',
+                                hintStyle: titleStyle,
+                                border: InputBorder.none),
+                            style: titleStyle,
+                            onChanged: (value) {
+                              setState(() {
+                                playlistToBeAdded.title = value;
+                              });
+                            },
+                            onSubmitted: (value) {
+                              setState(() {
+                                playlistToBeAdded.title = value;
+                              });
+                            },
                           ),
                         ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: x / 2,
-                    ),
-                    SizedBox(
-                      width: size.width,
-                      height: x * 2,
-                      child: TextField(
-                        controller: titleTextController,
-                        decoration: InputDecoration(
-                            hintText: 'Title',
-                            hintStyle: titleStyle,
-                            border: InputBorder.none),
-                        style: titleStyle,
-                        onChanged: (value) {
-                          setState(() {
-                            playlistToBeAdded.title = value;
-                          });
-                        },
-                        onSubmitted: (value) {
-                          setState(() {
-                            playlistToBeAdded.title = value;
-                          });
-                        },
-                      ),
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: SizedBox(
-                            width: 150,
-                            height: 150,
-                            child: GestureDetector(
-                              onTap: saveIcon,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: iconImage,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: SizedBox(
+                                width: 150,
+                                height: 150,
+                                child: GestureDetector(
+                                  onTap: saveIcon,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      image: DecorationImage(
+                                        fit: BoxFit.cover,
+                                        image: iconImage,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        Column(
-                          children: [
-                            Row(
-                              children: [
-                                DropdownButton<SongModel>(
-                                  value: selectedSong,
-                                  style: dropdownStyle,
-                                  dropdownColor: backgroundAccent,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedSong = value;
-                                    });
-                                  },
-                                  items: dropdownList,
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    if (selectedSong == null) return;
-                                    setState(
-                                      () {
-                                        playlistToBeAdded.songs
-                                            .add(selectedSong!);
-                                      },
-                                    );
-                                  },
-                                  child: const Icon(Icons.add),
-                                )
-                              ],
+                            const SizedBox(
+                              width: 5,
                             ),
-                            SizedBox(
-                              height: 170,
-                              width: size.width - 185,
-                              child: ListView(
-                                children: songsInPlaylist,
-                              ),
+                            Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    DropdownButton<SongModel>(
+                                      value: selectedSong,
+                                      style: dropdownStyle,
+                                      dropdownColor: backgroundAccent,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedSong = value;
+                                        });
+                                      },
+                                      items: dropdownList,
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        if (selectedSong == null) return;
+                                        setState(
+                                          () {
+                                            playlistToBeAdded.songs
+                                                .add(selectedSong!);
+                                          },
+                                        );
+                                      },
+                                      child: const Icon(Icons.add),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 160,
+                                  width: size.width - 185,
+                                  child: ListView(
+                                    children: songsInPlaylist,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  height: 50,
-                  width: size.width - 185,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        backgroundColor.withOpacity(0),
-                        backgroundColor,
-                      ],
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      height: 50,
+                      width: size.width - 185,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            backgroundColor.withOpacity(0),
+                            backgroundColor,
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              Positioned(
-                bottom: 10,
-                child: SizedBox(
-                  width: 90,
-                  height: 50,
-                  child: ElevatedButton(
-                    style: saveButtonStyle,
-                    onPressed: () async {
-                      playlistDataManager.addPlaylist(playlistToBeAdded);
-                      setState(() {
-                        playlistToBeAdded =
-                            PlaylistModel.fromMap(defaultPlaylist.toMap());
-                        titleTextController.text = '';
-                      });
-                      widget.callback();
-                    },
-                    child: const FaIcon(
-                      FontAwesomeIcons.solidFloppyDisk,
-                      size: 30,
+                  Positioned(
+                    bottom: 10,
+                    child: SizedBox(
+                      width: 90,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: saveButtonStyle,
+                        onPressed: () async {
+                          playlistDataManager.addPlaylist(playlistToBeAdded);
+                          setState(() {
+                            playlistToBeAdded =
+                                PlaylistModel.fromMap(defaultPlaylist.toMap());
+                            titleTextController.text = '';
+                          });
+                          widget.callback();
+                        },
+                        child: const FaIcon(
+                          FontAwesomeIcons.solidFloppyDisk,
+                          size: 30,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
