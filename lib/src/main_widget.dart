@@ -1,5 +1,7 @@
 import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
+import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/audio/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
@@ -15,6 +17,8 @@ class AppModule extends Module {
   @override
   List<Bind> get binds => [
         Bind((i) => ColorController()),
+        Bind((i) => PlaylistUIController()),
+        Bind((i) => JustPlaylistManager()),
         Bind((i) => FilePathImpl()),
         Bind(
           (i) => DioDownloadService(

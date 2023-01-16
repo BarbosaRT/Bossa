@@ -1,6 +1,7 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/audio/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:flutter/material.dart';
@@ -20,12 +21,27 @@ class PlayerPage extends StatefulWidget {
 class _PlayerPageState extends State<PlayerPage> {
   static double x = 30.0;
   double iconSize = 30;
-  final JustPlaylistManager playlistManager = JustPlaylistManager();
+
+  PlaylistModel playlist =
+      PlaylistModel(id: 0, title: 'title', icon: 'icon', songs: []);
 
   @override
   void initState() {
     super.initState();
-    playlistManager.setPlaylist(widget.playlist);
+    final playlistManager = Modular.get<JustPlaylistManager>();
+    playlistManager.setPlaylist(playlist);
+    playlist = PlaylistModel.fromMap(widget.playlist.toMap());
+
+    final playlistUIController = Modular.get<PlaylistUIController>();
+    playlistUIController.setPlaylist(widget.playlist);
+
+    playlistUIController.addListener(() {
+      playlist = playlistUIController.playlist;
+      playlistManager.setPlaylist(playlist);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {});
+      });
+    });
   }
 
   String durationFormatter(Duration duration, {int length = 0}) {
@@ -65,10 +81,14 @@ class _PlayerPageState extends State<PlayerPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
+    final accentColor = colorController.currentScheme.accentColor;
     final contrastColor = colorController.currentScheme.contrastColor;
     final contrastAccent = colorController.currentScheme.contrastAccent;
     final backgroundColor = colorController.currentScheme.backgroundColor;
     final backgroundAccent = colorController.currentScheme.backgroundAccent;
+
+    final playlistManager = Modular.get<JustPlaylistManager>();
+    final playlistUIController = Modular.get<PlaylistUIController>();
 
     final headerStyle = GoogleFonts.poppins(
         color: contrastColor, fontSize: 14, fontWeight: FontWeight.normal);
@@ -77,7 +97,7 @@ class _PlayerPageState extends State<PlayerPage> {
     final authorStyle = GoogleFonts.poppins(
         color: contrastAccent, fontSize: 10, fontWeight: FontWeight.normal);
 
-    String title = '''Tocando Agora: \n ${widget.playlist.title}''';
+    String title = '''Tocando Agora: \n ${playlist.title}''';
 
     final buttonStyle = ButtonStyle(
       padding: MaterialStateProperty.all(EdgeInsets.zero),
@@ -89,6 +109,13 @@ class _PlayerPageState extends State<PlayerPage> {
 
     Stream<SequenceState?> songsStream =
         playlistManager.player.sequenceStateStream;
+
+    Stream<bool> playingStream = playlistManager.player.playingStream;
+
+    Stream<bool> shuffleStream =
+        playlistManager.player.shuffleModeEnabledStream;
+
+    Stream<LoopMode> loopmodeStream = playlistManager.player.loopModeStream;
 
     AudioPlayer audioManager = playlistManager.player;
 
@@ -106,10 +133,20 @@ class _PlayerPageState extends State<PlayerPage> {
               ),
               Row(
                 children: [
-                  FaIcon(
-                    FontAwesomeIcons.angleDown,
-                    size: iconSize,
-                    color: contrastColor,
+                  SizedBox(
+                    width: iconSize * 1.5,
+                    height: iconSize * 1.5,
+                    child: ElevatedButton(
+                      style: buttonStyle,
+                      onPressed: () {
+                        Modular.to.pushNamed('/');
+                      },
+                      child: FaIcon(
+                        FontAwesomeIcons.angleDown,
+                        size: iconSize,
+                        color: contrastColor,
+                      ),
+                    ),
                   ),
                   Expanded(
                     child: Center(
@@ -119,236 +156,338 @@ class _PlayerPageState extends State<PlayerPage> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                  )
+                  ),
+                  SizedBox(
+                    width: iconSize * 1.5,
+                    height: iconSize * 1.5,
+                  ),
                 ],
               ),
               SizedBox(
                 height: x,
               ),
-              StreamBuilder<SequenceState?>(
-                stream: songsStream,
-                builder: (context, snapshot) {
-                  String icon = widget.playlist.icon;
-                  SongModel currentSong = widget.playlist.songs[0];
-                  SequenceState? state = snapshot.data;
-                  if (state != null) {
-                    currentSong = widget.playlist.songs[state.currentIndex];
-                    icon = widget.playlist.songs[state.currentIndex].icon;
-                  }
-                  return Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: sliderSpacing),
-                        child: SizedBox(
-                          width: size.width - sliderSpacing * 2,
-                          height: size.width - x - sliderSpacing * 2,
-                          child: Image(
-                            image: ImageParser.getImageProviderFromString(
-                              icon,
+              Expanded(
+                child: StreamBuilder<SequenceState?>(
+                  stream: songsStream,
+                  builder: (context, snapshot) {
+                    SongModel currentSong = playlist.songs[0];
+                    SequenceState? state = snapshot.data;
+                    if (state != null) {
+                      currentSong = playlist.songs[state.currentIndex];
+                    }
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(left: sliderSpacing),
+                          child: SizedBox(
+                            width: size.width - sliderSpacing * 2,
+                            height: size.width - x - sliderSpacing * 2,
+                            child: Image(
+                              image: ImageParser.getImageProviderFromString(
+                                currentSong.icon,
+                              ),
+                              fit: BoxFit.cover,
                             ),
-                            fit: BoxFit.cover,
                           ),
                         ),
-                      ),
-                      Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: sliderSpacing),
-                            child: SizedBox(
-                              width: size.width,
-                              child: Text(
-                                currentSong.title,
-                                style: titleStyle,
+                        Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: sliderSpacing),
+                              child: SizedBox(
+                                width: size.width,
+                                child: Text(
+                                  currentSong.title,
+                                  style: titleStyle,
+                                ),
                               ),
                             ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: sliderSpacing),
-                            child: SizedBox(
-                              width: size.width,
-                              child: Text(
-                                currentSong.author,
-                                style: authorStyle,
+                            Padding(
+                              padding: EdgeInsets.only(left: sliderSpacing),
+                              child: SizedBox(
+                                width: size.width,
+                                child: Text(
+                                  currentSong.author,
+                                  style: authorStyle,
+                                ),
                               ),
                             ),
-                          ),
-                          //
-                          // Slider
-                          //
-                          StreamBuilder<Duration?>(
-                            stream: audioManager.durationStream,
-                            builder: (context, stream) {
-                              double max = stream.data == null
-                                  ? 2
-                                  : stream.data!.inSeconds.toDouble();
-                              max = max > 0 ? max : 1;
-                              return StreamBuilder<Duration>(
-                                stream: audioManager.positionStream,
-                                builder: (context, snapshot) {
-                                  double value = snapshot.data == null
-                                      ? 1
-                                      : snapshot.data!.inSeconds.toDouble();
+                            //
+                            // Slider
+                            //
+                            StreamBuilder<Duration?>(
+                              stream: audioManager.durationStream,
+                              builder: (context, stream) {
+                                double max = stream.data == null
+                                    ? 2
+                                    : stream.data!.inSeconds.toDouble();
+                                max = max > 0 ? max : 1;
+                                playlistUIController.setHasPlayedOnce(true);
+                                return StreamBuilder<Duration>(
+                                  stream: audioManager.positionStream,
+                                  builder: (context, snapshot) {
+                                    double value = snapshot.data == null
+                                        ? 1
+                                        : snapshot.data!.inSeconds.toDouble();
 
-                                  String maxString = durationFormatter(
-                                    Duration(
-                                      seconds: max.toInt(),
-                                    ),
-                                  );
+                                    String maxString = durationFormatter(
+                                      Duration(
+                                        seconds: max.toInt(),
+                                      ),
+                                    );
 
-                                  return Column(
-                                    children: [
-                                      SliderTheme(
-                                        data: SliderThemeData(
-                                          inactiveTrackColor: backgroundAccent,
-                                          activeTrackColor: contrastColor,
-                                          thumbColor: contrastColor,
-                                          overlayShape:
-                                              const RoundSliderOverlayShape(
-                                            overlayRadius: 0,
+                                    return Column(
+                                      children: [
+                                        SliderTheme(
+                                          data: SliderThemeData(
+                                            inactiveTrackColor:
+                                                backgroundAccent,
+                                            activeTrackColor: contrastColor,
+                                            thumbColor: contrastColor,
+                                            overlayShape:
+                                                const RoundSliderOverlayShape(
+                                              overlayRadius: 0,
+                                            ),
+                                            thumbShape:
+                                                const RoundSliderThumbShape(
+                                                    enabledThumbRadius: 7),
                                           ),
-                                          thumbShape:
-                                              const RoundSliderThumbShape(
-                                                  enabledThumbRadius: 7),
+                                          child: Slider(
+                                            min: 0,
+                                            max: max,
+                                            value: value,
+                                            label: durationFormatter(
+                                              Duration(
+                                                seconds: value.toInt(),
+                                              ),
+                                            ),
+                                            divisions: max.toInt(),
+                                            onChanged: (value) {
+                                              setState(
+                                                () {
+                                                  audioManager.seek(
+                                                    Duration(
+                                                      seconds: value.toInt(),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          ),
                                         ),
-                                        child: Slider(
-                                          min: 0,
-                                          max: max,
-                                          value: value,
-                                          label: durationFormatter(
-                                            Duration(
-                                              seconds: value.toInt(),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: sliderSpacing),
+                                          child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  durationFormatter(
+                                                    Duration(
+                                                      seconds: value.toInt(),
+                                                    ),
+                                                    length: maxString.length,
+                                                  ),
+                                                  style: titleStyle,
+                                                ),
+                                                Text(
+                                                  maxString,
+                                                  style: titleStyle,
+                                                )
+                                              ]),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                            //
+                            // Player
+                            //
+                            Padding(
+                              padding: EdgeInsets.only(left: sliderSpacing),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  StreamBuilder<bool>(
+                                      stream: shuffleStream,
+                                      builder: (context, snapshot) {
+                                        bool shuffle = snapshot.data != null
+                                            ? snapshot.data!
+                                            : false;
+                                        return SizedBox(
+                                          width: iconSize * 1.5,
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              playlistManager
+                                                  .setShuffleModeEnabled(
+                                                      !shuffle);
+                                            },
+                                            style: buttonStyle,
+                                            child: Column(
+                                              children: [
+                                                SizedBox(
+                                                  height: iconSize * 0.35,
+                                                ),
+                                                FaIcon(
+                                                  FontAwesomeIcons.shuffle,
+                                                  size: iconSize,
+                                                  color: shuffle
+                                                      ? accentColor
+                                                      : contrastColor,
+                                                ),
+                                                SizedBox(
+                                                  height: iconSize * 0.1,
+                                                ),
+                                                shuffle
+                                                    ? Container(
+                                                        height: iconSize * 0.25,
+                                                        width: iconSize * 0.5,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(15),
+                                                          color: accentColor,
+                                                        ),
+                                                      )
+                                                    : SizedBox(
+                                                        height: iconSize * 0.25,
+                                                      )
+                                              ],
                                             ),
                                           ),
-                                          divisions: max.toInt(),
-                                          onChanged: (value) {
-                                            setState(
-                                              () {
-                                                audioManager.seek(
-                                                  Duration(
-                                                    seconds: value.toInt(),
-                                                  ),
-                                                );
-                                              },
+                                        );
+                                      }),
+                                  SizedBox(
+                                    width: 3 * iconSize / 2,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        playlistManager.seekToPrevious();
+                                      },
+                                      style: buttonStyle,
+                                      child: FaIcon(
+                                        FontAwesomeIcons.backwardStep,
+                                        size: iconSize,
+                                        color: contrastColor,
+                                      ),
+                                    ),
+                                  ),
+                                  StreamBuilder<bool>(
+                                      stream: playingStream,
+                                      builder: (context, snapshot) {
+                                        bool playing = snapshot.data != null
+                                            ? snapshot.data!
+                                            : false;
+
+                                        return SizedBox(
+                                          width: 3 * iconSize / 2,
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              playing
+                                                  ? audioManager.pause()
+                                                  : audioManager.play();
+                                            },
+                                            style: buttonStyle,
+                                            child: FaIcon(
+                                              playing
+                                                  ? FontAwesomeIcons
+                                                      .solidCirclePause
+                                                  : FontAwesomeIcons
+                                                      .solidCirclePlay,
+                                              size: iconSize * 1.5,
+                                              color: contrastColor,
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                  SizedBox(
+                                    width: 3 * iconSize / 2,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        playlistManager.seekToNext();
+                                      },
+                                      style: buttonStyle,
+                                      child: FaIcon(
+                                        FontAwesomeIcons.forwardStep,
+                                        size: iconSize,
+                                        color: contrastColor,
+                                      ),
+                                    ),
+                                  ),
+                                  StreamBuilder<LoopMode>(
+                                    stream: loopmodeStream,
+                                    builder: (context, snapshot) {
+                                      LoopMode loopMode = snapshot.data != null
+                                          ? snapshot.data!
+                                          : LoopMode.off;
+
+                                      bool isRepeating =
+                                          loopMode == LoopMode.one;
+
+                                      return SizedBox(
+                                        width: 3 * iconSize / 2,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            playlistManager.setLoopMode(
+                                              isRepeating
+                                                  ? LoopMode.off
+                                                  : LoopMode.one,
                                             );
                                           },
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            left: sliderSpacing),
-                                        child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                          style: buttonStyle,
+                                          child: Column(
                                             children: [
-                                              Text(
-                                                durationFormatter(
-                                                  Duration(
-                                                    seconds: value.toInt(),
-                                                  ),
-                                                  length: maxString.length,
-                                                ),
-                                                style: titleStyle,
+                                              SizedBox(
+                                                height: iconSize * 0.35,
                                               ),
-                                              Text(
-                                                maxString,
-                                                style: titleStyle,
-                                              )
-                                            ]),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: sliderSpacing),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                  width: 3 * iconSize / 2,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      playlistManager
-                                          .setShuffleModeEnabled(true);
+                                              FaIcon(
+                                                FontAwesomeIcons.repeat,
+                                                size: iconSize,
+                                                color: isRepeating
+                                                    ? accentColor
+                                                    : contrastColor,
+                                              ),
+                                              SizedBox(
+                                                height: iconSize * 0.1,
+                                              ),
+                                              isRepeating
+                                                  ? Container(
+                                                      height: iconSize * 0.25,
+                                                      width: iconSize * 0.5,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15),
+                                                        color: accentColor,
+                                                      ),
+                                                    )
+                                                  : SizedBox(
+                                                      height: iconSize * 0.25,
+                                                    )
+                                            ],
+                                          ),
+                                        ),
+                                      );
                                     },
-                                    style: buttonStyle,
-                                    child: FaIcon(
-                                      FontAwesomeIcons.shuffle,
-                                      size: iconSize,
-                                      color: contrastColor,
-                                    ),
                                   ),
-                                ),
-                                SizedBox(
-                                  width: 3 * iconSize / 2,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      playlistManager.seekToPrevious();
-                                    },
-                                    style: buttonStyle,
-                                    child: FaIcon(
-                                      FontAwesomeIcons.backwardStep,
-                                      size: iconSize,
-                                      color: contrastColor,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 3 * iconSize / 2,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      audioManager.playing
-                                          ? audioManager.pause()
-                                          : audioManager.play();
-                                    },
-                                    style: buttonStyle,
-                                    child: FaIcon(
-                                      audioManager.playing
-                                          ? FontAwesomeIcons.solidCirclePause
-                                          : FontAwesomeIcons.solidCirclePlay,
-                                      size: iconSize * 1.5,
-                                      color: contrastColor,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 3 * iconSize / 2,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      playlistManager.seekToNext();
-                                    },
-                                    style: buttonStyle,
-                                    child: FaIcon(
-                                      FontAwesomeIcons.forwardStep,
-                                      size: iconSize,
-                                      color: contrastColor,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 3 * iconSize / 2,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      playlistManager.setLoopMode(LoopMode.one);
-                                    },
-                                    style: buttonStyle,
-                                    child: FaIcon(
-                                      FontAwesomeIcons.repeat,
-                                      size: iconSize,
-                                      color: contrastColor,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ],
-                  );
-                },
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: x / 3,
+                        )
+                      ],
+                    );
+                  },
+                ),
               ),
             ],
           ),

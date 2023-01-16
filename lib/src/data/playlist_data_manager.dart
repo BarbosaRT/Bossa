@@ -68,7 +68,7 @@ class PlaylistDataManager {
     var database = await localDataManagerInstance.database();
 
     List<Map> songsFromPlaylist = await database.rawQuery("""
-    SELECT s.id, s.title, s.icon, s.url, s.path from songs as s 
+    SELECT s.id, s.title, s.icon, s.url, s.path, s.author from songs as s 
     JOIN playlists_songs as ps ON ps.idSong = s.id AND ps.idPlaylist = ${playlist.id}; 
     """);
 

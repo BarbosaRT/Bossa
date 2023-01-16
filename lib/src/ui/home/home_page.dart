@@ -1,6 +1,8 @@
 import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/audio/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
@@ -12,6 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:text_scroll/text_scroll.dart';
 
 enum Pages { home, search, list, config }
 
@@ -230,6 +234,8 @@ class _HomePageState extends State<HomePage> {
           image: ImageParser.getImageProviderFromString(
             icon,
           ),
+          fit: BoxFit.cover,
+          alignment: FractionalOffset.center,
           width: 100,
           height: 100,
         ),
@@ -242,16 +248,27 @@ class _HomePageState extends State<HomePage> {
     final size = MediaQuery.of(context).size;
     final songDataManager = Modular.get<SongDataManager>();
     final playlistDataManager = Modular.get<PlaylistDataManager>();
+    final playlistManager = Modular.get<JustPlaylistManager>();
+    final playlistUIController = Modular.get<PlaylistUIController>();
+    final audioManager = playlistManager.player;
 
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
+    final contrastAccent = colorController.currentScheme.contrastAccent;
     final backgroundColor = colorController.currentScheme.backgroundColor;
+    final backgroundAccent = colorController.currentScheme.backgroundAccent;
 
     final textStyle = GoogleFonts.poppins(
         color: contrastColor, fontSize: 28, fontWeight: FontWeight.normal);
 
     final headerStyle = GoogleFonts.poppins(
         color: contrastColor, fontSize: 28, fontWeight: FontWeight.bold);
+
+    final titleStyle = GoogleFonts.poppins(
+        color: contrastColor, fontSize: 15, fontWeight: FontWeight.bold);
+
+    final authorStyle = GoogleFonts.poppins(
+        color: contrastAccent, fontSize: 10, fontWeight: FontWeight.normal);
 
     final buttonStyle = ButtonStyle(
       padding: MaterialStateProperty.all(EdgeInsets.zero),
@@ -261,22 +278,29 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: MaterialStateProperty.all(Colors.transparent),
     );
 
+    Stream<bool> playingStream = playlistManager.player.playingStream;
+    Stream<SequenceState?> songsStream =
+        playlistManager.player.sequenceStateStream;
+
     List<Widget> songContainers = [];
     for (SongModel song in songs) {
       List<SongModel> songsForPlaylist = songs.toList();
       songsForPlaylist.remove(song);
       songsForPlaylist.insert(0, song);
-
+      PlaylistModel playlist = PlaylistModel(
+          id: 0,
+          title: 'Todas as Músicas',
+          icon: song.icon,
+          songs: songsForPlaylist);
       songContainers.add(
         contentContainer(
           onTap: () {
+            Modular.to.popUntil(ModalRoute.withName('/'));
+            audioManager.pause();
+            playlistUIController.setPlaylist(playlist);
             Modular.to.pushReplacementNamed(
               '/player',
-              arguments: PlaylistModel(
-                  id: 0,
-                  title: 'Todas as Músicas',
-                  icon: song.icon,
-                  songs: songsForPlaylist),
+              arguments: playlist,
             );
           },
           icon: song.icon,
@@ -293,6 +317,9 @@ class _HomePageState extends State<HomePage> {
       playlistContainers.add(
         contentContainer(
           onTap: () {
+            Modular.to.popUntil(ModalRoute.withName('/'));
+            audioManager.pause();
+            playlistUIController.setPlaylist(playlist);
             Modular.to.pushReplacementNamed(
               '/player',
               arguments: playlist,
@@ -345,6 +372,7 @@ class _HomePageState extends State<HomePage> {
               SongModel song = await youtubeParser.convertYoutubeSong(url);
               songDataManager.addSong(song);
               loadSongs();
+              songTextController.text = '';
             },
             child: FaIcon(
               FontAwesomeIcons.plus,
@@ -394,6 +422,7 @@ class _HomePageState extends State<HomePage> {
                   .convertYoutubePlaylist(playlistTextController.text);
 
               playlistDataManager.addPlaylist(playlist);
+              loadPlaylists();
               playlistTextController.text = '';
             },
             child: FaIcon(
@@ -498,38 +527,6 @@ class _HomePageState extends State<HomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Mais Ouvidos', style: textStyle),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: songContainers,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 160,
-                        width: size.width,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Populares', style: textStyle),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: songContainers,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 160,
-                        width: size.width,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
                             Text('Playlists', style: textStyle),
                             SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
@@ -546,6 +543,150 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
+              ),
+              //
+              // Player Part
+              //
+              Positioned(
+                bottom: x + iconSize / 2,
+                left: x / 4,
+                child: StreamBuilder<bool>(
+                    stream: playingStream,
+                    builder: (context, snapshot) {
+                      bool playing =
+                          snapshot.data != null ? snapshot.data! : false;
+                      return playlistUIController.hasPlayedOnce
+                          ? StreamBuilder<SequenceState?>(
+                              stream: songsStream,
+                              builder: (context, snapshot) {
+                                SongModel currentSong =
+                                    playlistUIController.playlist.songs[0];
+                                SequenceState? state = snapshot.data;
+                                if (state != null) {
+                                  currentSong = playlistUIController
+                                      .playlist.songs[state.currentIndex];
+                                }
+                                return GestureDetector(
+                                  onTap: () {
+                                    Modular.to.pop();
+                                  },
+                                  child: Container(
+                                    height: 70,
+                                    width: size.width - x / 2,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      color: backgroundAccent,
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: x / 2, horizontal: x / 2),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Image(
+                                                image: ImageParser
+                                                    .getImageProviderFromString(
+                                                  currentSong.icon,
+                                                ),
+                                                width: 60,
+                                                height: 60,
+                                                fit: BoxFit.fill,
+                                              ),
+                                              SizedBox(
+                                                width: x / 4,
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                    width: size.width - x * 7,
+                                                    height: 20,
+                                                    child: TextScroll(
+                                                      currentSong.title,
+                                                      mode: TextScrollMode
+                                                          .endless,
+                                                      velocity: const Velocity(
+                                                          pixelsPerSecond:
+                                                              Offset(100, 0)),
+                                                      delayBefore:
+                                                          const Duration(
+                                                              seconds: 10),
+                                                      pauseBetween:
+                                                          const Duration(
+                                                              seconds: 5),
+                                                      style: titleStyle,
+                                                      textAlign:
+                                                          TextAlign.right,
+                                                      selectable: true,
+                                                    ),
+                                                  ),
+                                                  // Text(
+                                                  //   currentSong.title,
+                                                  //   style: titleStyle,
+                                                  // ),
+                                                  Text(
+                                                    currentSong.author,
+                                                    style: authorStyle,
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              SizedBox(
+                                                width: 3 * iconSize / 2,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    playing
+                                                        ? audioManager.pause()
+                                                        : audioManager.play();
+                                                  },
+                                                  style: buttonStyle,
+                                                  child: FaIcon(
+                                                    playing
+                                                        ? FontAwesomeIcons
+                                                            .solidCirclePause
+                                                        : FontAwesomeIcons
+                                                            .solidCirclePlay,
+                                                    size: iconSize * 1.5,
+                                                    color: contrastColor,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: x / 2,
+                                              ),
+                                              SizedBox(
+                                                width: 3 * iconSize / 2,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    playlistManager
+                                                        .seekToNext();
+                                                  },
+                                                  style: buttonStyle,
+                                                  child: FaIcon(
+                                                    FontAwesomeIcons
+                                                        .forwardStep,
+                                                    size: iconSize,
+                                                    color: contrastColor,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              })
+                          : Container();
+                    }),
               ),
               //
               // Bottom Part

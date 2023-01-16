@@ -25,7 +25,6 @@ class JustPlaylistManager implements PlaylistAudioManager {
     shuffleOrder: DefaultShuffleOrder(),
     children: [],
   );
-
   @override
   Future<void> add(String path) async {
     await playlistAudioSource.add(getAudioSourceFromString(path));
