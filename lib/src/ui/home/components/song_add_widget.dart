@@ -9,21 +9,24 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class SongAddWidget extends StatefulWidget {
+class SongAddPage extends StatefulWidget {
+  final SongModel? songToBeEdited;
   final void Function() callback;
-  const SongAddWidget({super.key, required this.callback});
+  const SongAddPage({super.key, required this.callback, this.songToBeEdited});
 
   @override
-  State<SongAddWidget> createState() => _SongAddWidgetState();
+  State<SongAddPage> createState() => _SongAddPageState();
 }
 
-class _SongAddWidgetState extends State<SongAddWidget> {
+class _SongAddPageState extends State<SongAddPage> {
   static String defaultIcon = 'assets/images/disc.png';
   static double x = 30.0;
   final titleTextController = TextEditingController();
   final authorTextController = TextEditingController();
 
   final scrollController = ScrollController();
+
+  bool editing = false;
 
   final SongModel defaultSong = SongModel(
       id: 0,
@@ -40,6 +43,17 @@ class _SongAddWidgetState extends State<SongAddWidget> {
       url: 'url',
       path: '',
       author: 'author');
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.songToBeEdited != null) {
+      songToBeAdded = SongModel.fromMap(widget.songToBeEdited!.toMap());
+      editing = true;
+      titleTextController.text = songToBeAdded.title;
+      authorTextController.text = songToBeAdded.author;
+    }
+  }
 
   void saveIcon() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -107,189 +121,209 @@ class _SongAddWidgetState extends State<SongAddWidget> {
       iconImage = FileImage(File(songToBeAdded.icon));
     }
 
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      child: Column(
-        children: [
-          Center(
-            child: GestureDetector(
-              onTap: () {
-                Navigator.of(context).pop();
-              },
-              child: Container(
-                width: size.width,
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(15),
-                    topRight: Radius.circular(15),
-                  ),
-                  color: backgroundColor,
-                ),
-                child: Padding(
-                  padding:
-                      EdgeInsets.symmetric(vertical: x / 2, horizontal: x / 2),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              SizedBox(
+                height: x * 2,
+              ),
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
                   child: Container(
-                    width: size.width - x,
-                    height: 10,
+                    width: size.width,
+                    height: 40,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: backgroundAccent,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                      ),
+                      color: backgroundColor,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: x / 2, horizontal: x / 2),
+                      child: Container(
+                        width: size.width - x,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: backgroundAccent,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Center(
-                      child: SizedBox(
-                        width: 150,
-                        height: 150,
-                        child: GestureDetector(
-                          onTap: saveIcon,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              image: DecorationImage(
-                                fit: BoxFit.cover,
-                                image: iconImage,
+              Container(
+                color: backgroundColor,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: x),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Center(
+                            child: SizedBox(
+                              width: size.width - x * 2,
+                              height: size.width - x * 2,
+                              child: GestureDetector(
+                                onTap: saveIcon,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: iconImage,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: SizedBox(
-                            width: size.width - 175,
-                            height: x * 2,
-                            child: TextField(
-                              controller: titleTextController,
-                              decoration: InputDecoration(
-                                  hintText: 'Title',
-                                  hintStyle: titleStyle,
-                                  border: InputBorder.none),
-                              style: titleStyle,
-                              onChanged: (value) {
-                                setState(() {
-                                  songToBeAdded.title = value;
-                                });
-                              },
-                              onSubmitted: (value) {
-                                setState(() {
-                                  songToBeAdded.title = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        Center(
-                          child: SizedBox(
-                            width: size.width - 175,
-                            height: x,
-                            child: TextField(
-                              controller: authorTextController,
-                              decoration: InputDecoration(
-                                  hintText: 'Author',
-                                  hintStyle: authorStyle,
-                                  border: InputBorder.none),
-                              style: authorStyle,
-                              onChanged: (value) {
-                                setState(() {
-                                  songToBeAdded.author = value;
-                                });
-                              },
-                              onSubmitted: (value) {
-                                setState(() {
-                                  songToBeAdded.author = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      width: 90,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: saveButtonStyle,
-                        onPressed: () async {
-                          songToBeAdded = await SongParser()
-                              .parseSongBeforeSave(songToBeAdded);
-                          songDataManager.addSong(songToBeAdded);
-                          setState(() {
-                            songToBeAdded =
-                                SongModel.fromMap(defaultSong.toMap());
-                            titleTextController.text = '';
-                            authorTextController.text = '';
-                          });
-                          widget.callback();
-                        },
-                        child: const FaIcon(
-                          FontAwesomeIcons.solidFloppyDisk,
-                          size: 30,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: x / 2,
-                    ),
-                    SizedBox(
-                      width: 90,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: songButtonStyle,
-                        onPressed: saveSong,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            FaIcon(
-                              FontAwesomeIcons.music,
-                              color: accentColor,
-                              size: 30,
-                            ),
-                            const SizedBox(
-                              height: 1,
-                            ),
-                            songToBeAdded.path.isEmpty
-                                ? Container()
-                                : Container(
-                                    width: 30,
-                                    height: 5,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      color: accentColor,
-                                    ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            children: [
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Center(
+                                child: SizedBox(
+                                  width: size.width,
+                                  height: x * 2,
+                                  child: TextField(
+                                    controller: titleTextController,
+                                    decoration: InputDecoration(
+                                        hintText: 'Title',
+                                        hintStyle: titleStyle,
+                                        border: InputBorder.none),
+                                    style: titleStyle,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        songToBeAdded.title = value;
+                                      });
+                                    },
+                                    onSubmitted: (value) {
+                                      setState(() {
+                                        songToBeAdded.title = value;
+                                      });
+                                    },
                                   ),
-                          ],
-                        ),
+                                ),
+                              ),
+                              Center(
+                                child: SizedBox(
+                                  width: size.width,
+                                  height: x,
+                                  child: TextField(
+                                    controller: authorTextController,
+                                    decoration: InputDecoration(
+                                        hintText: 'Author',
+                                        hintStyle: authorStyle,
+                                        border: InputBorder.none),
+                                    style: authorStyle,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        songToBeAdded.author = value;
+                                      });
+                                    },
+                                    onSubmitted: (value) {
+                                      setState(() {
+                                        songToBeAdded.author = value;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                width: 90,
+                                height: 50,
+                                child: ElevatedButton(
+                                  style: saveButtonStyle,
+                                  onPressed: () async {
+                                    songToBeAdded = await SongParser()
+                                        .parseSongBeforeSave(songToBeAdded);
+                                    editing
+                                        ? songDataManager
+                                            .editSong(songToBeAdded)
+                                        : songDataManager
+                                            .addSong(songToBeAdded);
+
+                                    setState(() {
+                                      songToBeAdded = SongModel.fromMap(
+                                          defaultSong.toMap());
+                                      titleTextController.text = '';
+                                      authorTextController.text = '';
+                                    });
+                                    widget.callback();
+                                  },
+                                  child: const FaIcon(
+                                    FontAwesomeIcons.solidFloppyDisk,
+                                    size: 30,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: x / 2,
+                              ),
+                              SizedBox(
+                                width: 90,
+                                height: 50,
+                                child: ElevatedButton(
+                                  style: songButtonStyle,
+                                  onPressed: saveSong,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      FaIcon(
+                                        FontAwesomeIcons.music,
+                                        color: accentColor,
+                                        size: 30,
+                                      ),
+                                      const SizedBox(
+                                        height: 1,
+                                      ),
+                                      songToBeAdded.path.isEmpty
+                                          ? Container()
+                                          : Container(
+                                              width: 30,
+                                              height: 5,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
+                                                color: accentColor,
+                                              ),
+                                            ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
