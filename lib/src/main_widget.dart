@@ -9,6 +9,7 @@ import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/ui/player/player_page.dart';
+import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -17,6 +18,7 @@ class AppModule extends Module {
   @override
   List<Bind> get binds => [
         Bind((i) => ColorController()),
+        Bind((i) => SettingsController()),
         Bind((i) => PlaylistUIController()),
         Bind((i) => JustPlaylistManager()),
         Bind((i) => FilePathImpl()),
