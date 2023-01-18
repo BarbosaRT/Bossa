@@ -47,10 +47,10 @@ class SongDataManager {
 
   void editSong(SongModel editedSong) async {
     var database = await localDataManagerInstance.database();
-
+    print(editedSong.author);
     database.rawUpdate('''UPDATE songs SET title = "${editedSong.title}", 
         icon = "${editedSong.icon}", url = "${editedSong.url}", 
-        path = "${editedSong.path}, author = "${editedSong.author}" 
+        path = "${editedSong.path}", author = "${editedSong.author}" 
         WHERE id = "${editedSong.id}"''');
   }
 

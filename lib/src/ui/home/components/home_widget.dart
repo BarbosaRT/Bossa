@@ -9,6 +9,7 @@ import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/home/components/playlist_add_widget.dart';
 import 'package:bossa/src/ui/home/components/song_add_widget.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
+import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -26,6 +27,8 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static double x = 30.0;
   double iconSize = 25;
+  double imagesSize = 100;
+  bool cropImages = true;
 
   List<SongModel> songs = [];
   List<PlaylistModel> playlists = [];
@@ -39,6 +42,15 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void initState() {
     super.initState();
+    final settingsController = Modular.get<SettingsController>();
+    settingsController.addListener(
+      () {
+        setState(() {
+          cropImages = settingsController.cropImages;
+        });
+      },
+    );
+
     loadSongs();
     loadPlaylists();
   }
@@ -59,7 +71,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     required String addText,
     required String fromYoutubeText,
     required String fromFileText,
-    required Widget addWidget,
+    required void Function(BuildContext ctx) onFilePress,
     required Widget urlWidget,
     void Function()? whenExit,
   }) {
@@ -154,19 +166,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        Asuka.showModalBottomSheet(
-                          isDismissible: false,
-                          backgroundColor: backgroundColor,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15),
-                            ),
-                          ),
-                          builder: (context) {
-                            return addWidget;
-                          },
-                        );
+                        onFilePress(context);
                       },
                       child: Text(
                         fromFileText,
@@ -190,6 +190,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget contentContainer(
       {required String icon,
       required void Function() remove,
+      required void Function(BuildContext ctx) edit,
       required void Function() onTap}) {
     final colorController = Modular.get<ColorController>();
     final backgroundColor = colorController.currentScheme.backgroundColor;
@@ -207,34 +208,48 @@ class _HomeWidgetState extends State<HomeWidget> {
               ),
             ),
             builder: (context) {
-              return Row(
-                children: [
-                  SizedBox(
-                    width: x / 2,
-                  ),
-                  ElevatedButton(
-                    onPressed: remove,
-                    child: FaIcon(
-                      FontAwesomeIcons.trash,
-                      size: iconSize,
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: x),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: remove,
+                      child: FaIcon(
+                        FontAwesomeIcons.trash,
+                        size: iconSize,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    width: x / 2,
-                  ),
-                ],
+                    ElevatedButton(
+                      onPressed: () {
+                        edit(context);
+                      },
+                      child: FaIcon(
+                        FontAwesomeIcons.penToSquare,
+                        size: iconSize,
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           );
         },
-        child: Image(
-          image: ImageParser.getImageProviderFromString(
-            icon,
+        child: ClipRect(
+          child: Align(
+            alignment: Alignment.center,
+            heightFactor: cropImages ? 0.75 : 1,
+            widthFactor: cropImages ? 0.75 : 1,
+            child: Image(
+              image: ImageParser.getImageProviderFromString(
+                icon,
+              ),
+              fit: BoxFit.cover,
+              alignment: FractionalOffset.center,
+              width: cropImages ? imagesSize * 1.25 : imagesSize,
+              height: cropImages ? imagesSize * 1.25 : imagesSize,
+            ),
           ),
-          fit: BoxFit.cover,
-          alignment: FractionalOffset.center,
-          width: 100,
-          height: 100,
         ),
       ),
     );
@@ -293,6 +308,16 @@ class _HomeWidgetState extends State<HomeWidget> {
             songDataManager.removeSong(song);
             loadSongs();
           },
+          edit: (BuildContext ctx) {
+            Navigator.of(ctx).pop();
+            Modular.to.push(
+              MaterialPageRoute(
+                builder: (context) => SongAddPage(
+                  songToBeEdited: song,
+                ),
+              ),
+            );
+          },
         ),
       );
     }
@@ -315,18 +340,30 @@ class _HomeWidgetState extends State<HomeWidget> {
             playlistDataManager.deletePlaylist(playlist);
             loadPlaylists();
           },
+          edit: (ctx) {
+            Navigator.of(ctx).pop();
+            Modular.to.push(
+              MaterialPageRoute(
+                builder: (context) => PlaylistAddPage(
+                  playlistToBeEdited: playlist,
+                  callback: loadPlaylists,
+                ),
+              ),
+            );
+          },
         ),
       );
     }
 
     final addSongWidget = addWidget(
-      addWidget: SizedBox(
-        width: size.width,
-        height: 250,
-        child: SongAddWidget(
-          callback: loadSongs,
-        ),
-      ),
+      onFilePress: (BuildContext ctx) {
+        Navigator.of(ctx).pop();
+        Modular.to.push(
+          MaterialPageRoute(
+            builder: (context) => const SongAddPage(),
+          ),
+        );
+      },
       whenExit: () {
         songTextController.text = '';
       },
@@ -369,13 +406,16 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
 
     final addPlaylistWidget = addWidget(
-      addWidget: SizedBox(
-        width: size.width,
-        height: 320,
-        child: PlaylistAddWidget(
-          callback: loadPlaylists,
-        ),
-      ),
+      onFilePress: (ctx) {
+        Navigator.of(ctx).pop();
+        Modular.to.push(
+          MaterialPageRoute(
+            builder: (context) => PlaylistAddPage(
+              callback: loadPlaylists,
+            ),
+          ),
+        );
+      },
       whenExit: () {
         playlistTextController.text = '';
       },
