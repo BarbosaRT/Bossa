@@ -9,6 +9,7 @@ import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/home/components/playlist_add_widget.dart';
 import 'package:bossa/src/ui/home/components/song_add_widget.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
+import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -26,6 +27,8 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static double x = 30.0;
   double iconSize = 25;
+  double imagesSize = 100;
+  bool cropImages = true;
 
   List<SongModel> songs = [];
   List<PlaylistModel> playlists = [];
@@ -39,6 +42,15 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void initState() {
     super.initState();
+    final settingsController = Modular.get<SettingsController>();
+    settingsController.addListener(
+      () {
+        setState(() {
+          cropImages = settingsController.cropImages;
+        });
+      },
+    );
+
     loadSongs();
     loadPlaylists();
   }
@@ -59,7 +71,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     required String addText,
     required String fromYoutubeText,
     required String fromFileText,
-    required void Function() onFilePress,
+    required void Function(BuildContext ctx) onFilePress,
     required Widget urlWidget,
     void Function()? whenExit,
   }) {
@@ -153,7 +165,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: onFilePress,
+                      onPressed: () {
+                        onFilePress(context);
+                      },
                       child: Text(
                         fromFileText,
                         style: popupStyle,
@@ -176,7 +190,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget contentContainer(
       {required String icon,
       required void Function() remove,
-      required void Function() edit,
+      required void Function(BuildContext ctx) edit,
       required void Function() onTap}) {
     final colorController = Modular.get<ColorController>();
     final backgroundColor = colorController.currentScheme.backgroundColor;
@@ -197,7 +211,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: x),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
                       onPressed: remove,
@@ -207,7 +221,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: edit,
+                      onPressed: () {
+                        edit(context);
+                      },
                       child: FaIcon(
                         FontAwesomeIcons.penToSquare,
                         size: iconSize,
@@ -219,14 +235,21 @@ class _HomeWidgetState extends State<HomeWidget> {
             },
           );
         },
-        child: Image(
-          image: ImageParser.getImageProviderFromString(
-            icon,
+        child: ClipRect(
+          child: Align(
+            alignment: Alignment.center,
+            heightFactor: cropImages ? 0.75 : 1,
+            widthFactor: cropImages ? 0.75 : 1,
+            child: Image(
+              image: ImageParser.getImageProviderFromString(
+                icon,
+              ),
+              fit: BoxFit.cover,
+              alignment: FractionalOffset.center,
+              width: cropImages ? imagesSize * 1.25 : imagesSize,
+              height: cropImages ? imagesSize * 1.25 : imagesSize,
+            ),
           ),
-          fit: BoxFit.cover,
-          alignment: FractionalOffset.center,
-          width: 100,
-          height: 100,
         ),
       ),
     );
@@ -285,12 +308,12 @@ class _HomeWidgetState extends State<HomeWidget> {
             songDataManager.removeSong(song);
             loadSongs();
           },
-          edit: () {
-            Asuka.removeCurrentSnackBar();
+          edit: (BuildContext ctx) {
+            Navigator.of(ctx).pop();
             Modular.to.push(
               MaterialPageRoute(
                 builder: (context) => SongAddPage(
-                  callback: loadSongs,
+                  songToBeEdited: song,
                 ),
               ),
             );
@@ -317,8 +340,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             playlistDataManager.deletePlaylist(playlist);
             loadPlaylists();
           },
-          edit: () {
-            Asuka.removeCurrentSnackBar();
+          edit: (ctx) {
+            Navigator.of(ctx).pop();
             Modular.to.push(
               MaterialPageRoute(
                 builder: (context) => PlaylistAddPage(
@@ -333,14 +356,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     final addSongWidget = addWidget(
-      onFilePress: () {
-        Asuka.hideCurrentSnackBar();
-        Modular.to.popUntil(ModalRoute.withName('/'));
+      onFilePress: (BuildContext ctx) {
+        Navigator.of(ctx).pop();
         Modular.to.push(
           MaterialPageRoute(
-            builder: (context) => SongAddPage(
-              callback: loadSongs,
-            ),
+            builder: (context) => const SongAddPage(),
           ),
         );
       },
@@ -386,8 +406,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
 
     final addPlaylistWidget = addWidget(
-      onFilePress: () {
-        Modular.to.popUntil(ModalRoute.withName('/'));
+      onFilePress: (ctx) {
+        Navigator.of(ctx).pop();
         Modular.to.push(
           MaterialPageRoute(
             builder: (context) => PlaylistAddPage(

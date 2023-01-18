@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
+import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -11,8 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class SongAddPage extends StatefulWidget {
   final SongModel? songToBeEdited;
-  final void Function() callback;
-  const SongAddPage({super.key, required this.callback, this.songToBeEdited});
+  const SongAddPage({super.key, this.songToBeEdited});
 
   @override
   State<SongAddPage> createState() => _SongAddPageState();
@@ -116,17 +115,21 @@ class _SongAddPageState extends State<SongAddPage> {
     TextStyle authorStyle =
         GoogleFonts.poppins(color: contrastColor, fontSize: 20);
 
-    ImageProvider iconImage = AssetImage(songToBeAdded.icon);
-    if (songToBeAdded.icon != defaultIcon) {
-      iconImage = FileImage(File(songToBeAdded.icon));
-    }
+    ImageProvider iconImage =
+        ImageParser.getImageProviderFromString(songToBeAdded.icon);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          child: Column(
+      backgroundColor: accentColor,
+      body: GestureDetector(
+        onTap: () {
+          FocusScopeNode currentFocus = FocusScope.of(context);
+
+          if (!currentFocus.hasPrimaryFocus) {
+            currentFocus.unfocus();
+          }
+        },
+        child: SafeArea(
+          child: ListView(
             children: [
               SizedBox(
                 height: x * 2,
@@ -134,7 +137,7 @@ class _SongAddPageState extends State<SongAddPage> {
               Center(
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.of(context).pop();
+                    Modular.to.popAndPushNamed('/');
                   },
                   child: Container(
                     width: size.width,
@@ -162,6 +165,8 @@ class _SongAddPageState extends State<SongAddPage> {
                 ),
               ),
               Container(
+                width: size.width,
+                height: size.height - x * 2 - 40,
                 color: backgroundColor,
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: x),
@@ -194,55 +199,56 @@ class _SongAddPageState extends State<SongAddPage> {
                         children: [
                           Column(
                             children: [
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              Center(
-                                child: SizedBox(
-                                  width: size.width,
-                                  height: x * 2,
-                                  child: TextField(
-                                    controller: titleTextController,
-                                    decoration: InputDecoration(
-                                        hintText: 'Title',
-                                        hintStyle: titleStyle,
-                                        border: InputBorder.none),
-                                    style: titleStyle,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        songToBeAdded.title = value;
-                                      });
-                                    },
-                                    onSubmitted: (value) {
-                                      setState(() {
-                                        songToBeAdded.title = value;
-                                      });
-                                    },
+                              SizedBox(
+                                width: size.width,
+                                height: 50,
+                                child: TextField(
+                                  controller: titleTextController,
+                                  decoration: InputDecoration(
+                                    hintText: 'Title',
+                                    hintStyle: titleStyle,
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    helperMaxLines: 1,
+                                    contentPadding: EdgeInsets.zero,
                                   ),
+                                  style: titleStyle,
+                                  textAlignVertical: TextAlignVertical.center,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      songToBeAdded.title = value;
+                                    });
+                                  },
+                                  onSubmitted: (value) {
+                                    setState(() {
+                                      songToBeAdded.title = value;
+                                    });
+                                  },
                                 ),
                               ),
-                              Center(
-                                child: SizedBox(
-                                  width: size.width,
-                                  height: x,
-                                  child: TextField(
-                                    controller: authorTextController,
-                                    decoration: InputDecoration(
-                                        hintText: 'Author',
-                                        hintStyle: authorStyle,
-                                        border: InputBorder.none),
-                                    style: authorStyle,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        songToBeAdded.author = value;
-                                      });
-                                    },
-                                    onSubmitted: (value) {
-                                      setState(() {
-                                        songToBeAdded.author = value;
-                                      });
-                                    },
-                                  ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              SizedBox(
+                                width: size.width,
+                                height: x,
+                                child: TextField(
+                                  controller: authorTextController,
+                                  decoration: InputDecoration(
+                                      hintText: 'Author',
+                                      hintStyle: authorStyle,
+                                      border: InputBorder.none),
+                                  style: authorStyle,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      songToBeAdded.author = value;
+                                    });
+                                  },
+                                  onSubmitted: (value) {
+                                    setState(() {
+                                      songToBeAdded.author = value;
+                                    });
+                                  },
                                 ),
                               ),
                             ],
@@ -270,10 +276,12 @@ class _SongAddPageState extends State<SongAddPage> {
                                       titleTextController.text = '';
                                       authorTextController.text = '';
                                     });
-                                    widget.callback();
+                                    Modular.to.popAndPushNamed('/');
                                   },
-                                  child: const FaIcon(
-                                    FontAwesomeIcons.solidFloppyDisk,
+                                  child: FaIcon(
+                                    editing
+                                        ? FontAwesomeIcons.penToSquare
+                                        : FontAwesomeIcons.solidFloppyDisk,
                                     size: 30,
                                   ),
                                 ),
