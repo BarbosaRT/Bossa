@@ -23,6 +23,7 @@ class PlayerPage extends StatefulWidget {
 class _PlayerPageState extends State<PlayerPage> {
   static double x = 30.0;
   double iconSize = 30;
+  final double sliderSpacing = 7;
   int currentIndex = 0;
   bool gradient = true;
 
@@ -145,12 +146,13 @@ class _PlayerPageState extends State<PlayerPage> {
 
     AudioPlayer audioManager = playlistManager.player;
 
-    double sliderSpacing = 7;
     Color gradientColor = backgroundColor;
     if (palette != null) {
       gradientColor =
           gradient ? palette!.dominantColor!.color : backgroundColor;
     }
+
+    double imageWidth = size.width - sliderSpacing * 2;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -228,15 +230,14 @@ class _PlayerPageState extends State<PlayerPage> {
                           children: [
                             Padding(
                               padding: EdgeInsets.only(left: sliderSpacing),
-                              child: SizedBox(
-                                width: size.width - sliderSpacing * 2,
-                                height: size.width - x - sliderSpacing * 2,
-                                child: Image(
-                                  image: ImageParser.getImageProviderFromString(
-                                    currentSong.icon,
-                                  ),
-                                  fit: BoxFit.cover,
+                              child: Image(
+                                image: ImageParser.getImageProviderFromString(
+                                  currentSong.icon,
                                 ),
+                                fit: BoxFit.cover,
+                                alignment: FractionalOffset.center,
+                                width: imageWidth,
+                                height: imageWidth - x,
                               ),
                             ),
                             Column(

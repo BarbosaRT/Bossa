@@ -19,6 +19,7 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     final settingsController = Modular.get<SettingsController>();
+    gradient = settingsController.gradientOnPlayer;
     settingsController.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {
@@ -48,6 +49,9 @@ class _SettingsPageState extends State<SettingsPage> {
         height: size.height,
         child: Column(
           children: [
+            SizedBox(
+              height: x / 2,
+            ),
             Row(
               children: [
                 SizedBox(

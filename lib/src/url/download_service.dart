@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 abstract class DownloadService {
-  Future<void> download(String url, String path);
+  Future<void> download(String url, String path, String directory);
 }
 
 class DioDownloadService implements DownloadService {
@@ -15,13 +15,11 @@ class DioDownloadService implements DownloadService {
   DioDownloadService({required this.filePath});
 
   @override
-  Future<void> download(String url, String fileName) async {
+  Future<void> download(String url, String fileName, String directory) async {
     if (Platform.isAndroid) {
       bool hasPermission = await _requestWritePermission();
       if (!hasPermission) throw Exception('Permission Denied');
     }
-
-    String workingDirectory = await filePath.getDocumentsDirectory();
 
     var youtube = YoutubeExplode();
     var videoManifest = await youtube.videos.streamsClient
@@ -31,8 +29,7 @@ class DioDownloadService implements DownloadService {
 
     var stream = youtube.videos.streamsClient.get(streamInfo);
 
-    await Directory('$workingDirectory/songs').create();
-    var file = File('$workingDirectory/songs/$fileName');
+    var file = File('$directory/$fileName');
     var fileStream = file.openWrite();
 
     await stream.pipe(fileStream);

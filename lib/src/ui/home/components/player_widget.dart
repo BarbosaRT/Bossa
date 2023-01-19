@@ -4,7 +4,6 @@ import 'package:bossa/src/audio/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
-import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -22,19 +21,9 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   static double x = 30.0;
   double iconSize = 25;
 
-  bool cropImage = true;
-
   @override
   void initState() {
     super.initState();
-    final settingsController = Modular.get<SettingsController>();
-    settingsController.addListener(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          cropImage = settingsController.cropImages;
-        });
-      });
-    });
   }
 
   @override
@@ -100,22 +89,14 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                           children: [
                             Row(
                               children: [
-                                ClipRect(
-                                  child: Align(
-                                    alignment: Alignment.center,
-                                    heightFactor: cropImage ? 0.75 : 1,
-                                    widthFactor: cropImage ? 0.75 : 1,
-                                    child: Image(
-                                      image: ImageParser
-                                          .getImageProviderFromString(
-                                        currentSong.icon,
-                                      ),
-                                      fit: BoxFit.cover,
-                                      alignment: FractionalOffset.center,
-                                      width: 60,
-                                      height: 60,
-                                    ),
+                                Image(
+                                  image: ImageParser.getImageProviderFromString(
+                                    currentSong.icon,
                                   ),
+                                  fit: BoxFit.cover,
+                                  alignment: FractionalOffset.center,
+                                  width: 60,
+                                  height: 60,
                                 ),
                                 SizedBox(
                                   width: x / 4,

@@ -6,7 +6,7 @@ import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
-import 'package:bossa/src/ui/test/song_container.dart';
+import 'package:bossa/src/test/song_container.dart';
 import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter/material.dart';
 

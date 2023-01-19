@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/url/download_service.dart';
@@ -48,10 +49,17 @@ class SongParser {
 
   Future<SongModel> parseSongBeforeSave(SongModel song) async {
     if (SongParser().isSongFromYoutube(song.url)) {
-      await DioDownloadService(filePath: FilePathImpl())
-          .download(song.url, '${song.title}.m4a');
       String workingDirectory = await FilePathImpl().getDocumentsDirectory();
+
+      await Directory('$workingDirectory/songs').create();
+      await DioDownloadService(filePath: FilePathImpl())
+          .download(song.url, '${song.title}.m4a', '$workingDirectory/songs');
       song.path = '$workingDirectory/songs/${song.title}.m4a';
+
+      await Directory('$workingDirectory/icons').create();
+      await DioDownloadService(filePath: FilePathImpl())
+          .download(song.icon, '${song.title}.jpg', '$workingDirectory/icons');
+      song.icon = '$workingDirectory/icons/${song.title}.jpg';
     }
     return song;
   }

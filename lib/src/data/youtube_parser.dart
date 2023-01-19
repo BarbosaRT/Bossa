@@ -21,6 +21,7 @@ class YoutubeParser {
     var yt = YoutubeExplode();
 
     var video = await yt.videos.get(parsedUrl);
+
     ThumbnailSet thumbnails = video.thumbnails;
     String icon = thumbnails.standardResUrl.isEmpty
         ? thumbnails.lowResUrl

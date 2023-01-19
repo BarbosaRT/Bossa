@@ -1,11 +1,11 @@
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/file/file_path.dart';
-import 'package:bossa/src/ui/test/test_playlist_add_widget.dart';
-import 'package:bossa/src/ui/test/playlist_container.dart';
-import 'package:bossa/src/ui/test/test_song_add_widget.dart';
-import 'package:bossa/src/ui/test/song_container.dart';
-import 'package:bossa/src/ui/test/youtube_add_widget.dart';
+import 'package:bossa/src/test/test_playlist_add_widget.dart';
+import 'package:bossa/src/test/playlist_container.dart';
+import 'package:bossa/src/test/test_song_add_widget.dart';
+import 'package:bossa/src/test/song_container.dart';
+import 'package:bossa/src/test/youtube_add_widget.dart';
 import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter/material.dart';
 import 'package:bossa/models/playlist_model.dart';

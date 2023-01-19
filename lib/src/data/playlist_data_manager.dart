@@ -38,8 +38,22 @@ class PlaylistDataManager {
 
   void editPlaylist(PlaylistModel editedPlaylist) async {
     var database = await localDataManagerInstance.database();
-    database.update('playlists', editedPlaylist.toSql(),
-        where: 'playlists.id = ?', whereArgs: [editedPlaylist.id]);
+    database.update(
+      'playlists',
+      editedPlaylist.toSql(),
+      where: 'playlists.id = ?',
+      whereArgs: [editedPlaylist.id],
+    );
+
+    database.delete(
+      'playlists_songs',
+      where: 'playlists_songs.idPlaylist = ?',
+      whereArgs: [editedPlaylist.id],
+    );
+
+    for (SongModel song in editedPlaylist.songs) {
+      appendToPlaylist(song, editedPlaylist);
+    }
   }
 
   Future<PlaylistModel> loadLastAddedPlaylist() async {

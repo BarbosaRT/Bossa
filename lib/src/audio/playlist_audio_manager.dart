@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
+import 'package:bossa/src/data/song_parser.dart';
 import 'package:bossa/src/url/url_parser.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 abstract class PlaylistAudioManager {
   Future<void> setPlaylist(PlaylistModel playlist,
@@ -27,12 +31,14 @@ class JustPlaylistManager implements PlaylistAudioManager {
   );
   @override
   Future<void> add(String path) async {
-    await playlistAudioSource.add(getAudioSourceFromString(path));
+    AudioSource audioSource = await getAudioSourceFromString(path);
+    await playlistAudioSource.add(audioSource);
   }
 
   @override
   Future<void> insert(int index, String path) async {
-    await playlistAudioSource.insert(index, getAudioSourceFromString(path));
+    AudioSource audioSource = await getAudioSourceFromString(path);
+    await playlistAudioSource.insert(index, audioSource);
   }
 
   @override
@@ -67,11 +73,12 @@ class JustPlaylistManager implements PlaylistAudioManager {
 
     for (SongModel song in playlist.songs) {
       String path = song.path.isEmpty ? song.url : song.path;
-      songs.add(getAudioSourceFromString(path));
+      AudioSource audioSource = getAudioSourceFromString(path);
+      songs.add(audioSource);
     }
 
     playlistAudioSource = ConcatenatingAudioSource(
-      useLazyPreparation: true,
+      useLazyPreparation: false,
       shuffleOrder: DefaultShuffleOrder(),
       children: songs,
     );
@@ -91,5 +98,43 @@ class JustPlaylistManager implements PlaylistAudioManager {
     } else {
       return AudioSource.uri(Uri.file(string));
     }
+  }
+
+  Future<AudioSource?> tryGetAudioSourceFromYoutube(String string) async {
+    if (SongParser().isSongFromYoutube(string)) {
+      var youtube = YoutubeExplode();
+      var videoManifest = await youtube.videos.streamsClient
+          .getManifest(SongParser().parseYoutubeSongUrl(string));
+      var streamInfo = videoManifest.audioOnly.withHighestBitrate();
+      List<int> bytes = [];
+      var stream = youtube.videos.streamsClient.get(streamInfo);
+      final controller = StreamController<List<int>>();
+      controller.addStream(stream);
+      controller.stream.listen((data) {
+        bytes += data;
+      });
+      controller.close();
+      youtube.close();
+      return YoutubeStreamSource(bytes);
+    }
+    return null;
+  }
+}
+
+class YoutubeStreamSource extends StreamAudioSource {
+  final List<int> bytes;
+  YoutubeStreamSource(this.bytes);
+
+  @override
+  Future<StreamAudioResponse> request([int? start, int? end]) async {
+    start ??= 0;
+    end ??= bytes.length;
+    return StreamAudioResponse(
+      sourceLength: bytes.length,
+      contentLength: end - start,
+      offset: start,
+      stream: Stream.value(bytes.sublist(start, end)),
+      contentType: 'audio/m4a',
+    );
   }
 }
