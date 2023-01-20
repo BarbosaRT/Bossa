@@ -317,6 +317,7 @@ class _PlayerPageState extends State<PlayerPage> {
                                                   Duration(
                                                     seconds: value.toInt(),
                                                   ),
+                                                  length: maxString.length,
                                                 ),
                                                 divisions: max.toInt(),
                                                 onChanged: (value) {

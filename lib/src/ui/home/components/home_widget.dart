@@ -382,10 +382,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       songsForPlaylist.remove(song);
       songsForPlaylist.insert(0, song);
       PlaylistModel playlist = PlaylistModel(
-          id: 0,
-          title: 'Todas as Músicas',
-          icon: song.icon,
-          songs: songsForPlaylist);
+          id: 0, title: 'Todas as Músicas', icon: song.icon, songs: [song]);
       songContainers.add(
         ContentContainer(
           detailContainer: DetailContainer(

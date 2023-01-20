@@ -110,12 +110,18 @@ class JustPlaylistManager implements PlaylistAudioManager {
       var youtube = YoutubeExplode();
       var videoManifest = await youtube.videos.streamsClient
           .getManifest(SongParser().parseYoutubeSongUrl(string));
-      var streamInfo = videoManifest.audioOnly.withHighestBitrate();
+      var streamInf = videoManifest.audioOnly.sortByBitrate();
+      var streamInfo = streamInf[streamInf.length - 1];
+      // 535175 a minute of audio
+      int minuteInBytes = 535175;
 
       List<int> bytes = [];
       var stream = youtube.videos.streamsClient.get(streamInfo);
       await for (var bytesList in stream) {
         bytes += bytesList;
+        if (bytes.length >= minuteInBytes) {
+          break;
+        }
       }
       youtube.close();
       return YoutubeStreamSource(bytes);
