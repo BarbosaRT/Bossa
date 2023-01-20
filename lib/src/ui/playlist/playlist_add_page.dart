@@ -125,9 +125,7 @@ class _PlaylistSongContainerState extends State<PlaylistSongContainer> {
 
 class PlaylistAddPage extends StatefulWidget {
   final PlaylistModel? playlistToBeEdited;
-  final void Function() callback;
-  const PlaylistAddPage(
-      {super.key, required this.callback, this.playlistToBeEdited});
+  const PlaylistAddPage({super.key, this.playlistToBeEdited});
 
   @override
   State<PlaylistAddPage> createState() => _PlaylistAddPageState();

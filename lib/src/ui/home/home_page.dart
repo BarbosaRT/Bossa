@@ -2,6 +2,7 @@ import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
 import 'package:bossa/src/ui/home/components/player_widget.dart';
 import 'package:bossa/src/ui/library/library_page.dart';
+import 'package:bossa/src/ui/search/search_page.dart';
 import 'package:bossa/src/ui/settings/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -27,6 +28,8 @@ class _HomePageState extends State<HomePage> {
         return const SettingsPage();
       case Pages.library:
         return const LibraryPage();
+      case Pages.search:
+        return const SearchPage();
       default:
         return const HomeWidget();
     }
@@ -63,9 +66,10 @@ class _HomePageState extends State<HomePage> {
               // Player Part
               //
               Positioned(
-                  bottom: x + iconSize / 2,
-                  left: x / 4,
-                  child: const PlayerWidget()),
+                bottom: x + iconSize / 2,
+                left: x / 4,
+                child: const PlayerWidget(),
+              ),
               //
               // Bottom Part
               //

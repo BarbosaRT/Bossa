@@ -1,7 +1,7 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
-import 'package:bossa/src/audio/playlist_ui_controller.dart';
+import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:bossa/src/ui/settings/settings_controller.dart';
@@ -11,10 +11,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'package:text_scroll/text_scroll.dart';
 
 class PlayerPage extends StatefulWidget {
-  final PlaylistModel playlist;
-  const PlayerPage({super.key, required this.playlist});
+  const PlayerPage({super.key});
 
   @override
   State<PlayerPage> createState() => _PlayerPageState();
@@ -44,12 +44,13 @@ class _PlayerPageState extends State<PlayerPage> {
   @override
   void initState() {
     super.initState();
-    final playlistManager = Modular.get<JustPlaylistManager>();
-    playlistManager.setPlaylist(playlist);
-    playlist = PlaylistModel.fromMap(widget.playlist.toMap());
 
     final playlistUIController = Modular.get<PlaylistUIController>();
-    playlistUIController.setPlaylist(widget.playlist);
+    playlist =
+        PlaylistModel.fromMap(playlistUIController.currentPlaylist.toMap());
+
+    final playlistManager = Modular.get<JustPlaylistManager>();
+    playlistManager.setPlaylist(playlist);
 
     updatePalette(playlist.songs[0].icon);
 
@@ -115,7 +116,6 @@ class _PlayerPageState extends State<PlayerPage> {
     final backgroundAccent = colorController.currentScheme.backgroundAccent;
 
     final playlistManager = Modular.get<JustPlaylistManager>();
-    final playlistUIController = Modular.get<PlaylistUIController>();
 
     final headerStyle = GoogleFonts.poppins(
         color: contrastColor, fontSize: 14, fontWeight: FontWeight.normal);
@@ -246,9 +246,16 @@ class _PlayerPageState extends State<PlayerPage> {
                                   padding: EdgeInsets.only(left: sliderSpacing),
                                   child: SizedBox(
                                     width: size.width,
-                                    child: Text(
+                                    child: TextScroll(
                                       currentSong.title,
+                                      mode: TextScrollMode.endless,
+                                      velocity: const Velocity(
+                                          pixelsPerSecond: Offset(100, 0)),
+                                      delayBefore: const Duration(seconds: 10),
+                                      pauseBetween: const Duration(seconds: 5),
                                       style: titleStyle,
+                                      textAlign: TextAlign.right,
+                                      selectable: true,
                                     ),
                                   ),
                                 ),
@@ -272,7 +279,6 @@ class _PlayerPageState extends State<PlayerPage> {
                                         ? 2
                                         : stream.data!.inSeconds.toDouble();
                                     max = max > 0 ? max : 1;
-                                    playlistUIController.setHasPlayedOnce(true);
                                     return StreamBuilder<Duration>(
                                       stream: audioManager.positionStream,
                                       builder: (context, snapshot) {

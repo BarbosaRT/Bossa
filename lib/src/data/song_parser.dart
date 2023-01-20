@@ -56,10 +56,10 @@ class SongParser {
           .download(song.url, '${song.title}.m4a', '$workingDirectory/songs');
       song.path = '$workingDirectory/songs/${song.title}.m4a';
 
-      await Directory('$workingDirectory/icons').create();
-      await DioDownloadService(filePath: FilePathImpl())
-          .download(song.icon, '${song.title}.jpg', '$workingDirectory/icons');
-      song.icon = '$workingDirectory/icons/${song.title}.jpg';
+      // await Directory('$workingDirectory/icons').create();
+      // await DioDownloadService(filePath: FilePathImpl())
+      //     .download(song.url, '${song.title}.jpg', '$workingDirectory/icons');
+      // song.icon = '$workingDirectory/icons/${song.title}.jpg';
     }
     return song;
   }

@@ -14,6 +14,9 @@ class DioDownloadService implements DownloadService {
 
   DioDownloadService({required this.filePath});
 
+  Future<void> downloadIcon(
+      String url, String fileName, String directory) async {}
+
   @override
   Future<void> download(String url, String fileName, String directory) async {
     if (Platform.isAndroid) {

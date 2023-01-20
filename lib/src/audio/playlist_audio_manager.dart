@@ -73,12 +73,12 @@ class JustPlaylistManager implements PlaylistAudioManager {
 
     for (SongModel song in playlist.songs) {
       String path = song.path.isEmpty ? song.url : song.path;
-      AudioSource audioSource = getAudioSourceFromString(path);
+      AudioSource audioSource = await getAudioSourceFromString(path);
       songs.add(audioSource);
     }
 
     playlistAudioSource = ConcatenatingAudioSource(
-      useLazyPreparation: false,
+      useLazyPreparation: true,
       shuffleOrder: DefaultShuffleOrder(),
       children: songs,
     );
@@ -92,7 +92,12 @@ class JustPlaylistManager implements PlaylistAudioManager {
     await player.setShuffleModeEnabled(enabled);
   }
 
-  AudioSource getAudioSourceFromString(String string) {
+  Future<AudioSource> getAudioSourceFromString(String string) async {
+    AudioSource? youtubeAudioSource =
+        await tryGetAudioSourceFromYoutube(string);
+    if (youtubeAudioSource != null) {
+      return youtubeAudioSource;
+    }
     if (UrlParser.validUrl(string)) {
       return AudioSource.uri(Uri.parse(string));
     } else {
@@ -106,14 +111,12 @@ class JustPlaylistManager implements PlaylistAudioManager {
       var videoManifest = await youtube.videos.streamsClient
           .getManifest(SongParser().parseYoutubeSongUrl(string));
       var streamInfo = videoManifest.audioOnly.withHighestBitrate();
+
       List<int> bytes = [];
       var stream = youtube.videos.streamsClient.get(streamInfo);
-      final controller = StreamController<List<int>>();
-      controller.addStream(stream);
-      controller.stream.listen((data) {
-        bytes += data;
-      });
-      controller.close();
+      await for (var bytesList in stream) {
+        bytes += bytesList;
+      }
       youtube.close();
       return YoutubeStreamSource(bytes);
     }
@@ -134,7 +137,7 @@ class YoutubeStreamSource extends StreamAudioSource {
       contentLength: end - start,
       offset: start,
       stream: Stream.value(bytes.sublist(start, end)),
-      contentType: 'audio/m4a',
+      contentType: 'audio/raw',
     );
   }
 }

@@ -61,6 +61,7 @@ class SongDataManager {
     List<SongModel> output = [];
     for (Map<String, dynamic> result in results) {
       SongModel song = SongModel.fromMap(result);
+      song.path = '';
       output.add(song);
     }
     return output;

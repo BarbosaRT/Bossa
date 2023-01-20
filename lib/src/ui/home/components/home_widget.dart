@@ -8,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
-import 'package:bossa/src/audio/playlist_ui_controller.dart';
+import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
@@ -19,203 +19,18 @@ import 'package:bossa/src/ui/song/song_add_page.dart';
 import 'package:bossa/src/url/url_add_page.dart';
 import 'package:text_scroll/text_scroll.dart';
 
-class ContentContainer extends StatefulWidget {
-  final DetailContainer detailContainer;
-  final String icon;
-  final void Function() onTap;
-
-  const ContentContainer({
-    super.key,
-    required this.icon,
-    required this.detailContainer,
-    required this.onTap,
-  });
+class AddWidget extends StatefulWidget {
+  const AddWidget({super.key});
 
   @override
-  State<ContentContainer> createState() => _ContentContainerState();
+  State<AddWidget> createState() => _AddWidgetState();
 }
 
-class _ContentContainerState extends State<ContentContainer> {
+class _AddWidgetState extends State<AddWidget> {
+  double iconSize = 25;
   static double x = 30;
-  double iconSize = 25;
-  double imagesSize = 100;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorController = Modular.get<ColorController>();
-    final backgroundColor = colorController.currentScheme.backgroundColor;
-
-    return Padding(
-      padding: EdgeInsets.only(right: x / 3),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        onLongPress: () {
-          Asuka.showModalBottomSheet(
-            backgroundColor: backgroundColor,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15),
-              ),
-            ),
-            builder: (context) {
-              return widget.detailContainer;
-            },
-          );
-        },
-        child: Image(
-          image: ImageParser.getImageProviderFromString(
-            widget.icon,
-          ),
-          fit: BoxFit.cover,
-          alignment: FractionalOffset.center,
-          width: imagesSize,
-          height: imagesSize,
-        ),
-      ),
-    );
-  }
-}
-
-class DetailContainer extends StatefulWidget {
-  final String icon;
-  final String title;
-  final void Function() remove;
-  final void Function(BuildContext ctx) edit;
-  const DetailContainer({
-    Key? key,
-    required this.icon,
-    required this.title,
-    required this.remove,
-    required this.edit,
-  }) : super(key: key);
-
-  @override
-  State<DetailContainer> createState() => _DetailContainerState();
-}
-
-class _DetailContainerState extends State<DetailContainer> {
-  static double x = 30;
-  double iconSize = 25;
-  double imagesSize = 100;
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final titleStyle = TextStyles().headline.copyWith(color: contrastColor);
-    final buttonStyle =
-        TextStyles().boldHeadline2.copyWith(color: contrastColor);
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: x),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Image(
-            image: ImageParser.getImageProviderFromString(
-              widget.icon,
-            ),
-            fit: BoxFit.cover,
-            alignment: FractionalOffset.center,
-            width: imagesSize,
-            height: imagesSize,
-          ),
-          SizedBox(
-            width: size.width,
-            child: TextScroll(
-              widget.title,
-              mode: TextScrollMode.endless,
-              velocity: const Velocity(pixelsPerSecond: Offset(100, 0)),
-              delayBefore: const Duration(seconds: 10),
-              pauseBetween: const Duration(seconds: 5),
-              style: titleStyle,
-              textAlign: TextAlign.center,
-              selectable: true,
-            ),
-          ),
-          SizedBox(
-            width: size.width,
-            height: 30,
-            child: GestureDetector(
-              onTap: widget.remove,
-              child: Row(children: [
-                FaIcon(
-                  FontAwesomeIcons.trash,
-                  size: iconSize,
-                  color: contrastColor,
-                ),
-                SizedBox(
-                  width: iconSize / 2,
-                ),
-                Text('Remover ', style: buttonStyle),
-              ]),
-            ),
-          ),
-          SizedBox(
-            width: size.width,
-            height: 30,
-            child: GestureDetector(
-              onTap: () {
-                widget.edit(context);
-              },
-              child: Row(children: [
-                FaIcon(
-                  FontAwesomeIcons.penToSquare,
-                  size: iconSize,
-                  color: contrastColor,
-                ),
-                SizedBox(
-                  width: iconSize / 2,
-                ),
-                Text('Editar ', style: buttonStyle),
-              ]),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class HomeWidget extends StatefulWidget {
-  const HomeWidget({super.key});
-
-  @override
-  State<HomeWidget> createState() => _HomeWidgetState();
-}
-
-class _HomeWidgetState extends State<HomeWidget> {
-  static double x = 30.0;
-  double iconSize = 25;
-  double imagesSize = 100;
-
-  List<SongModel> songs = [];
-  List<PlaylistModel> playlists = [];
-
   final popupStyle = GoogleFonts.poppins(
       color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal);
-
-  @override
-  void initState() {
-    super.initState();
-
-    loadSongs();
-    loadPlaylists();
-  }
-
-  void loadSongs() async {
-    final songDataManager = Modular.get<SongDataManager>();
-    songs = await songDataManager.loadAllSongs();
-    setState(() {});
-  }
-
-  void loadPlaylists() async {
-    final playlistDataManager = Modular.get<PlaylistDataManager>();
-    playlists = await playlistDataManager.loadPlaylists();
-    setState(() {});
-  }
 
   Widget addWidget({
     required String addText,
@@ -294,6 +109,258 @@ class _HomeWidgetState extends State<HomeWidget> {
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
     final backgroundColor = colorController.currentScheme.backgroundColor;
+    final addSongWidget = addWidget(
+      onFilePress: (BuildContext ctx) {
+        Navigator.of(ctx).pop();
+        Navigator.of(ctx).pop();
+        Modular.to.push(
+          MaterialPageRoute(
+            builder: (context) => const SongAddPage(),
+          ),
+        );
+      },
+      addText: 'Adicionar música',
+      fromYoutubeText: 'Adicionar música do Youtube',
+      fromFileText: 'Adicionar música de um arquivo',
+      onYoutubePress: (ctx) {
+        Navigator.of(ctx).pop();
+        Navigator.of(ctx).pop();
+        Modular.to.push(
+          MaterialPageRoute(
+            builder: (context) => const YoutubeUrlAddPage(
+              isSong: true,
+            ),
+          ),
+        );
+      },
+    );
+
+    final addPlaylistWidget = addWidget(
+      onFilePress: (ctx) {
+        Navigator.of(ctx).pop();
+        Navigator.of(ctx).pop();
+        Modular.to.push(
+          MaterialPageRoute(
+            builder: (context) => const PlaylistAddPage(),
+          ),
+        );
+      },
+      addText: 'Adicionar playlist',
+      fromYoutubeText: 'Adicionar playlist do Youtube',
+      fromFileText: 'Criar uma nova playlist',
+      onYoutubePress: (ctx) {
+        Navigator.of(ctx).pop();
+        Navigator.of(ctx).pop();
+        Modular.to.push(
+          MaterialPageRoute(
+            builder: (context) => const YoutubeUrlAddPage(
+              isSong: false,
+            ),
+          ),
+        );
+      },
+    );
+    return SizedBox(
+      width: 3 * iconSize / 2,
+      height: 3 * iconSize / 2,
+      child: ElevatedButton(
+        style: buttonStyle,
+        onPressed: () {
+          Asuka.showModalBottomSheet(
+            backgroundColor: backgroundColor,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
+              ),
+            ),
+            builder: (context) {
+              return SizedBox(
+                width: size.width,
+                height: 100,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: x),
+                  child: Column(
+                    children: [
+                      addSongWidget,
+                      addPlaylistWidget,
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        child: FaIcon(
+          FontAwesomeIcons.plus,
+          color: contrastColor,
+          size: iconSize,
+        ),
+      ),
+    );
+  }
+}
+
+class ContentContainer extends StatefulWidget {
+  final DetailContainer detailContainer;
+  final String icon;
+  final void Function() onTap;
+
+  const ContentContainer({
+    super.key,
+    required this.icon,
+    required this.detailContainer,
+    required this.onTap,
+  });
+
+  @override
+  State<ContentContainer> createState() => _ContentContainerState();
+}
+
+class _ContentContainerState extends State<ContentContainer> {
+  static double x = 30;
+  double iconSize = 25;
+  double imagesSize = 100;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorController = Modular.get<ColorController>();
+    final backgroundColor = colorController.currentScheme.backgroundColor;
+
+    return Padding(
+      padding: EdgeInsets.only(right: x / 3),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        onLongPress: () {
+          Asuka.showModalBottomSheet(
+            backgroundColor: backgroundColor,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
+              ),
+            ),
+            builder: (context) {
+              return widget.detailContainer;
+            },
+          );
+        },
+        child: Image(
+          image: ImageParser.getImageProviderFromString(
+            widget.icon,
+          ),
+          fit: BoxFit.cover,
+          alignment: FractionalOffset.center,
+          width: imagesSize,
+          height: imagesSize,
+        ),
+      ),
+    );
+  }
+}
+
+class DetailContainer extends StatefulWidget {
+  final String icon;
+  final String title;
+  final List<Widget> actions;
+  const DetailContainer({
+    Key? key,
+    required this.icon,
+    required this.title,
+    required this.actions,
+  }) : super(key: key);
+
+  @override
+  State<DetailContainer> createState() => _DetailContainerState();
+}
+
+class _DetailContainerState extends State<DetailContainer> {
+  static double x = 30;
+  double iconSize = 25;
+  double imagesSize = 100;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final colorController = Modular.get<ColorController>();
+    final contrastColor = colorController.currentScheme.contrastColor;
+    final titleStyle = TextStyles().headline.copyWith(color: contrastColor);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: x),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Image(
+            image: ImageParser.getImageProviderFromString(
+              widget.icon,
+            ),
+            fit: BoxFit.cover,
+            alignment: FractionalOffset.center,
+            width: imagesSize,
+            height: imagesSize,
+          ),
+          SizedBox(
+            width: size.width,
+            child: TextScroll(
+              widget.title,
+              mode: TextScrollMode.endless,
+              velocity: const Velocity(pixelsPerSecond: Offset(100, 0)),
+              delayBefore: const Duration(seconds: 10),
+              pauseBetween: const Duration(seconds: 5),
+              style: titleStyle,
+              textAlign: TextAlign.center,
+              selectable: true,
+            ),
+          ),
+          for (Widget action in widget.actions) action
+        ],
+      ),
+    );
+  }
+}
+
+class HomeWidget extends StatefulWidget {
+  const HomeWidget({super.key});
+
+  @override
+  State<HomeWidget> createState() => _HomeWidgetState();
+}
+
+class _HomeWidgetState extends State<HomeWidget> {
+  static double x = 30.0;
+  double iconSize = 25;
+  double imagesSize = 100;
+
+  List<SongModel> songs = [];
+  List<PlaylistModel> playlists = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadSongs();
+    loadPlaylists();
+  }
+
+  void loadSongs() async {
+    final songDataManager = Modular.get<SongDataManager>();
+    songs = await songDataManager.loadAllSongs();
+    setState(() {});
+  }
+
+  void loadPlaylists() async {
+    final playlistDataManager = Modular.get<PlaylistDataManager>();
+    playlists = await playlistDataManager.loadPlaylists();
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    final colorController = Modular.get<ColorController>();
+    final contrastColor = colorController.currentScheme.contrastColor;
 
     final songDataManager = Modular.get<SongDataManager>();
     final playlistDataManager = Modular.get<PlaylistDataManager>();
@@ -305,6 +372,9 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);
+
+    final buttonStyle =
+        TextStyles().boldHeadline2.copyWith(color: contrastColor);
 
     List<Widget> songContainers = [];
     for (SongModel song in songs) {
@@ -320,20 +390,56 @@ class _HomeWidgetState extends State<HomeWidget> {
         ContentContainer(
           detailContainer: DetailContainer(
             icon: song.icon,
-            remove: () async {
-              songDataManager.removeSong(song);
-              loadSongs();
-            },
-            edit: (BuildContext ctx) {
-              Navigator.of(ctx).pop();
-              Modular.to.push(
-                MaterialPageRoute(
-                  builder: (context) => SongAddPage(
-                    songToBeEdited: song,
-                  ),
+            actions: [
+              SizedBox(
+                width: size.width,
+                height: 30,
+                child: GestureDetector(
+                  onTap: () {
+                    songDataManager.removeSong(song);
+                    loadSongs();
+                  },
+                  child: Row(children: [
+                    FaIcon(
+                      FontAwesomeIcons.trash,
+                      size: iconSize,
+                      color: contrastColor,
+                    ),
+                    SizedBox(
+                      width: iconSize / 2,
+                    ),
+                    Text('Remover ', style: buttonStyle),
+                  ]),
                 ),
-              );
-            },
+              ),
+              SizedBox(
+                width: size.width,
+                height: 30,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Modular.to.push(
+                      MaterialPageRoute(
+                        builder: (context) => SongAddPage(
+                          songToBeEdited: song,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Row(children: [
+                    FaIcon(
+                      FontAwesomeIcons.penToSquare,
+                      size: iconSize,
+                      color: contrastColor,
+                    ),
+                    SizedBox(
+                      width: iconSize / 2,
+                    ),
+                    Text('Editar ', style: buttonStyle),
+                  ]),
+                ),
+              ),
+            ],
             title: song.title,
           ),
           onTap: () {
@@ -342,7 +448,6 @@ class _HomeWidgetState extends State<HomeWidget> {
             playlistUIController.setPlaylist(playlist);
             Modular.to.pushReplacementNamed(
               '/player',
-              arguments: playlist,
             );
           },
           icon: song.icon,
@@ -357,21 +462,56 @@ class _HomeWidgetState extends State<HomeWidget> {
           detailContainer: DetailContainer(
             icon: playlist.icon,
             title: playlist.title,
-            remove: () async {
-              playlistDataManager.deletePlaylist(playlist);
-              loadPlaylists();
-            },
-            edit: (ctx) {
-              Navigator.of(ctx).pop();
-              Modular.to.push(
-                MaterialPageRoute(
-                  builder: (context) => PlaylistAddPage(
-                    playlistToBeEdited: playlist,
-                    callback: loadPlaylists,
-                  ),
+            actions: [
+              SizedBox(
+                width: size.width,
+                height: 30,
+                child: GestureDetector(
+                  onTap: () {
+                    playlistDataManager.deletePlaylist(playlist);
+                    loadPlaylists();
+                  },
+                  child: Row(children: [
+                    FaIcon(
+                      FontAwesomeIcons.trash,
+                      size: iconSize,
+                      color: contrastColor,
+                    ),
+                    SizedBox(
+                      width: iconSize / 2,
+                    ),
+                    Text('Remover ', style: buttonStyle),
+                  ]),
                 ),
-              );
-            },
+              ),
+              SizedBox(
+                width: size.width,
+                height: 30,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Modular.to.push(
+                      MaterialPageRoute(
+                        builder: (context) => PlaylistAddPage(
+                          playlistToBeEdited: playlist,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Row(children: [
+                    FaIcon(
+                      FontAwesomeIcons.penToSquare,
+                      size: iconSize,
+                      color: contrastColor,
+                    ),
+                    SizedBox(
+                      width: iconSize / 2,
+                    ),
+                    Text('Editar ', style: buttonStyle),
+                  ]),
+                ),
+              ),
+            ],
           ),
           onTap: () {
             Modular.to.popUntil(ModalRoute.withName('/'));
@@ -386,56 +526,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
       );
     }
-
-    final addSongWidget = addWidget(
-      onFilePress: (BuildContext ctx) {
-        Navigator.of(ctx).pop();
-        Modular.to.push(
-          MaterialPageRoute(
-            builder: (context) => const SongAddPage(),
-          ),
-        );
-      },
-      addText: 'Adicionar música',
-      fromYoutubeText: 'Adicionar música do Youtube',
-      fromFileText: 'Adicionar música de um arquivo',
-      onYoutubePress: (ctx) {
-        Navigator.of(ctx).pop();
-        Modular.to.push(
-          MaterialPageRoute(
-            builder: (context) => const YoutubeUrlAddPage(
-              isSong: true,
-            ),
-          ),
-        );
-      },
-    );
-
-    final addPlaylistWidget = addWidget(
-      onFilePress: (ctx) {
-        Navigator.of(ctx).pop();
-        Modular.to.push(
-          MaterialPageRoute(
-            builder: (context) => PlaylistAddPage(
-              callback: loadPlaylists,
-            ),
-          ),
-        );
-      },
-      addText: 'Adicionar playlist',
-      fromYoutubeText: 'Adicionar playlist do Youtube',
-      fromFileText: 'Criar uma nova playlist',
-      onYoutubePress: (ctx) {
-        Navigator.of(ctx).pop();
-        Modular.to.push(
-          MaterialPageRoute(
-            builder: (context) => const YoutubeUrlAddPage(
-              isSong: false,
-            ),
-          ),
-        );
-      },
-    );
 
     return SafeArea(
       child: SizedBox(
@@ -457,48 +547,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             //
             // Plus Button
             //
-            Positioned(
-              top: x / 2,
-              right: x / 2,
-              child: SizedBox(
-                width: 3 * iconSize / 2,
-                height: 3 * iconSize / 2,
-                child: ElevatedButton(
-                  style: buttonStyle,
-                  onPressed: () {
-                    Asuka.showModalBottomSheet(
-                      backgroundColor: backgroundColor,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
-                        ),
-                      ),
-                      builder: (context) {
-                        return SizedBox(
-                          width: size.width,
-                          height: 100,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: x),
-                            child: Column(
-                              children: [
-                                addSongWidget,
-                                addPlaylistWidget,
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: FaIcon(
-                    FontAwesomeIcons.plus,
-                    color: contrastColor,
-                    size: iconSize,
-                  ),
-                ),
-              ),
-            ),
+            Positioned(top: x / 2, right: x / 2, child: const AddWidget()),
             //
             // Home List
             //

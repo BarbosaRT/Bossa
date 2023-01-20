@@ -11,15 +11,13 @@ class PlaylistUIController extends ChangeNotifier {
   bool get hasPlayedOnce => _hasPlayedOnce;
 
   void setHasPlayedOnce(bool value) {
-    if (_hasPlayedOnce) {
-      return;
-    }
     _hasPlayedOnce = value;
     notifyListeners();
   }
 
   void setPlaylist(PlaylistModel newPlaylist) {
     currentPlaylist = newPlaylist;
+    setHasPlayedOnce(true);
     notifyListeners();
   }
 }

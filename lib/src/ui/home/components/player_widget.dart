@@ -1,6 +1,6 @@
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
-import 'package:bossa/src/audio/playlist_ui_controller.dart';
+import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
@@ -73,6 +73,11 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                   return GestureDetector(
                     onTap: () {
                       Modular.to.pop();
+                    },
+                    onLongPress: () {
+                      setState(() {
+                        playlistUIController.setHasPlayedOnce(false);
+                      });
                     },
                     child: Container(
                       height: 60,

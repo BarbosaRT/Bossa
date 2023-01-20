@@ -1,7 +1,6 @@
 import 'package:asuka/asuka.dart';
-import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
-import 'package:bossa/src/audio/playlist_ui_controller.dart';
+import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
@@ -48,9 +47,7 @@ class AppModule extends Module {
         ),
         ChildRoute(
           '/player',
-          child: (context, args) => PlayerPage(
-            playlist: args.data as PlaylistModel,
-          ),
+          child: (context, args) => const PlayerPage(),
         ),
       ];
 }
@@ -77,7 +74,7 @@ class AppWidget extends StatelessWidget {
       800: accentColor.withOpacity(.9),
       900: accentColor.withOpacity(1),
     };
-    MaterialColor colorCustom = MaterialColor(0xFF002277, color);
+    MaterialColor colorCustom = MaterialColor(0xFF0000ff, color);
 
     return MaterialApp.router(
       builder: Asuka.builder,
