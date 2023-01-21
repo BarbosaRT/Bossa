@@ -28,7 +28,8 @@ class DataManager {
       icon text,
       url text,
       path text,
-      author text
+      author text,
+      timesPlayed integer NOT NULL DEFAULT 0
     )
     """);
     await database.execute("""CREATE TABLE IF NOT EXISTS playlists(

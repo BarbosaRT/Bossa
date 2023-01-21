@@ -5,7 +5,7 @@ import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/url/download_service.dart';
 import 'package:http/http.dart' as http;
 
-class HttpRequest {
+class HttpRequester {
   http.Client client = http.Client();
 
   Future<dynamic> retriveFromUrl(String link) async {

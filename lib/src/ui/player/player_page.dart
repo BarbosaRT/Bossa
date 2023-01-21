@@ -1,6 +1,7 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
@@ -116,6 +117,7 @@ class _PlayerPageState extends State<PlayerPage> {
     final backgroundAccent = colorController.currentScheme.backgroundAccent;
 
     final playlistManager = Modular.get<JustPlaylistManager>();
+    final songDataManager = Modular.get<SongDataManager>();
 
     final headerStyle = GoogleFonts.poppins(
         color: contrastColor, fontSize: 14, fontWeight: FontWeight.normal);
@@ -123,8 +125,6 @@ class _PlayerPageState extends State<PlayerPage> {
         color: contrastColor, fontSize: 15, fontWeight: FontWeight.bold);
     final authorStyle = GoogleFonts.poppins(
         color: contrastAccent, fontSize: 10, fontWeight: FontWeight.normal);
-
-    String title = '''Tocando Agora: \n ${playlist.title}''';
 
     final buttonStyle = ButtonStyle(
       padding: MaterialStateProperty.all(EdgeInsets.zero),
@@ -197,7 +197,7 @@ class _PlayerPageState extends State<PlayerPage> {
                       Expanded(
                         child: Center(
                           child: Text(
-                            title,
+                            'Tocando Agora: \n ${playlist.title}',
                             style: headerStyle,
                             textAlign: TextAlign.center,
                           ),
@@ -220,9 +220,15 @@ class _PlayerPageState extends State<PlayerPage> {
                         SequenceState? state = snapshot.data;
                         if (state != null) {
                           currentSong = playlist.songs[state.currentIndex];
+
                           if (state.currentIndex != currentIndex) {
                             currentIndex = state.currentIndex;
                             updatePalette(currentSong.icon);
+
+                            if (currentSong.id != -1) {
+                              currentSong.timesPlayed += 1;
+                              songDataManager.editSong(currentSong);
+                            }
                           }
                         }
                         return Column(
@@ -230,15 +236,22 @@ class _PlayerPageState extends State<PlayerPage> {
                           children: [
                             Padding(
                               padding: EdgeInsets.only(left: sliderSpacing),
-                              child: Image(
-                                image: ImageParser.getImageProviderFromString(
-                                  currentSong.icon,
-                                ),
-                                fit: BoxFit.cover,
-                                alignment: FractionalOffset.center,
+                              child: SizedBox(
                                 width: imageWidth,
                                 height: imageWidth - x,
+                                child: Image(
+                                  image: ImageParser.getImageProviderFromString(
+                                    currentSong.icon,
+                                  ),
+                                  fit: BoxFit.cover,
+                                  alignment: FractionalOffset.center,
+                                  width: imageWidth,
+                                  height: imageWidth - x,
+                                ),
                               ),
+                            ),
+                            const Spacer(
+                              flex: 1,
                             ),
                             Column(
                               children: [
@@ -278,7 +291,7 @@ class _PlayerPageState extends State<PlayerPage> {
                                     double max = stream.data == null
                                         ? 2
                                         : stream.data!.inSeconds.toDouble();
-                                    max = max > 0 ? max : 1;
+
                                     return StreamBuilder<Duration>(
                                       stream: audioManager.positionStream,
                                       builder: (context, snapshot) {
@@ -286,7 +299,7 @@ class _PlayerPageState extends State<PlayerPage> {
                                             ? 1
                                             : snapshot.data!.inSeconds
                                                 .toDouble();
-
+                                        max = max > value ? max : value + 1;
                                         String maxString = durationFormatter(
                                           Duration(
                                             seconds: max.toInt(),
@@ -320,16 +333,14 @@ class _PlayerPageState extends State<PlayerPage> {
                                                   length: maxString.length,
                                                 ),
                                                 divisions: max.toInt(),
-                                                onChanged: (value) {
+                                                onChanged: (value) async {
+                                                  await playlistManager.seek(
+                                                      Duration(
+                                                        seconds: value.toInt(),
+                                                      ),
+                                                      currentIndex);
                                                   setState(
-                                                    () {
-                                                      audioManager.seek(
-                                                        Duration(
-                                                          seconds:
-                                                              value.toInt(),
-                                                        ),
-                                                      );
-                                                    },
+                                                    () {},
                                                   );
                                                 },
                                               ),
@@ -552,7 +563,7 @@ class _PlayerPageState extends State<PlayerPage> {
                               ],
                             ),
                             SizedBox(
-                              height: x / 3,
+                              height: x / 2,
                             )
                           ],
                         );

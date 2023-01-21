@@ -81,14 +81,18 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Image(
-                image: ImageParser.getImageProviderFromString(
-                  widget.icon,
-                ),
-                fit: BoxFit.cover,
-                alignment: FractionalOffset.center,
+              SizedBox(
                 width: 60,
                 height: 60,
+                child: Image(
+                  image: ImageParser.getImageProviderFromString(
+                    widget.icon,
+                  ),
+                  fit: BoxFit.cover,
+                  alignment: FractionalOffset.center,
+                  width: 60,
+                  height: 60,
+                ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

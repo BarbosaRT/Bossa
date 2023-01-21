@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:asuka/asuka.dart';
+import 'package:bossa/src/ui/playlist/playlist_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -333,6 +334,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   double imagesSize = 100;
 
   List<SongModel> songs = [];
+  List<SongModel> songsSortedByTimesPlayed = [];
   List<PlaylistModel> playlists = [];
 
   @override
@@ -346,6 +348,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   void loadSongs() async {
     final songDataManager = Modular.get<SongDataManager>();
     songs = await songDataManager.loadAllSongs();
+    songsSortedByTimesPlayed = await songDataManager.loadAllSongs(
+      filter: SongDataManagerFilter.timesPlayedDesc,
+    );
     setState(() {});
   }
 
@@ -355,6 +360,84 @@ class _HomeWidgetState extends State<HomeWidget> {
     setState(() {});
   }
 
+  Widget songContainerBuilder(
+      SongModel song, PlaylistModel playlistToBePlayed) {
+    final size = MediaQuery.of(context).size;
+    final songDataManager = Modular.get<SongDataManager>();
+    final playlistManager = Modular.get<JustPlaylistManager>();
+    final playlistUIController = Modular.get<PlaylistUIController>();
+    final colorController = Modular.get<ColorController>();
+    final contrastColor = colorController.currentScheme.contrastColor;
+    final audioManager = playlistManager.player;
+    final buttonStyle =
+        TextStyles().boldHeadline2.copyWith(color: contrastColor);
+    return ContentContainer(
+      detailContainer: DetailContainer(
+        icon: song.icon,
+        actions: [
+          SizedBox(
+            width: size.width,
+            height: 30,
+            child: GestureDetector(
+              onTap: () {
+                songDataManager.removeSong(song);
+                loadSongs();
+              },
+              child: Row(children: [
+                FaIcon(
+                  FontAwesomeIcons.trash,
+                  size: iconSize,
+                  color: contrastColor,
+                ),
+                SizedBox(
+                  width: iconSize / 2,
+                ),
+                Text('Remover ', style: buttonStyle),
+              ]),
+            ),
+          ),
+          SizedBox(
+            width: size.width,
+            height: 30,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+                Modular.to.push(
+                  MaterialPageRoute(
+                    builder: (context) => SongAddPage(
+                      songToBeEdited: song,
+                    ),
+                  ),
+                );
+              },
+              child: Row(children: [
+                FaIcon(
+                  FontAwesomeIcons.penToSquare,
+                  size: iconSize,
+                  color: contrastColor,
+                ),
+                SizedBox(
+                  width: iconSize / 2,
+                ),
+                Text('Editar ', style: buttonStyle),
+              ]),
+            ),
+          ),
+        ],
+        title: song.title,
+      ),
+      onTap: () {
+        Modular.to.popUntil(ModalRoute.withName('/'));
+        audioManager.pause();
+        playlistUIController.setPlaylist(playlistToBePlayed);
+        Modular.to.pushReplacementNamed(
+          '/player',
+        );
+      },
+      icon: song.icon,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -362,11 +445,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
 
-    final songDataManager = Modular.get<SongDataManager>();
     final playlistDataManager = Modular.get<PlaylistDataManager>();
-    final playlistManager = Modular.get<JustPlaylistManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
-    final audioManager = playlistManager.player;
 
     final textStyle = TextStyles().headline.copyWith(color: contrastColor);
 
@@ -382,74 +462,11 @@ class _HomeWidgetState extends State<HomeWidget> {
       songsForPlaylist.remove(song);
       songsForPlaylist.insert(0, song);
       PlaylistModel playlist = PlaylistModel(
-          id: 0, title: 'Todas as Músicas', icon: song.icon, songs: [song]);
-      songContainers.add(
-        ContentContainer(
-          detailContainer: DetailContainer(
-            icon: song.icon,
-            actions: [
-              SizedBox(
-                width: size.width,
-                height: 30,
-                child: GestureDetector(
-                  onTap: () {
-                    songDataManager.removeSong(song);
-                    loadSongs();
-                  },
-                  child: Row(children: [
-                    FaIcon(
-                      FontAwesomeIcons.trash,
-                      size: iconSize,
-                      color: contrastColor,
-                    ),
-                    SizedBox(
-                      width: iconSize / 2,
-                    ),
-                    Text('Remover ', style: buttonStyle),
-                  ]),
-                ),
-              ),
-              SizedBox(
-                width: size.width,
-                height: 30,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    Modular.to.push(
-                      MaterialPageRoute(
-                        builder: (context) => SongAddPage(
-                          songToBeEdited: song,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Row(children: [
-                    FaIcon(
-                      FontAwesomeIcons.penToSquare,
-                      size: iconSize,
-                      color: contrastColor,
-                    ),
-                    SizedBox(
-                      width: iconSize / 2,
-                    ),
-                    Text('Editar ', style: buttonStyle),
-                  ]),
-                ),
-              ),
-            ],
-            title: song.title,
-          ),
-          onTap: () {
-            Modular.to.popUntil(ModalRoute.withName('/'));
-            audioManager.pause();
-            playlistUIController.setPlaylist(playlist);
-            Modular.to.pushReplacementNamed(
-              '/player',
-            );
-          },
+          id: 0,
+          title: 'Todas as Músicas',
           icon: song.icon,
-        ),
-      );
+          songs: songsForPlaylist);
+      songContainers.add(songContainerBuilder(song, playlist));
     }
 
     List<Widget> playlistContainers = [];
@@ -511,17 +528,29 @@ class _HomeWidgetState extends State<HomeWidget> {
             ],
           ),
           onTap: () {
-            Modular.to.popUntil(ModalRoute.withName('/'));
-            audioManager.pause();
             playlistUIController.setPlaylist(playlist);
-            Modular.to.pushReplacementNamed(
-              '/player',
-              arguments: playlist,
+            Modular.to.push(
+              MaterialPageRoute(
+                builder: (context) => const PlaylistPage(),
+              ),
             );
           },
           icon: playlist.icon,
         ),
       );
+    }
+
+    List<Widget> songsSortedWidgets = [];
+    for (SongModel song in songsSortedByTimesPlayed) {
+      List<SongModel> songsForPlaylist = songsSortedByTimesPlayed.toList();
+      songsForPlaylist.remove(song);
+      songsForPlaylist.insert(0, song);
+      PlaylistModel playlist = PlaylistModel(
+          id: 0,
+          title: 'Todas as Músicas',
+          icon: song.icon,
+          songs: songsForPlaylist);
+      songsSortedWidgets.add(songContainerBuilder(song, playlist));
     }
 
     return SafeArea(
@@ -583,6 +612,26 @@ class _HomeWidgetState extends State<HomeWidget> {
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: playlistContainers,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 160,
+                      width: size.width,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Músicas mais ouvidas',
+                            style: textStyle,
+                            maxLines: 2,
+                          ),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: songsSortedWidgets,
                             ),
                           ),
                         ],

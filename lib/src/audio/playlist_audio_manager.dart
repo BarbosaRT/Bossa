@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
@@ -29,6 +28,9 @@ class JustPlaylistManager implements PlaylistAudioManager {
     shuffleOrder: DefaultShuffleOrder(),
     children: [],
   );
+
+  List<bool> isYoutubeSongList = [];
+
   @override
   Future<void> add(String path) async {
     AudioSource audioSource = await getAudioSourceFromString(path);
@@ -48,6 +50,9 @@ class JustPlaylistManager implements PlaylistAudioManager {
 
   @override
   Future<void> seek(Duration position, int index) async {
+    // if (isYoutubeSongList[index]) {
+    //   return;
+    // }
     await player.seek(position, index: index);
   }
 
@@ -74,7 +79,9 @@ class JustPlaylistManager implements PlaylistAudioManager {
     for (SongModel song in playlist.songs) {
       String path = song.path.isEmpty ? song.url : song.path;
       AudioSource audioSource = await getAudioSourceFromString(path);
+
       songs.add(audioSource);
+      isYoutubeSongList.add(SongParser().isSongFromYoutube(path));
     }
 
     playlistAudioSource = ConcatenatingAudioSource(
@@ -93,57 +100,25 @@ class JustPlaylistManager implements PlaylistAudioManager {
   }
 
   Future<AudioSource> getAudioSourceFromString(String string) async {
-    AudioSource? youtubeAudioSource =
-        await tryGetAudioSourceFromYoutube(string);
-    if (youtubeAudioSource != null) {
-      return youtubeAudioSource;
+    if (SongParser().isSongFromYoutube(string)) {
+      var youtube = YoutubeExplode();
+      String parsedUrl = SongParser().parseYoutubeSongUrl(string);
+      var videoManifest =
+          await youtube.videos.streamsClient.getManifest(parsedUrl);
+
+      var streamInf = videoManifest.audioOnly.sortByBitrate();
+      var streamInfo = streamInf[streamInf.length - 1];
+      // For Highest Bitrate
+      // var streamInfo = videoManifest.audioOnly.withHighestBitrate();
+
+      return LockCachingAudioSource(
+        streamInfo.url,
+      );
     }
     if (UrlParser.validUrl(string)) {
       return AudioSource.uri(Uri.parse(string));
     } else {
       return AudioSource.uri(Uri.file(string));
     }
-  }
-
-  Future<AudioSource?> tryGetAudioSourceFromYoutube(String string) async {
-    if (SongParser().isSongFromYoutube(string)) {
-      var youtube = YoutubeExplode();
-      var videoManifest = await youtube.videos.streamsClient
-          .getManifest(SongParser().parseYoutubeSongUrl(string));
-      var streamInf = videoManifest.audioOnly.sortByBitrate();
-      var streamInfo = streamInf[streamInf.length - 1];
-      // 535175 a minute of audio
-      int minuteInBytes = 535175;
-
-      List<int> bytes = [];
-      var stream = youtube.videos.streamsClient.get(streamInfo);
-      await for (var bytesList in stream) {
-        bytes += bytesList;
-        if (bytes.length >= minuteInBytes) {
-          break;
-        }
-      }
-      youtube.close();
-      return YoutubeStreamSource(bytes);
-    }
-    return null;
-  }
-}
-
-class YoutubeStreamSource extends StreamAudioSource {
-  final List<int> bytes;
-  YoutubeStreamSource(this.bytes);
-
-  @override
-  Future<StreamAudioResponse> request([int? start, int? end]) async {
-    start ??= 0;
-    end ??= bytes.length;
-    return StreamAudioResponse(
-      sourceLength: bytes.length,
-      contentLength: end - start,
-      offset: start,
-      stream: Stream.value(bytes.sublist(start, end)),
-      contentType: 'audio/raw',
-    );
   }
 }

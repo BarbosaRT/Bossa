@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/data_manager.dart';
 
+enum SongDataManagerFilter { idDesc, idAsc, timesPlayedDesc, timesPlayedAsc }
+
 class SongDataManager {
   final DataManager localDataManagerInstance;
   final DownloadService downloadService;
@@ -21,9 +23,9 @@ class SongDataManager {
 
   void addSong(SongModel song) async {
     var database = await localDataManagerInstance.database();
-    await database
-        .rawInsert('''INSERT INTO songs(title, icon, url, path, author) 
-        VALUES("${song.title}","${song.icon}","${song.url}","${song.path}", "${song.author}")''');
+    await database.rawInsert(
+        '''INSERT INTO songs(title, icon, url, path, author, timesPlayed) 
+        VALUES("${song.title}","${song.icon}","${song.url}","${song.path}", "${song.author}", "${song.timesPlayed}")''');
   }
 
   Future<void> deleteFile(String path) async {
@@ -49,22 +51,37 @@ class SongDataManager {
     var database = await localDataManagerInstance.database();
     database.rawUpdate('''UPDATE songs SET title = "${editedSong.title}", 
         icon = "${editedSong.icon}", url = "${editedSong.url}", 
-        path = "${editedSong.path}", author = "${editedSong.author}" 
+        path = "${editedSong.path}", author = "${editedSong.author}", timesPlayed = "${editedSong.timesPlayed}" 
         WHERE id = "${editedSong.id}"''');
   }
 
-  Future<List<SongModel>> loadAllSongs() async {
+  Future<List<SongModel>> loadAllSongs(
+      {SongDataManagerFilter filter = SongDataManagerFilter.idDesc}) async {
     var database = await localDataManagerInstance.database();
     List<Map<String, dynamic>> results =
-        await database.query('songs', orderBy: "id");
+        await database.query('songs', orderBy: _getOrderBy(filter));
 
     List<SongModel> output = [];
     for (Map<String, dynamic> result in results) {
       SongModel song = SongModel.fromMap(result);
-      song.path = '';
       output.add(song);
     }
     return output;
+  }
+
+  String _getOrderBy(SongDataManagerFilter filter) {
+    switch (filter) {
+      case SongDataManagerFilter.idAsc:
+        return 'id';
+      case SongDataManagerFilter.idDesc:
+        return 'id desc';
+      case SongDataManagerFilter.timesPlayedAsc:
+        return 'timesPlayed';
+      case SongDataManagerFilter.timesPlayedDesc:
+        return 'timesPlayed desc';
+      default:
+        return 'id desc';
+    }
   }
 
   Future<SongModel> loadLastAddedSong() async {

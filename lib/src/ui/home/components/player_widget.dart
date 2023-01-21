@@ -75,6 +75,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                       Modular.to.pop();
                     },
                     onLongPress: () {
+                      audioManager.stop();
                       setState(() {
                         playlistUIController.setHasPlayedOnce(false);
                       });
@@ -94,14 +95,19 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                           children: [
                             Row(
                               children: [
-                                Image(
-                                  image: ImageParser.getImageProviderFromString(
-                                    currentSong.icon,
-                                  ),
-                                  fit: BoxFit.cover,
-                                  alignment: FractionalOffset.center,
+                                SizedBox(
                                   width: 60,
                                   height: 60,
+                                  child: Image(
+                                    image:
+                                        ImageParser.getImageProviderFromString(
+                                      currentSong.icon,
+                                    ),
+                                    fit: BoxFit.cover,
+                                    alignment: FractionalOffset.center,
+                                    width: 60,
+                                    height: 60,
+                                  ),
                                 ),
                                 SizedBox(
                                   width: x / 4,

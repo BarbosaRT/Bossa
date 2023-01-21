@@ -5,6 +5,7 @@ class SongModel {
   String url = '';
   String path = '';
   String author = '';
+  int timesPlayed = 0;
 
   SongModel({
     required this.id,
@@ -13,6 +14,7 @@ class SongModel {
     required this.url,
     this.path = '',
     this.author = '',
+    this.timesPlayed = 0,
   });
 
   factory SongModel.fromMap(Map map) {
@@ -20,14 +22,20 @@ class SongModel {
     if (map['author'] != null) {
       author = map['author'] as String;
     }
+    int timesPlayed = 0;
+    if (map['timesPlayed'] != null) {
+      timesPlayed = map['timesPlayed'] as int;
+    }
 
     return SongModel(
-        id: map['id'] as int,
-        title: map['title'] as String,
-        icon: map['icon'] as String,
-        url: map['url'] as String,
-        path: map['path'] as String,
-        author: author);
+      id: map['id'] as int,
+      title: map['title'] as String,
+      icon: map['icon'] as String,
+      url: map['url'] as String,
+      path: map['path'] as String,
+      author: author,
+      timesPlayed: timesPlayed,
+    );
   }
 
   @override
@@ -60,6 +68,7 @@ class SongModel {
       'url': url,
       'path': path,
       'author': author,
+      'timesPlayed': timesPlayed,
     };
   }
 }
