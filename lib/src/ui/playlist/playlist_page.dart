@@ -1,12 +1,16 @@
+import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
+import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
+import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:bossa/src/ui/library/library_page.dart';
+import 'package:bossa/src/ui/playlist/playlist_snackbar.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:bossa/src/ui/song/song_add_page.dart';
@@ -27,14 +31,16 @@ class _PlaylistPageState extends State<PlaylistPage> {
   PaletteGenerator? palette;
   bool gradient = true;
   static double x = 30.0;
-  double iconSize = 30;
+  double iconSize = UIConsts.iconSize.toDouble();
 
   void updatePalette(String image) async {
     palette = await PaletteGenerator.fromImageProvider(
       ImageParser.getImageProviderFromString(image),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -57,9 +63,11 @@ class _PlaylistPageState extends State<PlaylistPage> {
     final settingsController = Modular.get<SettingsController>();
     settingsController.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          gradient = settingsController.gradientOnPlayer;
-        });
+        if (mounted) {
+          setState(() {
+            gradient = settingsController.gradientOnPlayer;
+          });
+        }
       });
     });
     playlistUIController.addListener(() async {
@@ -67,7 +75,9 @@ class _PlaylistPageState extends State<PlaylistPage> {
       playlistManager.setPlaylist(playlist);
       updatePalette(playlist.songs[0].icon);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       });
     });
   }
@@ -76,7 +86,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
-    //final accentColor = colorController.currentScheme.accentColor;
+    final accentColor = colorController.currentScheme.accentColor;
     final contrastColor = colorController.currentScheme.contrastColor;
     //final contrastAccent = colorController.currentScheme.contrastAccent;
     final backgroundColor = colorController.currentScheme.backgroundColor;
@@ -86,6 +96,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
     final songDataManager = Modular.get<SongDataManager>();
     final playlistManager = Modular.get<JustPlaylistManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
+    final homeController = Modular.get<HomeController>();
     final audioManager = playlistManager.player;
 
     final buttonStyle = ButtonStyle(
@@ -219,7 +230,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                         child: ElevatedButton(
                           style: buttonStyle,
                           onPressed: () {
-                            Modular.to.pushNamed('/');
+                            homeController.changeCurrentPage(Pages.home);
                           },
                           child: FaIcon(
                             FontAwesomeIcons.angleLeft,
@@ -256,7 +267,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                   ),
                   SizedBox(
                     width: size.width - x / 2,
-                    height: 50,
+                    height: 40,
                     child: TextScroll(
                       playlist.title,
                       mode: TextScrollMode.endless,
@@ -267,6 +278,87 @@ class _PlaylistPageState extends State<PlaylistPage> {
                       textAlign: TextAlign.center,
                       selectable: true,
                     ),
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      SizedBox(
+                        width: iconSize * 1.5,
+                        height: iconSize * 1.5,
+                        child: ElevatedButton(
+                          style: buttonStyle,
+                          onPressed: () {
+                            Asuka.showModalBottomSheet(
+                              backgroundColor: backgroundColor,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(15),
+                                  topRight: Radius.circular(15),
+                                ),
+                              ),
+                              builder: (context) {
+                                return PlaylistSnackbar(playlist: playlist);
+                              },
+                            );
+                          },
+                          child: FaIcon(FontAwesomeIcons.bars,
+                              color: contrastColor),
+                        ),
+                      ),
+                      const Spacer(
+                        flex: 1,
+                      ),
+                      SizedBox(
+                        width: iconSize * 1.5,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Modular.to.popUntil(ModalRoute.withName('/'));
+                            audioManager.pause();
+                            playlistUIController.setPlaylist(playlist);
+                            playlistManager.setShuffleModeEnabled(true);
+                            Modular.to.pushReplacementNamed(
+                              '/player',
+                            );
+                            audioManager.play();
+                          },
+                          style: buttonStyle,
+                          child: FaIcon(
+                            FontAwesomeIcons.shuffle,
+                            size: iconSize,
+                            color: contrastColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      SizedBox(
+                        width: 3 * iconSize / 2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Modular.to.popUntil(ModalRoute.withName('/'));
+                            audioManager.pause();
+                            playlistUIController.setPlaylist(playlist);
+                            Modular.to.pushReplacementNamed(
+                              '/player',
+                            );
+                            audioManager.play();
+                          },
+                          style: buttonStyle,
+                          child: FaIcon(
+                            FontAwesomeIcons.solidCirclePlay,
+                            size: iconSize * 1.5,
+                            color: accentColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: x / 2,
                   ),
                   Expanded(
                     child: ListView(

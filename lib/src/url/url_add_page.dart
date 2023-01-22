@@ -8,6 +8,7 @@ import 'package:bossa/src/data/youtube_parser.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class YoutubeUrlAddPage extends StatefulWidget {
   final bool isSong;
@@ -22,22 +23,79 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
   static double x = 30;
 
   void addCommand(String value) async {
+    final colorController = Modular.get<ColorController>();
+    final snackbarColor = colorController.currentScheme.accentColor;
+    final contrastColor = colorController.currentScheme.contrastColor;
     final songDataManager = Modular.get<SongDataManager>();
     final playlistDataManager = Modular.get<PlaylistDataManager>();
     final parser = YoutubeParser(songDataManager: songDataManager);
 
+    final textStyle = TextStyles().boldHeadline2.copyWith(color: contrastColor);
+
     String content = widget.isSong ? 'música' : 'playlist';
 
-    AsukaSnackbar.warning('Carregando a $content').show();
+    Asuka.showSnackBar(
+      SnackBar(
+        backgroundColor: snackbarColor,
+        duration: const Duration(days: 1),
+        content: Text(
+          'Carregando a $content',
+          style: textStyle,
+        ),
+      ),
+    );
+
     if (widget.isSong) {
       SongModel song = await parser.convertYoutubeSong(value);
       songDataManager.addSong(song);
     } else {
-      PlaylistModel playlist = await parser.convertYoutubePlaylist(value);
-      playlistDataManager.addPlaylist(playlist);
-    }
+      var yt = YoutubeExplode();
 
-    AsukaSnackbar.success('A $content foi carregada com sucesso').show();
+      var playlist =
+          await yt.playlists.get(YoutubeParser().parseYoutubePlaylist(value));
+
+      final videoCount = playlist.videoCount == null ? 0 : playlist.videoCount!;
+      yt.close();
+
+      Stream<PlaylistModel> playlistStream =
+          parser.convertYoutubePlaylist(value).asBroadcastStream();
+
+      Asuka.hideCurrentSnackBar();
+      Asuka.showSnackBar(
+        SnackBar(
+          backgroundColor: snackbarColor,
+          duration: const Duration(days: 1),
+          content: StreamBuilder<PlaylistModel>(
+            stream: playlistStream,
+            builder: (context, snapshot) {
+              final downloaded =
+                  snapshot.data == null ? 0 : snapshot.data!.songs.length;
+              return Text(
+                'Progresso: ${(downloaded / videoCount) * 100}',
+                style: textStyle,
+              );
+            },
+          ),
+        ),
+      );
+
+      PlaylistModel? finalPlaylist;
+      await for (var playlist in playlistStream) {
+        finalPlaylist = playlist;
+      }
+
+      playlistDataManager.addPlaylist(finalPlaylist!);
+    }
+    Asuka.hideCurrentSnackBar();
+    Asuka.showSnackBar(
+      SnackBar(
+        backgroundColor: snackbarColor,
+        content: Text(
+          'A $content foi carregada com sucesso',
+          style: textStyle,
+        ),
+      ),
+    );
     Modular.to.pop();
   }
 

@@ -59,7 +59,7 @@ class TestPlaylistAddWidgetState extends State<TestPlaylistAddWidget> {
       PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
   final songDataManager = SongDataManager(
       localDataManagerInstance: dataManagerInstance,
-      downloadService: DioDownloadService(filePath: FilePathImpl()));
+      downloadService: HttpDownloadService(filePath: FilePathImpl()));
   List<SongModel> songs = [];
 
   bool playlistAdded = false;

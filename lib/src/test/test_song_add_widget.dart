@@ -21,7 +21,7 @@ class TestSongAddWidget extends StatefulWidget {
 class TestSongAddWidgetState extends State<TestSongAddWidget> {
   final songDataManager = SongDataManager(
     localDataManagerInstance: dataManagerInstance,
-    downloadService: DioDownloadService(
+    downloadService: HttpDownloadService(
       filePath: FilePathImpl(),
     ),
   );

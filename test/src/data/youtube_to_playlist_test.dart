@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bossa/models/playlist_model.dart';
+import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/youtube_parser.dart';
@@ -22,10 +23,14 @@ void main() {
       YoutubeParser converter = YoutubeParser(
           songDataManager: SongDataManager(
               localDataManagerInstance: testDataManagerInstance,
-              downloadService: DioDownloadService(filePath: FilePathImpl())));
-      PlaylistModel playlist = await converter.convertYoutubePlaylist(
+              downloadService: HttpDownloadService(filePath: FilePathImpl())));
+      Stream<PlaylistModel> playlistStream = converter.convertYoutubePlaylist(
           'https://www.youtube.com/playlist?list=PLXUeUBhvfMh8ivldygLkBMnXhSCH84nEu');
-      expect(playlist.songs.length, 13);
+      List<SongModel> songs = [];
+      await for (var playlist in playlistStream) {
+        songs = playlist.songs;
+      }
+      expect(songs.length, 13);
     }, timeout: const Timeout(Duration(minutes: 5)));
   });
 }

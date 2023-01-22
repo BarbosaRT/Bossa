@@ -5,6 +5,7 @@ import 'package:bossa/src/audio/audio_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
 import 'package:bossa/src/url/url_parser.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 abstract class PlaylistAudioManager {
@@ -50,9 +51,6 @@ class JustPlaylistManager implements PlaylistAudioManager {
 
   @override
   Future<void> seek(Duration position, int index) async {
-    // if (isYoutubeSongList[index]) {
-    //   return;
-    // }
     await player.seek(position, index: index);
   }
 
@@ -72,14 +70,26 @@ class JustPlaylistManager implements PlaylistAudioManager {
   }
 
   @override
+  Future<void> setShuffleModeEnabled(bool enabled) async {
+    await player.setShuffleModeEnabled(enabled);
+  }
+
+  @override
   Future<void> setPlaylist(PlaylistModel playlist,
       {int initialIndex = 0, initialPosition = Duration.zero}) async {
     List<AudioSource> songs = [];
 
     for (SongModel song in playlist.songs) {
       String path = song.path.isEmpty ? song.url : song.path;
-      AudioSource audioSource = await getAudioSourceFromString(path);
 
+      MediaItem tag = MediaItem(
+        id: song.id.toString(),
+        title: song.title,
+        album: playlist.title,
+        artUri: getUriFromString(song.icon),
+      );
+
+      AudioSource audioSource = await getAudioSourceFromString(path, tag: tag);
       songs.add(audioSource);
       isYoutubeSongList.add(SongParser().isSongFromYoutube(path));
     }
@@ -94,12 +104,16 @@ class JustPlaylistManager implements PlaylistAudioManager {
         initialIndex: initialIndex, initialPosition: initialPosition);
   }
 
-  @override
-  Future<void> setShuffleModeEnabled(bool enabled) async {
-    await player.setShuffleModeEnabled(enabled);
+  Uri getUriFromString(String string) {
+    if (UrlParser.validUrl(string)) {
+      return Uri.parse(string);
+    } else {
+      return Uri.file(string);
+    }
   }
 
-  Future<AudioSource> getAudioSourceFromString(String string) async {
+  Future<AudioSource> getAudioSourceFromString(String string,
+      {MediaItem? tag}) async {
     if (SongParser().isSongFromYoutube(string)) {
       var youtube = YoutubeExplode();
       String parsedUrl = SongParser().parseYoutubeSongUrl(string);
@@ -113,12 +127,9 @@ class JustPlaylistManager implements PlaylistAudioManager {
 
       return LockCachingAudioSource(
         streamInfo.url,
+        tag: tag,
       );
     }
-    if (UrlParser.validUrl(string)) {
-      return AudioSource.uri(Uri.parse(string));
-    } else {
-      return AudioSource.uri(Uri.file(string));
-    }
+    return AudioSource.uri(getUriFromString(string), tag: tag);
   }
 }

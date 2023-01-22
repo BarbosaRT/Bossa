@@ -2,6 +2,9 @@ import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/styles/ui_consts.dart';
+import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/ui/playlist/playlist_snackbar.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
@@ -9,7 +12,6 @@ import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
-import 'package:bossa/src/ui/playlist/playlist_add_page.dart';
 import 'package:bossa/src/ui/song/song_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -17,7 +19,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class LibraryContentContainer extends StatefulWidget {
-  final DetailContainer detailContainer;
+  final Widget detailContainer;
   final void Function() onTap;
   final String icon;
   final String title;
@@ -157,7 +159,7 @@ class LibraryPage extends StatefulWidget {
 
 class _LibraryPageState extends State<LibraryPage>
     with SingleTickerProviderStateMixin {
-  double iconSize = 25;
+  double iconSize = UIConsts.iconSize.toDouble();
   static double x = 30;
   late TabController _tabController;
   final ScrollController _scrollController = ScrollController();
@@ -196,10 +198,10 @@ class _LibraryPageState extends State<LibraryPage>
     final backgroundAccent = colorController.currentScheme.backgroundAccent;
 
     final songDataManager = Modular.get<SongDataManager>();
-    final playlistDataManager = Modular.get<PlaylistDataManager>();
     final playlistManager = Modular.get<JustPlaylistManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
     final audioManager = playlistManager.player;
+    final homeController = Modular.get<HomeController>();
 
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);
@@ -282,6 +284,7 @@ class _LibraryPageState extends State<LibraryPage>
               '/player',
               arguments: playlist,
             );
+            audioManager.play();
           },
           icon: song.icon,
         ),
@@ -293,68 +296,10 @@ class _LibraryPageState extends State<LibraryPage>
       playlistContainers.add(
         LibraryContentContainer(
           title: playlist.title,
-          detailContainer: DetailContainer(
-            icon: playlist.icon,
-            title: playlist.title,
-            actions: [
-              SizedBox(
-                width: size.width,
-                height: 30,
-                child: GestureDetector(
-                  onTap: () {
-                    playlistDataManager.deletePlaylist(playlist);
-                    loadPlaylists();
-                  },
-                  child: Row(children: [
-                    FaIcon(
-                      FontAwesomeIcons.trash,
-                      size: iconSize,
-                      color: contrastColor,
-                    ),
-                    SizedBox(
-                      width: iconSize / 2,
-                    ),
-                    Text('Remover ', style: buttonStyle),
-                  ]),
-                ),
-              ),
-              SizedBox(
-                width: size.width,
-                height: 30,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    Modular.to.push(
-                      MaterialPageRoute(
-                        builder: (context) => PlaylistAddPage(
-                          playlistToBeEdited: playlist,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Row(children: [
-                    FaIcon(
-                      FontAwesomeIcons.penToSquare,
-                      size: iconSize,
-                      color: contrastColor,
-                    ),
-                    SizedBox(
-                      width: iconSize / 2,
-                    ),
-                    Text('Editar ', style: buttonStyle),
-                  ]),
-                ),
-              ),
-            ],
-          ),
+          detailContainer: PlaylistSnackbar(playlist: playlist),
           onTap: () {
-            Modular.to.popUntil(ModalRoute.withName('/'));
-            audioManager.pause();
             playlistUIController.setPlaylist(playlist);
-            Modular.to.pushReplacementNamed(
-              '/player',
-              arguments: playlist,
-            );
+            homeController.changeCurrentPage(Pages.playlist);
           },
           icon: playlist.icon,
         ),

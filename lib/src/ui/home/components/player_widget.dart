@@ -1,5 +1,6 @@
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
@@ -19,7 +20,7 @@ class PlayerWidget extends StatefulWidget {
 
 class _PlayerWidgetState extends State<PlayerWidget> {
   static double x = 30.0;
-  double iconSize = 25;
+  double iconSize = UIConsts.iconSize.toDouble();
 
   @override
   void initState() {

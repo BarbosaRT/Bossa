@@ -27,7 +27,7 @@ class _YoutubeAddWidgetState extends State<YoutubeAddWidget> {
 
   final SongDataManager songDataManager = SongDataManager(
       localDataManagerInstance: dataManagerInstance,
-      downloadService: DioDownloadService(filePath: FilePathImpl()));
+      downloadService: HttpDownloadService(filePath: FilePathImpl()));
   String url = '';
   bool added = false;
 
@@ -128,9 +128,14 @@ class _YoutubeAddWidgetState extends State<YoutubeAddWidget> {
                         added = true;
                       });
 
-                      PlaylistModel playlist =
-                          await youtubeToPlaylist.convertYoutubePlaylist(url);
-                      playlistDataManager.addPlaylist(playlist);
+                      Stream<PlaylistModel> playlistStream =
+                          youtubeToPlaylist.convertYoutubePlaylist(url);
+
+                      PlaylistModel? finalPlaylist;
+                      await for (var playlist in playlistStream) {
+                        finalPlaylist = playlist;
+                      }
+                      playlistDataManager.addPlaylist(finalPlaylist!);
                       widget.callback();
 
                       await Future.delayed(const Duration(seconds: 10)).then(

@@ -23,7 +23,7 @@ class TestPage extends StatefulWidget {
 class _TestPageState extends State<TestPage> {
   final songDataManager = SongDataManager(
       localDataManagerInstance: dataManagerInstance,
-      downloadService: DioDownloadService(filePath: FilePathImpl()));
+      downloadService: HttpDownloadService(filePath: FilePathImpl()));
   GlobalKey<TestSongAddWidgetState> songAddKey = GlobalKey();
   List<SongModel> songs = [];
 

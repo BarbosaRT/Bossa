@@ -32,7 +32,7 @@ class _PlaylistContainerState extends State<PlaylistContainer> {
       PlaylistDataManager(localDataManagerInstance: dataManagerInstance);
   final songDataManager = SongDataManager(
       localDataManagerInstance: dataManagerInstance,
-      downloadService: DioDownloadService(filePath: FilePathImpl()));
+      downloadService: HttpDownloadService(filePath: FilePathImpl()));
   final justPlaylistManager = JustPlaylistManager();
 
   @override

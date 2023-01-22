@@ -17,7 +17,7 @@ void main() {
 
     final songDataManager = SongDataManager(
         localDataManagerInstance: dataManagerInstance,
-        downloadService: DioDownloadService(filePath: FilePathImpl()));
+        downloadService: HttpDownloadService(filePath: FilePathImpl()));
     final song1 = SongModel(
         id: 1,
         title: 'Song 1',

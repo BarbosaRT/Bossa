@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
+import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/youtube_parser.dart';
@@ -24,6 +26,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final urlTextController = TextEditingController();
   static double x = 30;
+  double iconSize = UIConsts.iconSize.toDouble();
   bool searchEnabled = true;
   Duration delay = const Duration(milliseconds: 250);
   Timer searchTimer = Timer(const Duration(milliseconds: 250), () {});
@@ -57,37 +60,19 @@ class _SearchPageState extends State<SearchPage> {
     final backgroundAccent = colorController.currentScheme.backgroundAccent;
     final playlistManager = Modular.get<JustPlaylistManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
+    final songDataManager = Modular.get<SongDataManager>();
     final audioManager = playlistManager.player;
 
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);
     TextStyle titleStyle =
         TextStyles().headline2.copyWith(color: contrastColor);
+    final buttonTextStyle =
+        TextStyles().boldHeadline2.copyWith(color: contrastColor);
 
     List<Widget> videoContainers = [];
     for (var video in videos) {
-      ThumbnailSet thumbnails = video.thumbnails;
-      List<String> thumbnailsList = [
-        thumbnails.highResUrl,
-        thumbnails.lowResUrl,
-        thumbnails.maxResUrl,
-        thumbnails.mediumResUrl,
-        thumbnails.standardResUrl
-      ];
-      String icon = 'assets/images/disc.png';
-      for (String thumbnail in thumbnailsList) {
-        if (thumbnail.isEmpty) {
-          continue;
-        }
-        try {
-          HttpRequester().retriveFromUrl(thumbnail);
-          icon = thumbnail.toString();
-          break;
-        } catch (e) {
-          continue;
-        }
-      }
-
+      final icon = YoutubeParser().getYoutubeThumbnailFromVideo(video);
       videoContainers.add(
         Padding(
           padding: EdgeInsets.symmetric(horizontal: x / 2),
@@ -96,7 +81,50 @@ class _SearchPageState extends State<SearchPage> {
             author: video.author,
             detailContainer: DetailContainer(
               icon: icon,
-              actions: const [],
+              actions: [
+                SizedBox(
+                  width: size.width,
+                  height: 30,
+                  child: GestureDetector(
+                    onTap: () async {
+                      SongModel song =
+                          await YoutubeParser().convertYoutubeSong(video.url);
+                      song = await SongParser().parseSongBeforeSave(song);
+                      songDataManager.addSong(song);
+                      setState(() {});
+                    },
+                    child: Row(children: [
+                      FaIcon(
+                        FontAwesomeIcons.plus,
+                        size: iconSize,
+                        color: contrastColor,
+                      ),
+                      SizedBox(
+                        width: iconSize / 2,
+                      ),
+                      Text('Adicionar Música', style: buttonTextStyle),
+                    ]),
+                  ),
+                ),
+                SizedBox(
+                  width: size.width,
+                  height: 30,
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Row(children: [
+                      FaIcon(
+                        FontAwesomeIcons.list,
+                        size: iconSize,
+                        color: contrastColor,
+                      ),
+                      SizedBox(
+                        width: iconSize / 2,
+                      ),
+                      Text('Adicionar á uma playlist ', style: buttonTextStyle),
+                    ]),
+                  ),
+                ),
+              ],
               title: video.title,
             ),
             onTap: () async {

@@ -5,6 +5,7 @@ import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
+import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -134,6 +135,7 @@ class PlaylistAddPage extends StatefulWidget {
 class _PlaylistAddPageState extends State<PlaylistAddPage> {
   static String defaultIcon = 'assets/images/disc.png';
   static double x = 30.0;
+  double iconSize = UIConsts.iconSize.toDouble();
   final titleTextController = TextEditingController();
 
   final scrollController = ScrollController();
@@ -251,7 +253,7 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
             child: FaIcon(
               FontAwesomeIcons.xmark,
               color: contrastColor,
-              size: 40,
+              size: iconSize,
             ),
           ),
         ),
@@ -274,7 +276,7 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                       ? FontAwesomeIcons.penToSquare
                       : FontAwesomeIcons.solidFloppyDisk,
                   color: contrastColor,
-                  size: editing ? 35 : 40,
+                  size: editing ? iconSize : iconSize * 1.25,
                 ),
               ),
             ),
@@ -354,50 +356,86 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                               Column(
                                 children: [
                                   SizedBox(
-                                    height: 148,
+                                    height: size.height / 3,
                                     width: size.width,
-                                    child: ReorderableListView(
-                                      proxyDecorator: (Widget child, int index,
-                                          Animation<double> animation) {
-                                        return AnimatedBuilder(
-                                          animation: animation,
-                                          builder: (BuildContext context,
-                                              Widget? child) {
-                                            final double animValue = Curves
-                                                .easeInOut
-                                                .transform(animation.value);
-                                            final double elevation =
-                                                lerpDouble(0, 6, animValue)!;
-                                            final double scale =
-                                                lerpDouble(1, 1.1, animValue)!;
-                                            return Transform.scale(
-                                              scale: scale,
-                                              child: Material(
-                                                elevation: elevation,
-                                                color: Colors.transparent,
-                                                shadowColor: Colors.black,
+                                    child: Stack(
+                                      children: [
+                                        Expanded(
+                                          child: ReorderableListView(
+                                            proxyDecorator: (Widget child,
+                                                int index,
+                                                Animation<double> animation) {
+                                              return AnimatedBuilder(
+                                                animation: animation,
+                                                builder: (BuildContext context,
+                                                    Widget? child) {
+                                                  final double animValue =
+                                                      Curves.easeInOut
+                                                          .transform(
+                                                              animation.value);
+                                                  final double elevation =
+                                                      lerpDouble(
+                                                          0, 6, animValue)!;
+                                                  final double scale =
+                                                      lerpDouble(
+                                                          1, 1.1, animValue)!;
+                                                  return Transform.scale(
+                                                    scale: scale,
+                                                    child: Material(
+                                                      elevation: elevation,
+                                                      color: Colors.transparent,
+                                                      shadowColor: Colors.black,
+                                                      child: child,
+                                                    ),
+                                                  );
+                                                },
                                                 child: child,
+                                              );
+                                            },
+                                            onReorder: (oldIndex, newIndex) {
+                                              if (oldIndex < newIndex) {
+                                                newIndex -= 1;
+                                              }
+                                              SongModel song =
+                                                  SongModel.fromMap(
+                                                      playlistToBeAdded
+                                                          .songs[oldIndex]
+                                                          .toMap());
+                                              playlistToBeAdded.songs
+                                                  .removeAt(oldIndex);
+                                              setState(() {
+                                                playlistToBeAdded.songs
+                                                    .insert(newIndex, song);
+                                              });
+                                            },
+                                            children: songsInPlaylist,
+                                          ),
+                                        ),
+                                        //
+                                        // Gradient
+                                        //
+                                        Positioned(
+                                          bottom: 0,
+                                          child: MouseRegion(
+                                            opaque: false,
+                                            child: Container(
+                                              height: 50,
+                                              width: size.width,
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter,
+                                                  colors: [
+                                                    backgroundColor
+                                                        .withOpacity(0),
+                                                    backgroundColor,
+                                                  ],
+                                                ),
                                               ),
-                                            );
-                                          },
-                                          child: child,
-                                        );
-                                      },
-                                      onReorder: (oldIndex, newIndex) {
-                                        if (oldIndex < newIndex) {
-                                          newIndex -= 1;
-                                        }
-                                        SongModel song = SongModel.fromMap(
-                                            playlistToBeAdded.songs[oldIndex]
-                                                .toMap());
-                                        playlistToBeAdded.songs
-                                            .removeAt(oldIndex);
-                                        setState(() {
-                                          playlistToBeAdded.songs
-                                              .insert(newIndex, song);
-                                        });
-                                      },
-                                      children: songsInPlaylist,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                   Padding(
@@ -412,7 +450,7 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                                     ),
                                   ),
                                   SizedBox(
-                                    height: 138,
+                                    height: size.height / 3,
                                     width: size.width,
                                     child: ListView(
                                       children: songsToAdd,
@@ -421,27 +459,6 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                                 ],
                               ),
                             ],
-                          ),
-                          Positioned(
-                            top: size.width,
-                            right: 0,
-                            child: MouseRegion(
-                              opaque: false,
-                              child: Container(
-                                height: 50,
-                                width: size.width,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      backgroundColor.withOpacity(0),
-                                      backgroundColor,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
                           ),
                         ],
                       ),

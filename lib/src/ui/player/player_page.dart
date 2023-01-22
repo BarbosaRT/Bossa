@@ -2,6 +2,7 @@ import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
+import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
@@ -23,7 +24,7 @@ class PlayerPage extends StatefulWidget {
 
 class _PlayerPageState extends State<PlayerPage> {
   static double x = 30.0;
-  double iconSize = 30;
+  double iconSize = UIConsts.iconSize.toDouble();
   final double sliderSpacing = 7;
   int currentIndex = 0;
   bool gradient = true;
@@ -232,26 +233,22 @@ class _PlayerPageState extends State<PlayerPage> {
                           }
                         }
                         return Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Padding(
                               padding: EdgeInsets.only(left: sliderSpacing),
-                              child: SizedBox(
+                              child: Image(
+                                image: ImageParser.getImageProviderFromString(
+                                  currentSong.icon,
+                                ),
+                                fit: BoxFit.cover,
+                                alignment: FractionalOffset.center,
                                 width: imageWidth,
                                 height: imageWidth - x,
-                                child: Image(
-                                  image: ImageParser.getImageProviderFromString(
-                                    currentSong.icon,
-                                  ),
-                                  fit: BoxFit.cover,
-                                  alignment: FractionalOffset.center,
-                                  width: imageWidth,
-                                  height: imageWidth - x,
-                                ),
                               ),
                             ),
-                            const Spacer(
-                              flex: 1,
+                            SizedBox(
+                              height: x,
                             ),
                             Column(
                               children: [

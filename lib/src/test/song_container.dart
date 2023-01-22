@@ -26,7 +26,7 @@ class _SongContainerState extends State<SongContainer> {
   final audioManager = audioManagerInstance;
   final songDataManager = SongDataManager(
       localDataManagerInstance: dataManagerInstance,
-      downloadService: DioDownloadService(filePath: FilePathImpl()));
+      downloadService: HttpDownloadService(filePath: FilePathImpl()));
 
   @override
   void initState() {

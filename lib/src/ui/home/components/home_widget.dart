@@ -1,11 +1,11 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:asuka/asuka.dart';
-import 'package:bossa/src/ui/playlist/playlist_page.dart';
+import 'package:bossa/src/styles/ui_consts.dart';
+import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/ui/playlist/playlist_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
@@ -28,7 +28,7 @@ class AddWidget extends StatefulWidget {
 }
 
 class _AddWidgetState extends State<AddWidget> {
-  double iconSize = 25;
+  double iconSize = UIConsts.iconSize.toDouble();
   static double x = 30;
   final popupStyle = GoogleFonts.poppins(
       color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal);
@@ -203,7 +203,7 @@ class _AddWidgetState extends State<AddWidget> {
 }
 
 class ContentContainer extends StatefulWidget {
-  final DetailContainer detailContainer;
+  final Widget detailContainer;
   final String icon;
   final void Function() onTap;
 
@@ -220,7 +220,7 @@ class ContentContainer extends StatefulWidget {
 
 class _ContentContainerState extends State<ContentContainer> {
   static double x = 30;
-  double iconSize = 25;
+  double iconSize = UIConsts.iconSize.toDouble();
   double imagesSize = 100;
 
   @override
@@ -277,7 +277,7 @@ class DetailContainer extends StatefulWidget {
 
 class _DetailContainerState extends State<DetailContainer> {
   static double x = 30;
-  double iconSize = 25;
+  double iconSize = UIConsts.iconSize.toDouble();
   double imagesSize = 100;
 
   @override
@@ -330,7 +330,7 @@ class HomeWidget extends StatefulWidget {
 
 class _HomeWidgetState extends State<HomeWidget> {
   static double x = 30.0;
-  double iconSize = 25;
+  double iconSize = UIConsts.iconSize.toDouble();
   double imagesSize = 100;
 
   List<SongModel> songs = [];
@@ -433,6 +433,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         Modular.to.pushReplacementNamed(
           '/player',
         );
+        audioManager.play();
       },
       icon: song.icon,
     );
@@ -445,16 +446,13 @@ class _HomeWidgetState extends State<HomeWidget> {
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
 
-    final playlistDataManager = Modular.get<PlaylistDataManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
+    final homeController = Modular.get<HomeController>();
 
     final textStyle = TextStyles().headline.copyWith(color: contrastColor);
 
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);
-
-    final buttonStyle =
-        TextStyles().boldHeadline2.copyWith(color: contrastColor);
 
     List<Widget> songContainers = [];
     for (SongModel song in songs) {
@@ -473,67 +471,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     for (PlaylistModel playlist in playlists) {
       playlistContainers.add(
         ContentContainer(
-          detailContainer: DetailContainer(
-            icon: playlist.icon,
-            title: playlist.title,
-            actions: [
-              SizedBox(
-                width: size.width,
-                height: 30,
-                child: GestureDetector(
-                  onTap: () {
-                    playlistDataManager.deletePlaylist(playlist);
-                    loadPlaylists();
-                  },
-                  child: Row(children: [
-                    FaIcon(
-                      FontAwesomeIcons.trash,
-                      size: iconSize,
-                      color: contrastColor,
-                    ),
-                    SizedBox(
-                      width: iconSize / 2,
-                    ),
-                    Text('Remover ', style: buttonStyle),
-                  ]),
-                ),
-              ),
-              SizedBox(
-                width: size.width,
-                height: 30,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    Modular.to.push(
-                      MaterialPageRoute(
-                        builder: (context) => PlaylistAddPage(
-                          playlistToBeEdited: playlist,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Row(children: [
-                    FaIcon(
-                      FontAwesomeIcons.penToSquare,
-                      size: iconSize,
-                      color: contrastColor,
-                    ),
-                    SizedBox(
-                      width: iconSize / 2,
-                    ),
-                    Text('Editar ', style: buttonStyle),
-                  ]),
-                ),
-              ),
-            ],
-          ),
+          detailContainer: PlaylistSnackbar(playlist: playlist),
           onTap: () {
             playlistUIController.setPlaylist(playlist);
-            Modular.to.push(
-              MaterialPageRoute(
-                builder: (context) => const PlaylistPage(),
-              ),
-            );
+            homeController.changeCurrentPage(Pages.playlist);
           },
           icon: playlist.icon,
         ),

@@ -1,14 +1,26 @@
 import 'package:bossa/src/color/color_controller.dart';
+import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
 import 'package:bossa/src/ui/home/components/player_widget.dart';
 import 'package:bossa/src/ui/library/library_page.dart';
+import 'package:bossa/src/ui/playlist/playlist_page.dart';
 import 'package:bossa/src/ui/search/search_page.dart';
 import 'package:bossa/src/ui/settings/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-enum Pages { home, search, library, settings }
+class HomeController extends ChangeNotifier {
+  Pages _currentPage = Pages.home;
+  Pages get currentPage => _currentPage;
+
+  void changeCurrentPage(Pages newPage) {
+    _currentPage = newPage;
+    notifyListeners();
+  }
+}
+
+enum Pages { home, search, library, settings, playlist }
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,7 +31,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   static double x = 30.0;
-  double iconSize = 25;
+  double iconSize = UIConsts.iconSize.toDouble();
   Pages currentPage = Pages.home;
 
   Widget returnPage() {
@@ -30,9 +42,27 @@ class _HomePageState extends State<HomePage> {
         return const LibraryPage();
       case Pages.search:
         return const SearchPage();
+      case Pages.playlist:
+        return const PlaylistPage();
       default:
         return const HomeWidget();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final homeController = Modular.get<HomeController>();
+    currentPage = homeController.currentPage;
+    homeController.addListener(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            currentPage = homeController.currentPage;
+          });
+        }
+      });
+    });
   }
 
   @override

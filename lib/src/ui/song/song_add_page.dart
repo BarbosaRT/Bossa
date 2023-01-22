@@ -2,6 +2,7 @@ import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
+import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ class SongAddPage extends StatefulWidget {
 class _SongAddPageState extends State<SongAddPage> {
   static String defaultIcon = 'assets/images/disc.png';
   static double x = 30.0;
+  double iconSize = UIConsts.iconSize.toDouble();
   final titleTextController = TextEditingController();
   final authorTextController = TextEditingController();
 
@@ -113,7 +115,7 @@ class _SongAddPageState extends State<SongAddPage> {
               child: FaIcon(
                 FontAwesomeIcons.xmark,
                 color: contrastColor,
-                size: 40,
+                size: iconSize,
               ),
             ),
           ),
@@ -136,7 +138,7 @@ class _SongAddPageState extends State<SongAddPage> {
                       ? FontAwesomeIcons.penToSquare
                       : FontAwesomeIcons.solidFloppyDisk,
                   color: contrastColor,
-                  size: editing ? 35 : 40,
+                  size: editing ? iconSize : iconSize * 1.25,
                 ),
               ),
             ),
@@ -259,7 +261,7 @@ class _SongAddPageState extends State<SongAddPage> {
                                         FaIcon(
                                           FontAwesomeIcons.music,
                                           color: contrastColor,
-                                          size: 30,
+                                          size: iconSize,
                                         ),
                                         const SizedBox(
                                           height: 1,

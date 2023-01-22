@@ -19,10 +19,11 @@ class AppModule extends Module {
         Bind((i) => ColorController()),
         Bind((i) => SettingsController()),
         Bind((i) => PlaylistUIController()),
+        Bind((i) => HomeController()),
         Bind((i) => JustPlaylistManager()),
         Bind((i) => FilePathImpl()),
         Bind(
-          (i) => DioDownloadService(
+          (i) => HttpDownloadService(
             filePath: i(),
           ),
         ),

@@ -21,7 +21,7 @@ void main() {
         PlaylistDataManager(localDataManagerInstance: testDataManagerInstance);
     final songDataManager = SongDataManager(
         localDataManagerInstance: testDataManagerInstance,
-        downloadService: DioDownloadService(filePath: FilePathImpl()));
+        downloadService: HttpDownloadService(filePath: FilePathImpl()));
     final playlist1 =
         PlaylistModel(id: 1, title: 'Song 1', icon: 'icon1', songs: []);
 

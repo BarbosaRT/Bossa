@@ -5,6 +5,7 @@ import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
 import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/url/download_service.dart';
+import 'package:bossa/src/url/http_requester.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class YoutubeParser {
@@ -13,7 +14,32 @@ class YoutubeParser {
   YoutubeParser({this.songDataManager}) {
     songDataManager = SongDataManager(
         localDataManagerInstance: dataManagerInstance,
-        downloadService: DioDownloadService(filePath: FilePathImpl()));
+        downloadService: HttpDownloadService(filePath: FilePathImpl()));
+  }
+
+  String getYoutubeThumbnailFromVideo(Video video) {
+    ThumbnailSet thumbnails = video.thumbnails;
+    List<String> thumbnailsList = [
+      thumbnails.highResUrl,
+      thumbnails.lowResUrl,
+      thumbnails.maxResUrl,
+      thumbnails.mediumResUrl,
+      thumbnails.standardResUrl
+    ];
+    String icon = 'assets/images/disc.png';
+    for (String thumbnail in thumbnailsList) {
+      if (thumbnail.isEmpty) {
+        continue;
+      }
+      try {
+        HttpRequester().retriveFromUrl(thumbnail);
+        icon = thumbnail.toString();
+        break;
+      } catch (e) {
+        continue;
+      }
+    }
+    return icon;
   }
 
   Future<SongModel> convertYoutubeSong(String url) async {
@@ -22,10 +48,7 @@ class YoutubeParser {
 
     var video = await yt.videos.get(parsedUrl);
 
-    ThumbnailSet thumbnails = video.thumbnails;
-    String icon = thumbnails.standardResUrl.isEmpty
-        ? thumbnails.lowResUrl
-        : thumbnails.standardResUrl;
+    String icon = YoutubeParser().getYoutubeThumbnailFromVideo(video);
 
     String title = video.title.replaceAll('"', "'");
 
@@ -36,10 +59,15 @@ class YoutubeParser {
     return song;
   }
 
-  Future<PlaylistModel> convertYoutubePlaylist(String url) async {
+  String parseYoutubePlaylist(String url) {
     String parsedUrl = url.replaceAll('youtube.com/playlist?list=', '');
     parsedUrl = parsedUrl.replaceAll('https://', '');
     parsedUrl = parsedUrl.replaceAll('www.', '');
+    return parsedUrl;
+  }
+
+  Stream<PlaylistModel> convertYoutubePlaylist(String url) async* {
+    String parsedUrl = parseYoutubePlaylist(url);
 
     var yt = YoutubeExplode();
 
@@ -52,11 +80,10 @@ class YoutubeParser {
 
       SongModel retrivedSong = await songDataManager!.loadLastAddedSong();
       songs.add(retrivedSong);
+      yield PlaylistModel(
+          id: 0, title: playlist.title, icon: songs[0].icon, songs: songs);
     }
 
     yt.close();
-
-    return PlaylistModel(
-        id: 0, title: playlist.title, icon: songs[0].icon, songs: songs);
   }
 }
