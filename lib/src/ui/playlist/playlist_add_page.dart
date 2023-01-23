@@ -133,8 +133,8 @@ class PlaylistAddPage extends StatefulWidget {
 }
 
 class _PlaylistAddPageState extends State<PlaylistAddPage> {
-  static String defaultIcon = 'assets/images/disc.png';
-  static double x = 30.0;
+  static String defaultIcon = UIConsts.assetImage;
+  static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
   final titleTextController = TextEditingController();
 
@@ -298,172 +298,162 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                 height: size.height,
                 width: size.width,
                 color: backgroundColor,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: x / 2, right: x / 2),
-                      child: Stack(
+                child: Padding(
+                  padding: EdgeInsets.only(left: x / 2, right: x / 2),
+                  child: Stack(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Center(
+                            child: GestureDetector(
+                              onTap: saveIcon,
+                              child: Image(
+                                image: iconImage,
+                                fit: BoxFit.cover,
+                                alignment: FractionalOffset.center,
+                                width: 280 - x * 2,
+                                height: 280 - x * 2,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          SizedBox(
+                            width: size.width,
+                            height: x,
+                            child: TextField(
+                              controller: titleTextController,
+                              decoration: InputDecoration(
+                                hintText: 'Title',
+                                hintStyle: titleStyle,
+                                border: InputBorder.none,
+                                isDense: true,
+                                helperMaxLines: 1,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              style: titleStyle,
+                              textAlign: TextAlign.center,
+                              textAlignVertical: TextAlignVertical.center,
+                              onChanged: (value) {
+                                setState(() {
+                                  playlistToBeAdded.title = value;
+                                });
+                              },
+                              onSubmitted: (value) {
+                                setState(() {
+                                  playlistToBeAdded.title = value;
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
                           Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Center(
-                                child: GestureDetector(
-                                  onTap: saveIcon,
-                                  child: Image(
-                                    image: iconImage,
-                                    fit: BoxFit.cover,
-                                    alignment: FractionalOffset.center,
-                                    width: 280 - x * 2,
-                                    height: 280 - x * 2,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
                               SizedBox(
+                                height: size.height / 3,
                                 width: size.width,
-                                height: x,
-                                child: TextField(
-                                  controller: titleTextController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Title',
-                                    hintStyle: titleStyle,
-                                    border: InputBorder.none,
-                                    isDense: true,
-                                    helperMaxLines: 1,
-                                    contentPadding: EdgeInsets.zero,
-                                  ),
-                                  style: titleStyle,
-                                  textAlign: TextAlign.center,
-                                  textAlignVertical: TextAlignVertical.center,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      playlistToBeAdded.title = value;
-                                    });
-                                  },
-                                  onSubmitted: (value) {
-                                    setState(() {
-                                      playlistToBeAdded.title = value;
-                                    });
-                                  },
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              Column(
-                                children: [
-                                  SizedBox(
-                                    height: size.height / 3,
-                                    width: size.width,
-                                    child: Stack(
-                                      children: [
-                                        Expanded(
-                                          child: ReorderableListView(
-                                            proxyDecorator: (Widget child,
-                                                int index,
-                                                Animation<double> animation) {
-                                              return AnimatedBuilder(
-                                                animation: animation,
-                                                builder: (BuildContext context,
-                                                    Widget? child) {
-                                                  final double animValue =
-                                                      Curves.easeInOut
-                                                          .transform(
-                                                              animation.value);
-                                                  final double elevation =
-                                                      lerpDouble(
-                                                          0, 6, animValue)!;
-                                                  final double scale =
-                                                      lerpDouble(
-                                                          1, 1.1, animValue)!;
-                                                  return Transform.scale(
-                                                    scale: scale,
-                                                    child: Material(
-                                                      elevation: elevation,
-                                                      color: Colors.transparent,
-                                                      shadowColor: Colors.black,
-                                                      child: child,
-                                                    ),
-                                                  );
-                                                },
-                                                child: child,
+                                child: Stack(
+                                  children: [
+                                    Expanded(
+                                      child: ReorderableListView(
+                                        proxyDecorator: (Widget child,
+                                            int index,
+                                            Animation<double> animation) {
+                                          return AnimatedBuilder(
+                                            animation: animation,
+                                            builder: (BuildContext context,
+                                                Widget? child) {
+                                              final double animValue = Curves
+                                                  .easeInOut
+                                                  .transform(animation.value);
+                                              final double elevation =
+                                                  lerpDouble(0, 6, animValue)!;
+                                              final double scale = lerpDouble(
+                                                  1, 1.1, animValue)!;
+                                              return Transform.scale(
+                                                scale: scale,
+                                                child: Material(
+                                                  elevation: elevation,
+                                                  color: Colors.transparent,
+                                                  shadowColor: Colors.black,
+                                                  child: child,
+                                                ),
                                               );
                                             },
-                                            onReorder: (oldIndex, newIndex) {
-                                              if (oldIndex < newIndex) {
-                                                newIndex -= 1;
-                                              }
-                                              SongModel song =
-                                                  SongModel.fromMap(
-                                                      playlistToBeAdded
-                                                          .songs[oldIndex]
-                                                          .toMap());
-                                              playlistToBeAdded.songs
-                                                  .removeAt(oldIndex);
-                                              setState(() {
-                                                playlistToBeAdded.songs
-                                                    .insert(newIndex, song);
-                                              });
-                                            },
-                                            children: songsInPlaylist,
-                                          ),
-                                        ),
-                                        //
-                                        // Gradient
-                                        //
-                                        Positioned(
-                                          bottom: 0,
-                                          child: MouseRegion(
-                                            opaque: false,
-                                            child: Container(
-                                              height: 50,
-                                              width: size.width,
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  begin: Alignment.topCenter,
-                                                  end: Alignment.bottomCenter,
-                                                  colors: [
-                                                    backgroundColor
-                                                        .withOpacity(0),
-                                                    backgroundColor,
-                                                  ],
-                                                ),
-                                              ),
+                                            child: child,
+                                          );
+                                        },
+                                        onReorder: (oldIndex, newIndex) {
+                                          if (oldIndex < newIndex) {
+                                            newIndex -= 1;
+                                          }
+                                          SongModel song = SongModel.fromMap(
+                                              playlistToBeAdded.songs[oldIndex]
+                                                  .toMap());
+                                          playlistToBeAdded.songs
+                                              .removeAt(oldIndex);
+                                          setState(() {
+                                            playlistToBeAdded.songs
+                                                .insert(newIndex, song);
+                                          });
+                                        },
+                                        children: songsInPlaylist,
+                                      ),
+                                    ),
+                                    //
+                                    // Gradient
+                                    //
+                                    Positioned(
+                                      bottom: 0,
+                                      child: MouseRegion(
+                                        opaque: false,
+                                        child: Container(
+                                          height: 50,
+                                          width: size.width,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: [
+                                                backgroundColor.withOpacity(0),
+                                                backgroundColor,
+                                              ],
                                             ),
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10),
-                                    child: SizedBox(
-                                      width: size.width,
-                                      child: Text(
-                                        'Músicas para adicionar',
-                                        style: titleStyle,
-                                        textAlign: TextAlign.center,
                                       ),
                                     ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: SizedBox(
+                                  width: size.width,
+                                  child: Text(
+                                    'Músicas para adicionar',
+                                    style: titleStyle,
+                                    textAlign: TextAlign.center,
                                   ),
-                                  SizedBox(
-                                    height: size.height / 3,
-                                    width: size.width,
-                                    child: ListView(
-                                      children: songsToAdd,
-                                    ),
-                                  ),
-                                ],
+                                ),
+                              ),
+                              SizedBox(
+                                height: size.height / 3,
+                                width: size.width,
+                                child: ListView(
+                                  children: songsToAdd,
+                                ),
                               ),
                             ],
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               )
             ],

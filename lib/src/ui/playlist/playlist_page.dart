@@ -30,7 +30,7 @@ class PlaylistPage extends StatefulWidget {
 class _PlaylistPageState extends State<PlaylistPage> {
   PaletteGenerator? palette;
   bool gradient = true;
-  static double x = 30.0;
+  static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
 
   void updatePalette(String image) async {
@@ -51,12 +51,8 @@ class _PlaylistPageState extends State<PlaylistPage> {
   void initState() {
     super.initState();
 
-    final playlistUIController = Modular.get<PlaylistUIController>();
-    playlist =
-        PlaylistModel.fromMap(playlistUIController.currentPlaylist.toMap());
-
-    final playlistManager = Modular.get<JustPlaylistManager>();
-    playlistManager.setPlaylist(playlist);
+    final homeController = Modular.get<HomeController>();
+    playlist = PlaylistModel.fromMap(homeController.currentPlaylist.toMap());
 
     updatePalette(playlist.songs[0].icon);
 
@@ -70,9 +66,8 @@ class _PlaylistPageState extends State<PlaylistPage> {
         }
       });
     });
-    playlistUIController.addListener(() async {
-      playlist = playlistUIController.playlist;
-      playlistManager.setPlaylist(playlist);
+    homeController.addListener(() async {
+      playlist = homeController.currentPlaylist;
       updatePalette(playlist.songs[0].icon);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -117,16 +112,8 @@ class _PlaylistPageState extends State<PlaylistPage> {
     }
 
     List<Widget> songContainers = [];
-    List<SongModel> songs = playlist.songs.toList();
     for (SongModel song in playlist.songs) {
-      List<SongModel> songsForPlaylist = songs.toList();
-      songsForPlaylist.remove(song);
-      songsForPlaylist.insert(0, song);
-      PlaylistModel playlistToBePlayed = PlaylistModel(
-          id: -1,
-          title: playlist.title,
-          icon: song.icon,
-          songs: songsForPlaylist);
+      final index = playlist.songs.indexOf(song);
       songContainers.add(
         LibraryContentContainer(
           title: song.title,
@@ -187,7 +174,8 @@ class _PlaylistPageState extends State<PlaylistPage> {
           ),
           onTap: () {
             audioManager.pause();
-            playlistUIController.setPlaylist(playlistToBePlayed);
+            playlistUIController.setPlaylist(playlist);
+            playlistManager.setPlaylist(playlist, initialIndex: index);
             Modular.to.pushReplacementNamed(
               '/player',
             );

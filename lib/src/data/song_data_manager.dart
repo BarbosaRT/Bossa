@@ -69,6 +69,24 @@ class SongDataManager {
     return output;
   }
 
+  Future<List<SongModel>> searchSongs(
+      {required String searchQuery,
+      SongDataManagerFilter filter = SongDataManagerFilter.idDesc}) async {
+    var database = await localDataManagerInstance.database();
+    List<Map<String, dynamic>> results = await database.query(
+      'songs',
+      orderBy: _getOrderBy(filter),
+      where: 'title like "${searchQuery.trim()}%"',
+    );
+
+    List<SongModel> output = [];
+    for (Map<String, dynamic> result in results) {
+      SongModel song = SongModel.fromMap(result);
+      output.add(song);
+    }
+    return output;
+  }
+
   String _getOrderBy(SongDataManagerFilter filter) {
     switch (filter) {
       case SongDataManagerFilter.idAsc:

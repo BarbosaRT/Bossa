@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:audio_session/audio_session.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
@@ -78,7 +79,6 @@ class JustPlaylistManager implements PlaylistAudioManager {
   Future<void> setPlaylist(PlaylistModel playlist,
       {int initialIndex = 0, initialPosition = Duration.zero}) async {
     List<AudioSource> songs = [];
-
     for (SongModel song in playlist.songs) {
       String path = song.path.isEmpty ? song.url : song.path;
 
@@ -100,8 +100,15 @@ class JustPlaylistManager implements PlaylistAudioManager {
       children: songs,
     );
 
+    AndroidLoudnessEnhancer loudnessEnhancer = AndroidLoudnessEnhancer();
+    loudnessEnhancer.setEnabled(true);
+    loudnessEnhancer.setTargetGain(40);
+
+    await player.setAndroidAudioAttributes(const AndroidAudioAttributes());
     await player.setAudioSource(playlistAudioSource,
         initialIndex: initialIndex, initialPosition: initialPosition);
+
+    await setLoopMode(LoopMode.all);
   }
 
   Uri getUriFromString(String string) {

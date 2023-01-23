@@ -4,6 +4,7 @@ import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
+import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/ui/playlist/playlist_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -27,6 +28,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
     final contrastColor = colorController.currentScheme.contrastColor;
 
     final playlistDataManager = Modular.get<PlaylistDataManager>();
+    final homeController = Modular.get<HomeController>();
 
     final buttonStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
@@ -40,6 +42,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
           child: GestureDetector(
             onTap: () {
               playlistDataManager.deletePlaylist(widget.playlist);
+              homeController.changeCurrentPage(Pages.home);
             },
             child: Row(children: [
               FaIcon(

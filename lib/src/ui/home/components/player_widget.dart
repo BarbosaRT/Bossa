@@ -19,7 +19,7 @@ class PlayerWidget extends StatefulWidget {
 }
 
 class _PlayerWidgetState extends State<PlayerWidget> {
-  static double x = 30.0;
+  static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
 
   @override
@@ -76,10 +76,12 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                       Modular.to.pop();
                     },
                     onLongPress: () {
-                      audioManager.stop();
-                      setState(() {
-                        playlistUIController.setHasPlayedOnce(false);
-                      });
+                      audioManager.pause();
+                      if (mounted) {
+                        setState(() {
+                          playlistUIController.setHasPlayedOnce(false);
+                        });
+                      }
                     },
                     child: Container(
                       height: 60,

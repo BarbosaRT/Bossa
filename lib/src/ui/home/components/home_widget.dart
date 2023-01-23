@@ -29,7 +29,7 @@ class AddWidget extends StatefulWidget {
 
 class _AddWidgetState extends State<AddWidget> {
   double iconSize = UIConsts.iconSize.toDouble();
-  static double x = 30;
+  static double x = UIConsts.spacing;
   final popupStyle = GoogleFonts.poppins(
       color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal);
 
@@ -219,7 +219,7 @@ class ContentContainer extends StatefulWidget {
 }
 
 class _ContentContainerState extends State<ContentContainer> {
-  static double x = 30;
+  static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
   double imagesSize = 100;
 
@@ -276,7 +276,7 @@ class DetailContainer extends StatefulWidget {
 }
 
 class _DetailContainerState extends State<DetailContainer> {
-  static double x = 30;
+  static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
   double imagesSize = 100;
 
@@ -329,7 +329,7 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
-  static double x = 30.0;
+  static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
   double imagesSize = 100;
 
@@ -351,13 +351,17 @@ class _HomeWidgetState extends State<HomeWidget> {
     songsSortedByTimesPlayed = await songDataManager.loadAllSongs(
       filter: SongDataManagerFilter.timesPlayedDesc,
     );
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void loadPlaylists() async {
     final playlistDataManager = Modular.get<PlaylistDataManager>();
     playlists = await playlistDataManager.loadPlaylists();
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Widget songContainerBuilder(
@@ -429,7 +433,10 @@ class _HomeWidgetState extends State<HomeWidget> {
       onTap: () {
         Modular.to.popUntil(ModalRoute.withName('/'));
         audioManager.pause();
+
         playlistUIController.setPlaylist(playlistToBePlayed);
+        playlistManager.setPlaylist(playlistToBePlayed);
+
         Modular.to.pushReplacementNamed(
           '/player',
         );
@@ -445,8 +452,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
-
-    final playlistUIController = Modular.get<PlaylistUIController>();
     final homeController = Modular.get<HomeController>();
 
     final textStyle = TextStyles().headline.copyWith(color: contrastColor);
@@ -473,8 +478,12 @@ class _HomeWidgetState extends State<HomeWidget> {
         ContentContainer(
           detailContainer: PlaylistSnackbar(playlist: playlist),
           onTap: () {
-            playlistUIController.setPlaylist(playlist);
-            homeController.changeCurrentPage(Pages.playlist);
+            homeController.setPlaylist(playlist);
+            if (mounted) {
+              setState(() {
+                homeController.changeCurrentPage(Pages.playlist);
+              });
+            }
           },
           icon: playlist.icon,
         ),

@@ -4,6 +4,7 @@ import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
 import 'package:bossa/src/file/file_path.dart';
+import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/url/download_service.dart';
 import 'package:bossa/src/url/http_requester.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -26,7 +27,7 @@ class YoutubeParser {
       thumbnails.mediumResUrl,
       thumbnails.standardResUrl
     ];
-    String icon = 'assets/images/disc.png';
+    String icon = UIConsts.assetImage;
     for (String thumbnail in thumbnailsList) {
       if (thumbnail.isEmpty) {
         continue;

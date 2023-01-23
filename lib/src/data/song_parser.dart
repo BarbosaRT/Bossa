@@ -32,14 +32,17 @@ class SongParser {
     return output.substring(0, 11);
   }
 
-  Future<SongModel> parseSongBeforeSave(SongModel song) async {
-    if (SongParser().isSongFromYoutube(song.url)) {
+  Future<SongModel> parseSongBeforeSave(SongModel song,
+      {bool? saveOffline}) async {
+    if (SongParser().isSongFromYoutube(song.url) &&
+        saveOffline != null &&
+        saveOffline == true) {
       String workingDirectory = await FilePathImpl().getDocumentsDirectory();
       String fileName = parseYoutubeSongUrl(song.url);
+
       await Directory('$workingDirectory/icons').create();
       await HttpDownloadService(filePath: FilePathImpl()).downloadIcon(
           song.icon.toString(), '$fileName.jpg', '$workingDirectory/icons');
-
       song.icon = '$workingDirectory/icons/$fileName.jpg';
 
       await Directory('$workingDirectory/songs').create();

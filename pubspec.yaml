@@ -29,6 +29,7 @@ dependencies:
   just_audio: ^0.9.30
   just_audio_mpv: ^0.1.6
   just_audio_background: ^0.0.1-beta.9
+  audio_session: ^0.1.13
   
   youtube_explode_dart: ^1.10.4
   

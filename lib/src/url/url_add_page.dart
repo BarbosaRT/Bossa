@@ -6,13 +6,15 @@ import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/youtube_parser.dart';
 import 'package:bossa/src/styles/text_styles.dart';
+import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class YoutubeUrlAddPage extends StatefulWidget {
+  final String? url;
   final bool isSong;
-  const YoutubeUrlAddPage({super.key, required this.isSong});
+  const YoutubeUrlAddPage({super.key, required this.isSong, this.url});
 
   @override
   State<YoutubeUrlAddPage> createState() => _YoutubeUrlAddPageState();
@@ -20,12 +22,21 @@ class YoutubeUrlAddPage extends StatefulWidget {
 
 class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
   final urlTextController = TextEditingController();
-  static double x = 30;
+  static double x = UIConsts.spacing;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.url != null) {
+      urlTextController.text = widget.url!;
+    }
+  }
 
   void addCommand(String value) async {
     final colorController = Modular.get<ColorController>();
-    final snackbarColor = colorController.currentScheme.accentColor;
+    final snackbarColor = colorController.currentScheme.backgroundAccent;
     final contrastColor = colorController.currentScheme.contrastColor;
+
     final songDataManager = Modular.get<SongDataManager>();
     final playlistDataManager = Modular.get<PlaylistDataManager>();
     final parser = YoutubeParser(songDataManager: songDataManager);
@@ -70,8 +81,9 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
             builder: (context, snapshot) {
               final downloaded =
                   snapshot.data == null ? 0 : snapshot.data!.songs.length;
+              final progress = ((downloaded / videoCount) * 100).toInt();
               return Text(
-                'Progresso: ${(downloaded / videoCount) * 100}',
+                'Progresso: $progress%',
                 style: textStyle,
               );
             },

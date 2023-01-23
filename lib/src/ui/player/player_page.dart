@@ -23,7 +23,7 @@ class PlayerPage extends StatefulWidget {
 }
 
 class _PlayerPageState extends State<PlayerPage> {
-  static double x = 30.0;
+  static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
   final double sliderSpacing = 7;
   int currentIndex = 0;
@@ -153,7 +153,9 @@ class _PlayerPageState extends State<PlayerPage> {
           gradient ? palette!.dominantColor!.color : backgroundColor;
     }
 
-    double imageWidth = size.width - sliderSpacing * 2;
+    final imageSize =
+        size.width > size.height ? size.height * 0.75 : size.width;
+    double imageWidth = imageSize - sliderSpacing * 2;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -346,26 +348,25 @@ class _PlayerPageState extends State<PlayerPage> {
                                               padding: EdgeInsets.only(
                                                   left: sliderSpacing),
                                               child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Text(
-                                                      durationFormatter(
-                                                        Duration(
-                                                          seconds:
-                                                              value.toInt(),
-                                                        ),
-                                                        length:
-                                                            maxString.length,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    durationFormatter(
+                                                      Duration(
+                                                        seconds: value.toInt(),
                                                       ),
-                                                      style: titleStyle,
+                                                      length: maxString.length,
                                                     ),
-                                                    Text(
-                                                      maxString,
-                                                      style: titleStyle,
-                                                    )
-                                                  ]),
+                                                    style: titleStyle,
+                                                  ),
+                                                  Text(
+                                                    maxString,
+                                                    style: titleStyle,
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                           ],
                                         );

@@ -1,3 +1,4 @@
+import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
@@ -18,6 +19,23 @@ class HomeController extends ChangeNotifier {
     _currentPage = newPage;
     notifyListeners();
   }
+
+  PlaylistModel _currentPlaylist =
+      PlaylistModel(id: 0, title: 'Todas as Musicas', icon: 'icon', songs: []);
+  PlaylistModel get currentPlaylist => _currentPlaylist;
+
+  void setPlaylist(PlaylistModel newPlaylist) {
+    _currentPlaylist = newPlaylist;
+    notifyListeners();
+  }
+
+  bool _searchLibrary = false;
+  bool get searchLibrary => _searchLibrary;
+
+  void setSearchLibrary(bool value) {
+    _searchLibrary = value;
+    notifyListeners();
+  }
 }
 
 enum Pages { home, search, library, settings, playlist }
@@ -30,24 +48,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  static double x = 30.0;
+  static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
   Pages currentPage = Pages.home;
-
-  Widget returnPage() {
-    switch (currentPage) {
-      case Pages.settings:
-        return const SettingsPage();
-      case Pages.library:
-        return const LibraryPage();
-      case Pages.search:
-        return const SearchPage();
-      case Pages.playlist:
-        return const PlaylistPage();
-      default:
-        return const HomeWidget();
-    }
-  }
+  Map<Pages, Widget> pageWidgets = {
+    Pages.home: HomeWidget(key: UniqueKey()),
+    Pages.library: LibraryPage(key: UniqueKey()),
+    Pages.settings: SettingsPage(key: UniqueKey()),
+    Pages.playlist: PlaylistPage(key: UniqueKey()),
+    Pages.search: SearchPage(key: UniqueKey()),
+  };
 
   @override
   void initState() {
@@ -73,6 +83,8 @@ class _HomePageState extends State<HomePage> {
     final contrastColor = colorController.currentScheme.contrastColor;
     final backgroundColor = colorController.currentScheme.backgroundColor;
 
+    final homeController = Modular.get<HomeController>();
+
     final buttonStyle = ButtonStyle(
       padding: MaterialStateProperty.all(EdgeInsets.zero),
       overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -81,7 +93,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: MaterialStateProperty.all(Colors.transparent),
     );
 
-    Widget widgetPage = returnPage();
+    Widget widgetPage = pageWidgets[currentPage]!;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -155,6 +167,7 @@ class _HomePageState extends State<HomePage> {
                                     style: buttonStyle,
                                     onPressed: () {
                                       setState(() {
+                                        homeController.setSearchLibrary(false);
                                         currentPage = Pages.search;
                                       });
                                     },

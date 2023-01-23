@@ -1,16 +1,19 @@
 import 'dart:async';
+import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
-import 'package:bossa/src/data/song_parser.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
+import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/youtube_parser.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
 import 'package:bossa/src/ui/library/library_page.dart';
+import 'package:bossa/src/ui/song/song_add_page.dart';
+import 'package:bossa/src/url/url_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -25,53 +28,153 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final urlTextController = TextEditingController();
-  static double x = 30;
+  static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
+
+  bool searchLibrary = false;
   bool searchEnabled = true;
   Duration delay = const Duration(milliseconds: 250);
   Timer searchTimer = Timer(const Duration(milliseconds: 250), () {});
-  List<Video> videos = [];
 
-  void search(String searchQuery) async {
-    if (!searchEnabled) {
-      return;
-    }
-    searchEnabled = false;
-    final yt = YoutubeExplode();
+  List<Widget> videoContainers = [];
 
-    final searchResponse = await yt.search.search(searchQuery);
-    setState(() {
-      videos = searchResponse.toList();
-    });
-
-    yt.close();
-
-    Future.delayed(delay).then((value) {
-      searchEnabled = true;
+  @override
+  void initState() {
+    super.initState();
+    final homeController = Modular.get<HomeController>();
+    homeController.addListener(() {
+      searchLibrary = homeController.searchLibrary;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {});
+        }
+      });
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  void search(String searchQuery) async {
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
     final backgroundAccent = colorController.currentScheme.backgroundAccent;
+
     final playlistManager = Modular.get<JustPlaylistManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
     final songDataManager = Modular.get<SongDataManager>();
     final audioManager = playlistManager.player;
 
-    final headerStyle =
-        TextStyles().boldHeadline.copyWith(color: contrastColor);
-    TextStyle titleStyle =
-        TextStyles().headline2.copyWith(color: contrastColor);
     final buttonTextStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
 
-    List<Widget> videoContainers = [];
-    for (var video in videos) {
+    videoContainers = [];
+    if (!searchEnabled) {
+      return;
+    }
+    searchEnabled = false;
+
+    if (searchLibrary) {
+      List<SongModel> songs =
+          await songDataManager.searchSongs(searchQuery: searchQuery);
+
+      for (SongModel song in songs) {
+        List<SongModel> songsForPlaylist = songs.toList();
+        songsForPlaylist.remove(song);
+        songsForPlaylist.insert(0, song);
+        PlaylistModel playlist = PlaylistModel(
+            id: 0,
+            title: 'Todas as Músicas',
+            icon: song.icon,
+            songs: songsForPlaylist);
+
+        videoContainers.add(
+          LibraryContentContainer(
+            title: song.title,
+            author: song.author,
+            detailContainer: DetailContainer(
+              icon: song.icon,
+              actions: [
+                SizedBox(
+                  width: size.width,
+                  height: 30,
+                  child: GestureDetector(
+                    onTap: () {
+                      songDataManager.removeSong(song);
+                    },
+                    child: Row(children: [
+                      FaIcon(
+                        FontAwesomeIcons.trash,
+                        size: iconSize,
+                        color: contrastColor,
+                      ),
+                      SizedBox(
+                        width: iconSize / 2,
+                      ),
+                      Text('Remover ', style: buttonTextStyle),
+                    ]),
+                  ),
+                ),
+                SizedBox(
+                  width: size.width,
+                  height: 30,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Modular.to.push(
+                        MaterialPageRoute(
+                          builder: (context) => SongAddPage(
+                            songToBeEdited: song,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Row(children: [
+                      FaIcon(
+                        FontAwesomeIcons.penToSquare,
+                        size: iconSize,
+                        color: contrastColor,
+                      ),
+                      SizedBox(
+                        width: iconSize / 2,
+                      ),
+                      Text('Editar ', style: buttonTextStyle),
+                    ]),
+                  ),
+                ),
+              ],
+              title: song.title,
+            ),
+            onTap: () {
+              Modular.to.popUntil(ModalRoute.withName('/'));
+              audioManager.pause();
+              playlistUIController.setPlaylist(playlist);
+              Modular.to.pushReplacementNamed(
+                '/player',
+                arguments: playlist,
+              );
+              audioManager.play();
+            },
+            icon: song.icon,
+          ),
+        );
+      }
+      videoContainers.add(
+        SizedBox(
+          height: 73 * 2 + x * 2,
+        ),
+      );
+      if (mounted) {
+        setState(() {});
+      }
+      Future.delayed(delay).then((value) {
+        searchEnabled = true;
+      });
+      return;
+    }
+    final yt = YoutubeExplode();
+    final searchResponse = await yt.search.search(searchQuery);
+
+    for (var video in searchResponse.toList()) {
       final icon = YoutubeParser().getYoutubeThumbnailFromVideo(video);
       videoContainers.add(
         Padding(
@@ -87,11 +190,15 @@ class _SearchPageState extends State<SearchPage> {
                   height: 30,
                   child: GestureDetector(
                     onTap: () async {
-                      SongModel song =
-                          await YoutubeParser().convertYoutubeSong(video.url);
-                      song = await SongParser().parseSongBeforeSave(song);
-                      songDataManager.addSong(song);
-                      setState(() {});
+                      Asuka.hideCurrentSnackBar();
+                      Modular.to.push(
+                        MaterialPageRoute(
+                          builder: (context) => YoutubeUrlAddPage(
+                            isSong: true,
+                            url: video.url,
+                          ),
+                        ),
+                      );
                     },
                     child: Row(children: [
                       FaIcon(
@@ -128,8 +235,22 @@ class _SearchPageState extends State<SearchPage> {
               title: video.title,
             ),
             onTap: () async {
+              Asuka.showSnackBar(
+                SnackBar(
+                  backgroundColor: backgroundAccent,
+                  duration: const Duration(days: 1),
+                  content: Text(
+                    'Carregando a música, por favor aguarde',
+                    style: buttonTextStyle,
+                  ),
+                ),
+              );
+
               SongModel song =
                   await YoutubeParser().convertYoutubeSong(video.url);
+
+              Asuka.hideCurrentSnackBar();
+
               song.id = -1;
               PlaylistModel playlist = PlaylistModel(
                   id: 0, title: 'Todas as Músicas', icon: icon, songs: [song]);
@@ -152,6 +273,36 @@ class _SearchPageState extends State<SearchPage> {
         height: 73 * 2 + x * 2,
       ),
     );
+    if (mounted) {
+      setState(() {});
+    }
+    yt.close();
+
+    Future.delayed(delay).then((value) {
+      searchEnabled = true;
+    });
+  }
+
+  //
+  // Build
+  //
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    final homeController = Modular.get<HomeController>();
+    if (homeController.searchLibrary != searchLibrary) {
+      searchLibrary = homeController.searchLibrary;
+      setState(() {});
+    }
+    final colorController = Modular.get<ColorController>();
+    final contrastColor = colorController.currentScheme.contrastColor;
+    final backgroundAccent = colorController.currentScheme.backgroundAccent;
+
+    final headerStyle =
+        TextStyles().boldHeadline.copyWith(color: contrastColor);
+    TextStyle titleStyle =
+        TextStyles().headline2.copyWith(color: contrastColor);
 
     return GestureDetector(
       onTap: () {
@@ -172,7 +323,8 @@ class _SearchPageState extends State<SearchPage> {
                 ),
                 Padding(
                   padding: EdgeInsets.only(left: x / 2),
-                  child: Text('Buscar', style: headerStyle),
+                  child: Text(searchLibrary ? 'Buscar na Biblioteca' : 'Buscar',
+                      style: headerStyle),
                 ),
                 SizedBox(
                   height: x / 2,

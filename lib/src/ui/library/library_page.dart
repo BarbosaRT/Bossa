@@ -59,17 +59,24 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
       child: GestureDetector(
         onTap: widget.onTap,
         onLongPress: () {
-          Asuka.showModalBottomSheet(
-            backgroundColor: backgroundColor,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15),
+          Asuka.showSnackBar(
+            SnackBar(
+              padding: EdgeInsets.zero,
+              backgroundColor: Colors.transparent,
+              duration: const Duration(days: 1),
+              content: Container(
+                height: size.height / 3,
+                width: size.width,
+                decoration: BoxDecoration(
+                  color: backgroundAccent,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
+                  ),
+                ),
+                child: widget.detailContainer,
               ),
             ),
-            builder: (context) {
-              return widget.detailContainer;
-            },
           );
         },
         child: Container(
@@ -160,7 +167,7 @@ class LibraryPage extends StatefulWidget {
 class _LibraryPageState extends State<LibraryPage>
     with SingleTickerProviderStateMixin {
   double iconSize = UIConsts.iconSize.toDouble();
-  static double x = 30;
+  static double x = UIConsts.spacing;
   late TabController _tabController;
   final ScrollController _scrollController = ScrollController();
 
@@ -205,8 +212,16 @@ class _LibraryPageState extends State<LibraryPage>
 
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);
-    final buttonStyle =
+    final buttonTextStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
+
+    final buttonStyle = ButtonStyle(
+      padding: MaterialStateProperty.all(EdgeInsets.zero),
+      overlayColor: MaterialStateProperty.all(Colors.transparent),
+      foregroundColor: MaterialStateProperty.all(Colors.transparent),
+      shadowColor: MaterialStateProperty.all(Colors.transparent),
+      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+    );
 
     List<Widget> songContainers = [];
     for (SongModel song in songs) {
@@ -242,7 +257,7 @@ class _LibraryPageState extends State<LibraryPage>
                     SizedBox(
                       width: iconSize / 2,
                     ),
-                    Text('Remover ', style: buttonStyle),
+                    Text('Remover ', style: buttonTextStyle),
                   ]),
                 ),
               ),
@@ -269,7 +284,7 @@ class _LibraryPageState extends State<LibraryPage>
                     SizedBox(
                       width: iconSize / 2,
                     ),
-                    Text('Editar ', style: buttonStyle),
+                    Text('Editar ', style: buttonTextStyle),
                   ]),
                 ),
               ),
@@ -298,7 +313,7 @@ class _LibraryPageState extends State<LibraryPage>
           title: playlist.title,
           detailContainer: PlaylistSnackbar(playlist: playlist),
           onTap: () {
-            playlistUIController.setPlaylist(playlist);
+            homeController.setPlaylist(playlist);
             homeController.changeCurrentPage(Pages.playlist);
           },
           icon: playlist.icon,
@@ -320,9 +335,24 @@ class _LibraryPageState extends State<LibraryPage>
                 const Spacer(
                   flex: 1,
                 ),
-                FaIcon(FontAwesomeIcons.magnifyingGlass, color: contrastColor),
+                SizedBox(
+                  width: 3 * iconSize / 2,
+                  height: 3 * iconSize / 2,
+                  child: ElevatedButton(
+                    style: buttonStyle,
+                    onPressed: () {
+                      homeController.changeCurrentPage(Pages.search);
+                      homeController.setSearchLibrary(true);
+                    },
+                    child: FaIcon(
+                      FontAwesomeIcons.magnifyingGlass,
+                      color: contrastColor,
+                      size: iconSize,
+                    ),
+                  ),
+                ),
                 const SizedBox(
-                  width: 5,
+                  width: 15,
                 ),
                 const AddWidget()
               ],
