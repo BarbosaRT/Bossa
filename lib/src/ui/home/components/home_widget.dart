@@ -1,11 +1,11 @@
 import 'package:asuka/asuka.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/ui/playlist/add_to_playlist_page.dart';
 import 'package:bossa/src/ui/playlist/playlist_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
@@ -17,7 +17,7 @@ import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:bossa/src/ui/playlist/playlist_add_page.dart';
 import 'package:bossa/src/ui/song/song_add_page.dart';
-import 'package:bossa/src/url/url_add_page.dart';
+import 'package:bossa/src/url/youtube_url_add_page.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class AddWidget extends StatefulWidget {
@@ -30,8 +30,6 @@ class AddWidget extends StatefulWidget {
 class _AddWidgetState extends State<AddWidget> {
   double iconSize = UIConsts.iconSize.toDouble();
   static double x = UIConsts.spacing;
-  final popupStyle = GoogleFonts.poppins(
-      color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal);
 
   Widget addWidget({
     required String addText,
@@ -44,6 +42,9 @@ class _AddWidgetState extends State<AddWidget> {
 
     final colorController = Modular.get<ColorController>();
     final backgroundColor = colorController.currentScheme.backgroundColor;
+    final contrastColor = colorController.currentScheme.contrastColor;
+
+    final popupStyle = TextStyles().headline2.copyWith(color: contrastColor);
 
     return ElevatedButton(
       onPressed: () {
@@ -110,6 +111,7 @@ class _AddWidgetState extends State<AddWidget> {
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
     final backgroundColor = colorController.currentScheme.backgroundColor;
+
     final addSongWidget = addWidget(
       onFilePress: (BuildContext ctx) {
         Navigator.of(ctx).pop();
@@ -225,16 +227,13 @@ class _ContentContainerState extends State<ContentContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final colorController = Modular.get<ColorController>();
-    final backgroundColor = colorController.currentScheme.backgroundColor;
-
     return Padding(
       padding: EdgeInsets.only(right: x / 3),
       child: GestureDetector(
         onTap: widget.onTap,
         onLongPress: () {
           Asuka.showModalBottomSheet(
-            backgroundColor: backgroundColor,
+            backgroundColor: Colors.transparent,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(15),
@@ -285,37 +284,49 @@ class _DetailContainerState extends State<DetailContainer> {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
+    final backgroundColor = colorController.currentScheme.backgroundColor;
     final titleStyle = TextStyles().headline.copyWith(color: contrastColor);
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: x),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Image(
-            image: ImageParser.getImageProviderFromString(
-              widget.icon,
+    return Container(
+      height: size.height / 3,
+      width: size.width,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(15),
+          topRight: Radius.circular(15),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: x),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Image(
+              image: ImageParser.getImageProviderFromString(
+                widget.icon,
+              ),
+              fit: BoxFit.cover,
+              alignment: FractionalOffset.center,
+              width: imagesSize,
+              height: imagesSize,
             ),
-            fit: BoxFit.cover,
-            alignment: FractionalOffset.center,
-            width: imagesSize,
-            height: imagesSize,
-          ),
-          SizedBox(
-            width: size.width,
-            child: TextScroll(
-              widget.title,
-              mode: TextScrollMode.endless,
-              velocity: const Velocity(pixelsPerSecond: Offset(100, 0)),
-              delayBefore: const Duration(seconds: 10),
-              pauseBetween: const Duration(seconds: 5),
-              style: titleStyle,
-              textAlign: TextAlign.center,
-              selectable: true,
+            SizedBox(
+              width: size.width,
+              child: TextScroll(
+                widget.title,
+                mode: TextScrollMode.endless,
+                velocity: const Velocity(pixelsPerSecond: Offset(100, 0)),
+                delayBefore: const Duration(seconds: 10),
+                pauseBetween: const Duration(seconds: 5),
+                style: titleStyle,
+                textAlign: TextAlign.center,
+                selectable: true,
+              ),
             ),
-          ),
-          for (Widget action in widget.actions) action
-        ],
+            for (Widget action in widget.actions) action
+          ],
+        ),
       ),
     );
   }
@@ -396,7 +407,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 SizedBox(
                   width: iconSize / 2,
                 ),
-                Text('Remover ', style: buttonStyle),
+                Text('Remover', style: buttonStyle),
               ]),
             ),
           ),
@@ -405,25 +416,25 @@ class _HomeWidgetState extends State<HomeWidget> {
             height: 30,
             child: GestureDetector(
               onTap: () {
-                Navigator.of(context).pop();
+                Asuka.hideCurrentSnackBar();
                 Modular.to.push(
                   MaterialPageRoute(
-                    builder: (context) => SongAddPage(
-                      songToBeEdited: song,
+                    builder: (context) => AddToPlaylistPage(
+                      song: song,
                     ),
                   ),
                 );
               },
               child: Row(children: [
                 FaIcon(
-                  FontAwesomeIcons.penToSquare,
+                  FontAwesomeIcons.circlePlus,
                   size: iconSize,
                   color: contrastColor,
                 ),
                 SizedBox(
                   width: iconSize / 2,
                 ),
-                Text('Editar ', style: buttonStyle),
+                Text('Adicionar à playlist', style: buttonStyle),
               ]),
             ),
           ),
@@ -481,7 +492,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             homeController.setPlaylist(playlist);
             if (mounted) {
               setState(() {
-                homeController.changeCurrentPage(Pages.playlist);
+                homeController.setCurrentPage(Pages.playlist);
               });
             }
           },

@@ -42,7 +42,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
           child: GestureDetector(
             onTap: () {
               playlistDataManager.deletePlaylist(widget.playlist);
-              homeController.changeCurrentPage(Pages.home);
+              homeController.setCurrentPage(Pages.home);
             },
             child: Row(children: [
               FaIcon(
@@ -53,7 +53,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               SizedBox(
                 width: iconSize / 2,
               ),
-              Text('Remover ', style: buttonStyle),
+              Text('Remover', style: buttonStyle),
             ]),
           ),
         ),
@@ -80,7 +80,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               SizedBox(
                 width: iconSize / 2,
               ),
-              Text('Editar ', style: buttonStyle),
+              Text('Editar', style: buttonStyle),
             ]),
           ),
         ),

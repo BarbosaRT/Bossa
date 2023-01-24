@@ -13,7 +13,7 @@ import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
 import 'package:bossa/src/ui/library/library_page.dart';
 import 'package:bossa/src/ui/song/song_add_page.dart';
-import 'package:bossa/src/url/url_add_page.dart';
+import 'package:bossa/src/url/youtube_url_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -32,7 +32,7 @@ class _SearchPageState extends State<SearchPage> {
   double iconSize = UIConsts.iconSize.toDouble();
 
   bool searchLibrary = false;
-  bool searchEnabled = true;
+  bool isSearching = true;
   Duration delay = const Duration(milliseconds: 250);
   Timer searchTimer = Timer(const Duration(milliseconds: 250), () {});
 
@@ -42,8 +42,14 @@ class _SearchPageState extends State<SearchPage> {
   void initState() {
     super.initState();
     final homeController = Modular.get<HomeController>();
+
+    if (!searchLibrary) {
+      urlTextController.text = homeController.lastSearchedTopic;
+    } else {
+      urlTextController.text = '';
+    }
     homeController.addListener(() {
-      searchLibrary = homeController.searchLibrary;
+      searchLibrarySetter();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {});
@@ -52,8 +58,18 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  void search(String searchQuery) async {
+  void searchLibrarySetter() {
+    final homeController = Modular.get<HomeController>();
+    searchLibrary = homeController.searchLibrary;
+  }
+
+  Future<void> search(String searchQuery) async {
     final size = MediaQuery.of(context).size;
+    final homeController = Modular.get<HomeController>();
+
+    if (!searchLibrary) {
+      homeController.setlastSearchedTopic(searchQuery);
+    }
 
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
@@ -68,10 +84,6 @@ class _SearchPageState extends State<SearchPage> {
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
 
     videoContainers = [];
-    if (!searchEnabled) {
-      return;
-    }
-    searchEnabled = false;
 
     if (searchLibrary) {
       List<SongModel> songs =
@@ -166,9 +178,6 @@ class _SearchPageState extends State<SearchPage> {
       if (mounted) {
         setState(() {});
       }
-      Future.delayed(delay).then((value) {
-        searchEnabled = true;
-      });
       return;
     }
     final yt = YoutubeExplode();
@@ -217,7 +226,17 @@ class _SearchPageState extends State<SearchPage> {
                   width: size.width,
                   height: 30,
                   child: GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      Asuka.hideCurrentSnackBar();
+                      Modular.to.push(
+                        MaterialPageRoute(
+                          builder: (context) => YoutubeUrlAddPage(
+                              isSong: true,
+                              url: video.url,
+                              addToPlaylist: true),
+                        ),
+                      );
+                    },
                     child: Row(children: [
                       FaIcon(
                         FontAwesomeIcons.list,
@@ -277,10 +296,6 @@ class _SearchPageState extends State<SearchPage> {
       setState(() {});
     }
     yt.close();
-
-    Future.delayed(delay).then((value) {
-      searchEnabled = true;
-    });
   }
 
   //
@@ -292,9 +307,10 @@ class _SearchPageState extends State<SearchPage> {
 
     final homeController = Modular.get<HomeController>();
     if (homeController.searchLibrary != searchLibrary) {
-      searchLibrary = homeController.searchLibrary;
+      searchLibrarySetter();
       setState(() {});
     }
+
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
     final backgroundAccent = colorController.currentScheme.backgroundAccent;
@@ -355,19 +371,32 @@ class _SearchPageState extends State<SearchPage> {
                         textAlign: TextAlign.start,
                         textAlignVertical: TextAlignVertical.center,
                         onChanged: (searchQuery) {
+                          print(searchQuery);
                           searchTimer.cancel();
                           searchTimer = Timer(
                               Duration(milliseconds: delay.inMilliseconds + 50),
-                              () {
-                            search(searchQuery);
+                              () async {
+                            setState(() {
+                              isSearching = true;
+                            });
+                            await search(searchQuery);
+                            setState(() {
+                              isSearching = false;
+                            });
                           });
                         },
                         onSubmitted: (searchQuery) {
                           searchTimer.cancel();
                           searchTimer = Timer(
                               Duration(milliseconds: delay.inMilliseconds + 50),
-                              () {
-                            search(searchQuery);
+                              () async {
+                            setState(() {
+                              isSearching = true;
+                            });
+                            await search(searchQuery);
+                            setState(() {
+                              isSearching = false;
+                            });
                           });
                         },
                       ),
@@ -378,72 +407,20 @@ class _SearchPageState extends State<SearchPage> {
                   height: x,
                 ),
                 SizedBox(
-                  height: size.height - x * 2,
+                  height: size.height - x * 5,
                   width: size.width,
-                  child: ListView(
-                    children: videoContainers,
-                  ),
+                  child: isSearching
+                      ? const Align(
+                          alignment: Alignment.topCenter,
+                          child: CircularProgressIndicator(),
+                        )
+                      : ListView(
+                          children: videoContainers,
+                        ),
                 ),
                 SizedBox(
                   height: x / 2,
                 ),
-                Padding(
-                  padding: EdgeInsets.only(left: x / 2),
-                  child: SizedBox(
-                    width: size.width - x,
-                    height: 40,
-                    child: Container(
-                      color: backgroundAccent,
-                      padding: const EdgeInsets.all(8),
-                      child: TextField(
-                        controller: urlTextController,
-                        decoration: InputDecoration(
-                          hintText: 'O que você quer ouvir?',
-                          hintStyle: titleStyle,
-                          isDense: true,
-                          helperMaxLines: 1,
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          icon: FaIcon(
-                            FontAwesomeIcons.magnifyingGlass,
-                            color: contrastColor,
-                          ),
-                        ),
-                        style: titleStyle,
-                        textAlign: TextAlign.start,
-                        textAlignVertical: TextAlignVertical.center,
-                        onChanged: (searchQuery) {
-                          Future.delayed(Duration(
-                                  milliseconds: delay.inMilliseconds + 50))
-                              .then(
-                            (value) {
-                              search(searchQuery);
-                            },
-                          );
-                        },
-                        onSubmitted: (searchQuery) {
-                          Future.delayed(Duration(
-                                  milliseconds: delay.inMilliseconds + 50))
-                              .then(
-                            (value) {
-                              search(searchQuery);
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: x,
-                ),
-                SizedBox(
-                  height: size.height - x * 2,
-                  width: size.width,
-                  child: ListView(
-                    children: videoContainers,
-                  ),
-                )
               ],
             ),
           ],

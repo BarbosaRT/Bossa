@@ -24,13 +24,15 @@ class LibraryContentContainer extends StatefulWidget {
   final String icon;
   final String title;
   final String? author;
+  final bool? useDetail;
   const LibraryContentContainer(
       {super.key,
       required this.detailContainer,
       required this.onTap,
       required this.icon,
       required this.title,
-      this.author});
+      this.author,
+      this.useDetail});
 
   @override
   State<LibraryContentContainer> createState() =>
@@ -59,25 +61,20 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
       child: GestureDetector(
         onTap: widget.onTap,
         onLongPress: () {
-          Asuka.showSnackBar(
-            SnackBar(
-              padding: EdgeInsets.zero,
-              backgroundColor: Colors.transparent,
-              duration: const Duration(days: 1),
-              content: Container(
-                height: size.height / 3,
-                width: size.width,
-                decoration: BoxDecoration(
-                  color: backgroundAccent,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(15),
-                    topRight: Radius.circular(15),
-                  ),
+          if (widget.useDetail == false) {
+            return;
+          }
+          Asuka.showModalBottomSheet(
+              backgroundColor: backgroundColor,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
                 ),
-                child: widget.detailContainer,
               ),
-            ),
-          );
+              builder: (context) {
+                return widget.detailContainer;
+              });
         },
         child: Container(
           width: size.width,
@@ -132,17 +129,16 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
               GestureDetector(
                 onTap: () {
                   Asuka.showModalBottomSheet(
-                    backgroundColor: backgroundColor,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(15),
-                        topRight: Radius.circular(15),
+                      backgroundColor: backgroundColor,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(15),
+                          topRight: Radius.circular(15),
+                        ),
                       ),
-                    ),
-                    builder: (context) {
-                      return widget.detailContainer;
-                    },
-                  );
+                      builder: (context) {
+                        return widget.detailContainer;
+                      });
                 },
                 child: FaIcon(
                   FontAwesomeIcons.bars,
@@ -314,7 +310,7 @@ class _LibraryPageState extends State<LibraryPage>
           detailContainer: PlaylistSnackbar(playlist: playlist),
           onTap: () {
             homeController.setPlaylist(playlist);
-            homeController.changeCurrentPage(Pages.playlist);
+            homeController.setCurrentPage(Pages.playlist);
           },
           icon: playlist.icon,
         ),
@@ -341,7 +337,7 @@ class _LibraryPageState extends State<LibraryPage>
                   child: ElevatedButton(
                     style: buttonStyle,
                     onPressed: () {
-                      homeController.changeCurrentPage(Pages.search);
+                      homeController.setCurrentPage(Pages.search);
                       homeController.setSearchLibrary(true);
                     },
                     child: FaIcon(

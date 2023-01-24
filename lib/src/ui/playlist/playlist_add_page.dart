@@ -248,7 +248,7 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
         leading: Center(
           child: GestureDetector(
             onTap: () {
-              Modular.to.pop();
+              Modular.to.popUntil(ModalRoute.withName('/'));
             },
             child: FaIcon(
               FontAwesomeIcons.xmark,
@@ -269,7 +269,8 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                   editing
                       ? playlistDataManager.editPlaylist(playlistToBeAdded)
                       : playlistDataManager.addPlaylist(playlistToBeAdded);
-                  Modular.to.pop();
+
+                  Modular.to.popUntil(ModalRoute.withName('/'));
                 },
                 child: FaIcon(
                   editing

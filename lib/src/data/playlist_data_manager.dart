@@ -38,6 +38,7 @@ class PlaylistDataManager {
 
   void editPlaylist(PlaylistModel editedPlaylist) async {
     var database = await localDataManagerInstance.database();
+
     database.update(
       'playlists',
       editedPlaylist.toSql(),
@@ -78,6 +79,26 @@ class PlaylistDataManager {
     return playlists;
   }
 
+  Future<List<PlaylistModel>> searchPlaylists({
+    required String searchQuery,
+  }) async {
+    var database = await localDataManagerInstance.database();
+    List<Map<String, dynamic>> playlistsFromQuery = await database.query(
+      'playlists',
+      where: 'title like "${searchQuery.trim()}%"',
+    );
+
+    List<PlaylistModel> playlists = [];
+
+    for (Map playlistFromQuery in playlistsFromQuery) {
+      PlaylistModel playlist = PlaylistModel.fromMap(playlistFromQuery);
+      playlist.songs = await _loadSongsFromPlaylist(playlist);
+      playlists.add(playlist);
+    }
+
+    return playlists;
+  }
+
   Future<List<SongModel>> _loadSongsFromPlaylist(PlaylistModel playlist) async {
     var database = await localDataManagerInstance.database();
 
@@ -101,11 +122,9 @@ class PlaylistDataManager {
         whereArgs: [playlist.id, song.id]);
   }
 
-  void appendToPlaylist(SongModel song, PlaylistModel playlist) async {
+  Future<void> appendToPlaylist(SongModel song, PlaylistModel playlist) async {
     var database = await localDataManagerInstance.database();
-    var values = {'idPlaylist': playlist.id, 'idSong': song.id};
-    await database.transaction((transaction) async {
-      await transaction.insert('playlists_songs', values);
-    });
+    await database.rawInsert(
+        'INSERT INTO playlists_songs(idPlaylist, idSong) VALUES("${playlist.id}", "${song.id}")');
   }
 }

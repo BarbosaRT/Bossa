@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:asuka/asuka.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
@@ -9,7 +8,6 @@ import 'package:bossa/src/data/youtube_parser.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
-import 'package:bossa/src/url/url_parser.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -123,21 +121,22 @@ class _SongAddPageState extends State<SongAddPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Disponivel online',
+              'Disponivel offline',
               style: authorStyle,
             ),
             Switch(
               value: songToBeAdded.path.isNotEmpty,
               onChanged: (value) async {
                 if (!value) {
-                  print("yeah");
                   final icon = File(songToBeAdded.icon);
                   final path = File(songToBeAdded.path);
 
                   if (await icon.exists()) {
+                    songToBeAdded.icon = '';
                     await icon.delete();
                   }
                   if (await path.exists()) {
+                    songToBeAdded.path = '';
                     await path.delete();
                   }
 
@@ -150,12 +149,12 @@ class _SongAddPageState extends State<SongAddPage> {
                   } else {
                     songToBeAdded.icon = UIConsts.assetImage;
                   }
-
                   if (mounted) {
                     setState(() {});
                   }
                   return;
                 }
+
                 Asuka.showSnackBar(
                   SnackBar(
                     backgroundColor: backgroundAccent,
@@ -168,7 +167,7 @@ class _SongAddPageState extends State<SongAddPage> {
                 );
                 songToBeAdded = await SongParser().parseSongBeforeSave(
                   songToBeAdded,
-                  saveOffline: value,
+                  saveOffline: true,
                 );
                 Asuka.hideCurrentSnackBar();
                 Asuka.showSnackBar(
@@ -199,7 +198,7 @@ class _SongAddPageState extends State<SongAddPage> {
           child: Center(
             child: GestureDetector(
               onTap: () {
-                Modular.to.pop();
+                Modular.to.popUntil(ModalRoute.withName('/'));
               },
               child: FaIcon(
                 FontAwesomeIcons.xmark,
@@ -220,7 +219,8 @@ class _SongAddPageState extends State<SongAddPage> {
                   editing
                       ? songDataManager.editSong(songToBeAdded)
                       : songDataManager.addSong(songToBeAdded);
-                  Modular.to.pop();
+
+                  Modular.to.popUntil(ModalRoute.withName('/'));
                 },
                 child: FaIcon(
                   editing
@@ -290,7 +290,7 @@ class _SongAddPageState extends State<SongAddPage> {
                                         child: TextField(
                                           controller: titleTextController,
                                           decoration: InputDecoration(
-                                            hintText: 'Title',
+                                            hintText: 'Titulo',
                                             hintStyle: titleStyle,
                                             border: InputBorder.none,
                                             isDense: true,
@@ -318,7 +318,7 @@ class _SongAddPageState extends State<SongAddPage> {
                                         child: TextField(
                                           controller: authorTextController,
                                           decoration: InputDecoration(
-                                              hintText: 'Author',
+                                              hintText: 'Autor',
                                               hintStyle: authorStyle,
                                               border: InputBorder.none),
                                           style: authorStyle,

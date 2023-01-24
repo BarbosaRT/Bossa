@@ -45,7 +45,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
   }
 
   PlaylistModel playlist =
-      PlaylistModel(id: 0, title: 'title', icon: 'icon', songs: []);
+      PlaylistModel(id: 0, title: 'Titulo', icon: 'icon', songs: []);
 
   @override
   void initState() {
@@ -85,7 +85,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
     final contrastColor = colorController.currentScheme.contrastColor;
     //final contrastAccent = colorController.currentScheme.contrastAccent;
     final backgroundColor = colorController.currentScheme.backgroundColor;
-    //final backgroundAccent = colorController.currentScheme.backgroundAccent;
+    final backgroundAccent = colorController.currentScheme.backgroundAccent;
 
     final titleStyle = TextStyles().boldHeadline.copyWith(color: contrastColor);
     final songDataManager = Modular.get<SongDataManager>();
@@ -218,7 +218,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                         child: ElevatedButton(
                           style: buttonStyle,
                           onPressed: () {
-                            homeController.changeCurrentPage(Pages.home);
+                            homeController.setCurrentPage(Pages.home);
                           },
                           child: FaIcon(
                             FontAwesomeIcons.angleLeft,
@@ -279,17 +279,24 @@ class _PlaylistPageState extends State<PlaylistPage> {
                         child: ElevatedButton(
                           style: buttonStyle,
                           onPressed: () {
-                            Asuka.showModalBottomSheet(
-                              backgroundColor: backgroundColor,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(15),
-                                  topRight: Radius.circular(15),
+                            Asuka.showSnackBar(
+                              SnackBar(
+                                padding: EdgeInsets.zero,
+                                backgroundColor: Colors.transparent,
+                                duration: const Duration(days: 1),
+                                content: Container(
+                                  height: size.height / 3,
+                                  width: size.width,
+                                  decoration: BoxDecoration(
+                                    color: backgroundAccent,
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(15),
+                                      topRight: Radius.circular(15),
+                                    ),
+                                  ),
+                                  child: PlaylistSnackbar(playlist: playlist),
                                 ),
                               ),
-                              builder: (context) {
-                                return PlaylistSnackbar(playlist: playlist);
-                              },
                             );
                           },
                           child: FaIcon(FontAwesomeIcons.bars,
@@ -352,6 +359,9 @@ class _PlaylistPageState extends State<PlaylistPage> {
                     child: ListView(
                       children: songContainers,
                     ),
+                  ),
+                  SizedBox(
+                    height: x * 2,
                   ),
                 ],
               ),

@@ -500,7 +500,7 @@ class _PlayerPageState extends State<PlayerPage> {
                                           LoopMode loopMode =
                                               snapshot.data != null
                                                   ? snapshot.data!
-                                                  : LoopMode.off;
+                                                  : LoopMode.all;
 
                                           bool isRepeating =
                                               loopMode == LoopMode.one;
@@ -511,7 +511,7 @@ class _PlayerPageState extends State<PlayerPage> {
                                               onPressed: () {
                                                 playlistManager.setLoopMode(
                                                   isRepeating
-                                                      ? LoopMode.off
+                                                      ? LoopMode.all
                                                       : LoopMode.one,
                                                 );
                                               },

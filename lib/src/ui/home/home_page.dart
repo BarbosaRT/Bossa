@@ -15,7 +15,7 @@ class HomeController extends ChangeNotifier {
   Pages _currentPage = Pages.home;
   Pages get currentPage => _currentPage;
 
-  void changeCurrentPage(Pages newPage) {
+  void setCurrentPage(Pages newPage) {
     _currentPage = newPage;
     notifyListeners();
   }
@@ -34,6 +34,14 @@ class HomeController extends ChangeNotifier {
 
   void setSearchLibrary(bool value) {
     _searchLibrary = value;
+    notifyListeners();
+  }
+
+  String _lastSearchedTopic = '';
+  String get lastSearchedTopic => _lastSearchedTopic;
+
+  void setlastSearchedTopic(String value) {
+    _lastSearchedTopic = value;
     notifyListeners();
   }
 }
@@ -92,9 +100,7 @@ class _HomePageState extends State<HomePage> {
       shadowColor: MaterialStateProperty.all(Colors.transparent),
       backgroundColor: MaterialStateProperty.all(Colors.transparent),
     );
-
     Widget widgetPage = pageWidgets[currentPage]!;
-
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SafeArea(
@@ -149,6 +155,7 @@ class _HomePageState extends State<HomePage> {
                                   child: ElevatedButton(
                                     style: buttonStyle,
                                     onPressed: () {
+                                      homeController.setCurrentPage(Pages.home);
                                       setState(() {
                                         currentPage = Pages.home;
                                       });
@@ -166,8 +173,10 @@ class _HomePageState extends State<HomePage> {
                                   child: ElevatedButton(
                                     style: buttonStyle,
                                     onPressed: () {
+                                      homeController.setSearchLibrary(false);
+                                      homeController
+                                          .setCurrentPage(Pages.search);
                                       setState(() {
-                                        homeController.setSearchLibrary(false);
                                         currentPage = Pages.search;
                                       });
                                     },
@@ -184,6 +193,8 @@ class _HomePageState extends State<HomePage> {
                                   child: ElevatedButton(
                                     style: buttonStyle,
                                     onPressed: () {
+                                      homeController
+                                          .setCurrentPage(Pages.library);
                                       setState(() {
                                         currentPage = Pages.library;
                                       });
@@ -201,6 +212,8 @@ class _HomePageState extends State<HomePage> {
                                   child: ElevatedButton(
                                     style: buttonStyle,
                                     onPressed: () {
+                                      homeController
+                                          .setCurrentPage(Pages.settings);
                                       setState(() {
                                         currentPage = Pages.settings;
                                       });

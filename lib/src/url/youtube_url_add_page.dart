@@ -7,6 +7,7 @@ import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/youtube_parser.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
+import 'package:bossa/src/ui/playlist/add_to_playlist_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -14,7 +15,9 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 class YoutubeUrlAddPage extends StatefulWidget {
   final String? url;
   final bool isSong;
-  const YoutubeUrlAddPage({super.key, required this.isSong, this.url});
+  final bool? addToPlaylist;
+  const YoutubeUrlAddPage(
+      {super.key, required this.isSong, this.url, this.addToPlaylist});
 
   @override
   State<YoutubeUrlAddPage> createState() => _YoutubeUrlAddPageState();
@@ -55,9 +58,9 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
         ),
       ),
     );
-
+    SongModel? song;
     if (widget.isSong) {
-      SongModel song = await parser.convertYoutubeSong(value);
+      song = await parser.convertYoutubeSong(value);
       songDataManager.addSong(song);
     } else {
       var yt = YoutubeExplode();
@@ -108,7 +111,18 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
         ),
       ),
     );
-    Modular.to.pop();
+    if (widget.addToPlaylist == true && widget.isSong) {
+      song = await songDataManager.loadLastAddedSong();
+      Modular.to.push(
+        MaterialPageRoute(
+          builder: (context) => AddToPlaylistPage(
+            song: song!,
+          ),
+        ),
+      );
+    } else {
+      Modular.to.popUntil(ModalRoute.withName('/'));
+    }
   }
 
   @override
@@ -184,7 +198,7 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      Modular.to.pop();
+                      Modular.to.popUntil(ModalRoute.withName('/'));
                     },
                     child: Text(
                       'CANCELAR',

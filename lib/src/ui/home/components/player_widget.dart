@@ -99,8 +99,8 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                             Row(
                               children: [
                                 SizedBox(
-                                  width: 60,
-                                  height: 60,
+                                  width: 50,
+                                  height: 50,
                                   child: Image(
                                     image:
                                         ImageParser.getImageProviderFromString(
