@@ -20,7 +20,7 @@ class SliverAppWidget extends StatelessWidget {
         pinned: true,
         backgroundColor: backgroundColor,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50),
+          preferredSize: const Size.fromHeight(40),
           child: Container(
               margin: const EdgeInsets.only(bottom: 20.0),
               child: TabBar(
@@ -44,13 +44,10 @@ class SliverAppWidget extends StatelessWidget {
                       ]),
                   tabs: const [
                     AppTabs(
-                        backgroundColor: Colors.orange,
                         text: 'Home'),
                     AppTabs(
-                        backgroundColor: Colors.red,
                         text: 'Playlists'),
                     AppTabs(
-                        backgroundColor: Colors.blue,
                         text: 'Radios'),
                   ])),
         ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ThemeNotifier extends ChangeNotifier{
-
+class ThemeNotifier extends ChangeNotifier {
   final Color _lightBackground = const Color.fromARGB(255, 220, 220, 220);
   final Color _lightColor = const Color.fromARGB(255, 200, 200, 200);
 
@@ -16,31 +15,31 @@ class ThemeNotifier extends ChangeNotifier{
 
   final Color _primaryColor = const Color.fromARGB(255, 0, 30, 255);
 
-  bool _isDark = true;    
-  bool get isDark => _isDark;        
+  bool _isDark = true;
+  bool get isDark => _isDark;
 
   ThemeData _themeData = ThemeData();
-  ThemeData get themeData => _themeData; 
+  ThemeData get themeData => _themeData;
 
   TextTheme _textTheme = const TextTheme(
     headline1: TextStyle(
       fontSize: 40,
-      fontFamily: 'Avenir',
+      fontFamily: 'Comic Sans',
       fontWeight: FontWeight.bold,
     ),
     headline2: TextStyle(
       fontSize: 30,
-      fontFamily: 'Avenir',
+      fontFamily: 'Comic Sans',
       fontWeight: FontWeight.bold,
     ),
     headline3: TextStyle(
       fontSize: 20,
-      fontFamily: 'Avenir',
+      fontFamily: 'Comic Sans',
       fontWeight: FontWeight.bold,
     ),
     headline4: TextStyle(
       fontSize: 15,
-      fontFamily: 'Avenir',
+      fontFamily: 'Comic Sans',
     ),
   );
   TextTheme get textTheme => _textTheme;
@@ -51,7 +50,7 @@ class ThemeNotifier extends ChangeNotifier{
   }
 
   // Changes the theme from dark mode to light mode
-  void changeTheme(bool darkModeEnabled) { 
+  void changeTheme(bool darkModeEnabled) {
     _isDark = darkModeEnabled;
     _colorScheme = ColorScheme(
         // Decide how you want to apply your own custom them, to the MaterialApp
@@ -68,22 +67,27 @@ class ThemeNotifier extends ChangeNotifier{
         error: Colors.red.shade400);
 
     _themeData = ThemeData(
-      primaryColorLight: _lightCard,
-      primaryColorDark: _darkCard,
-      backgroundColor: _isDark ? _darkBackground : _lightBackground,
-      primaryColor: _primaryColor,
-      cardColor: _isDark ? _darkCard : _lightCard,
-      canvasColor: isDark ? _darkCanvas : _lightCanvas,
-      buttonTheme: ButtonThemeData(colorScheme: _colorScheme)
-    );
+        primaryColorLight: _lightCard,
+        primaryColorDark: _darkCard,
+        backgroundColor: _isDark ? _darkBackground : _lightBackground,
+        primaryColor: _primaryColor,
+        cardColor: _isDark ? _darkCard : _lightCard,
+        canvasColor: isDark ? _darkCanvas : _lightCanvas,
+        buttonTheme: ButtonThemeData(colorScheme: _colorScheme));
 
-    _textTheme = (_isDark ? ThemeData.dark() : ThemeData.light()).textTheme.copyWith(
-              headline1: _textTheme.headline1!.copyWith(color: _isDark ? _lightColor : _darkColor),
-              headline2: _textTheme.headline2!.copyWith(color: _isDark ? _lightColor : _darkColor),
-              headline3: _textTheme.headline3!.copyWith(color: _isDark ? _lightColor : _darkColor),
-              headline4: _textTheme.headline4!.copyWith(color: _isDark ? _lightColor : _darkColor),
+    _textTheme =
+        (_isDark ? ThemeData.dark() : ThemeData.light()).textTheme.copyWith(
+              headline1: _textTheme.headline1!
+                  .copyWith(color: _isDark ? _lightColor : _darkColor),
+              headline2: _textTheme.headline2!
+                  .copyWith(color: _isDark ? _lightColor : _darkColor),
+              headline3: _textTheme.headline3!
+                  .copyWith(color: _isDark ? _lightColor : _darkColor),
+              headline4: _textTheme.headline4!
+                  .copyWith(color: _isDark ? _lightColor : _darkColor),
             );
 
     notifyListeners();
   }
 }
+
