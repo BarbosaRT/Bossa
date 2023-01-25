@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
-import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/youtube_parser.dart';
@@ -13,7 +12,6 @@ import 'package:bossa/src/ui/home/components/home_widget.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/ui/library/library_page.dart';
 import 'package:bossa/src/ui/playlist/playlist_snackbar.dart';
-import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/url/youtube_url_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -55,10 +53,7 @@ class PlaylistSearch {
     final contrastColor = colorController.currentScheme.contrastColor;
     final backgroundAccent = colorController.currentScheme.backgroundAccent;
 
-    final playlistManager = Modular.get<JustPlaylistManager>();
-    final playlistUIController = Modular.get<PlaylistUIController>();
     final homeController = Modular.get<HomeController>();
-    final audioManager = playlistManager.player;
 
     final buttonTextStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
