@@ -32,7 +32,6 @@ class _SongAddPageState extends State<SongAddPage> {
   final scrollController = ScrollController();
 
   bool editing = false;
-
   bool saveOffline = false;
 
   final SongModel defaultSong = SongModel(
@@ -145,7 +144,7 @@ class _SongAddPageState extends State<SongAddPage> {
                     final video = await yt.videos.get(
                         SongParser().parseYoutubeSongUrl(songToBeAdded.url));
                     songToBeAdded.icon =
-                        YoutubeParser().getYoutubeThumbnailFromVideo(video);
+                        YoutubeParser().getYoutubeThumbnail(video.thumbnails);
                   } else {
                     songToBeAdded.icon = UIConsts.assetImage;
                   }
@@ -198,7 +197,101 @@ class _SongAddPageState extends State<SongAddPage> {
           child: Center(
             child: GestureDetector(
               onTap: () {
-                Modular.to.popUntil(ModalRoute.withName('/'));
+                if (widget.songToBeEdited != songToBeAdded) {
+                  Asuka.hideCurrentSnackBar();
+                  Asuka.showSnackBar(
+                    SnackBar(
+                      padding: EdgeInsets.zero,
+                      backgroundColor: Colors.transparent,
+                      duration: const Duration(days: 1),
+                      content: Container(
+                        height: 100,
+                        width: size.width,
+                        decoration: BoxDecoration(
+                          color: backgroundAccent,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(15),
+                            topRight: Radius.circular(15),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Você têm mudanças não salvas, você deseja realmente sair?',
+                                  style: authorStyle,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          Asuka.hideCurrentSnackBar();
+                                          Modular.to.popAndPushNamed('/');
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20),
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                              color: accentColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
+                                            ),
+                                            padding: const EdgeInsets.all(8),
+                                            child: Text(
+                                              'Sim',
+                                              style: authorStyle,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          Asuka.hideCurrentSnackBar();
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                          ),
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                              color: accentColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
+                                            ),
+                                            padding: const EdgeInsets.all(8),
+                                            child: Text(
+                                              'Não',
+                                              style: authorStyle,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                } else {
+                  Modular.to.popAndPushNamed('/');
+                }
               },
               child: FaIcon(
                 FontAwesomeIcons.xmark,

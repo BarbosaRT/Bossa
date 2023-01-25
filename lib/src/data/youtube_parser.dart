@@ -18,8 +18,7 @@ class YoutubeParser {
         downloadService: HttpDownloadService(filePath: FilePathImpl()));
   }
 
-  String getYoutubeThumbnailFromVideo(Video video) {
-    ThumbnailSet thumbnails = video.thumbnails;
+  String getYoutubeThumbnail(ThumbnailSet thumbnails) {
     List<String> thumbnailsList = [
       thumbnails.highResUrl,
       thumbnails.lowResUrl,
@@ -49,7 +48,7 @@ class YoutubeParser {
 
     var video = await yt.videos.get(parsedUrl);
 
-    String icon = YoutubeParser().getYoutubeThumbnailFromVideo(video);
+    String icon = YoutubeParser().getYoutubeThumbnail(video.thumbnails);
 
     String title = video.title.replaceAll('"', "'");
 

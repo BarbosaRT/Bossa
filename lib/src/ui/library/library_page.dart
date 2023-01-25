@@ -45,7 +45,6 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
     final backgroundColor = colorController.currentScheme.backgroundColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
     final contrastColor = colorController.currentScheme.contrastColor;
     final contrastAccent = colorController.currentScheme.contrastAccent;
 
@@ -80,7 +79,7 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
           width: size.width,
           height: 70,
           decoration: BoxDecoration(
-            color: backgroundAccent,
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(15),
           ),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -141,7 +140,7 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
                       });
                 },
                 child: FaIcon(
-                  FontAwesomeIcons.bars,
+                  FontAwesomeIcons.ellipsisVertical,
                   color: contrastColor,
                 ),
               )
@@ -164,7 +163,9 @@ class _LibraryPageState extends State<LibraryPage>
     with SingleTickerProviderStateMixin {
   double iconSize = UIConsts.iconSize.toDouble();
   static double x = UIConsts.spacing;
+
   late TabController _tabController;
+  int currentTab = 0;
   final ScrollController _scrollController = ScrollController();
 
   List<PlaylistModel> playlists = [];
@@ -174,6 +175,13 @@ class _LibraryPageState extends State<LibraryPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.index != currentTab && mounted) {
+        setState(() {
+          currentTab = _tabController.index;
+        });
+      }
+    });
     loadSongs();
     loadPlaylists();
   }
@@ -221,26 +229,27 @@ class _LibraryPageState extends State<LibraryPage>
 
     List<Widget> songContainers = [];
     for (SongModel song in songs) {
-      List<SongModel> songsForPlaylist = songs.toList();
-      songsForPlaylist.remove(song);
-      songsForPlaylist.insert(0, song);
       PlaylistModel playlist = PlaylistModel(
           id: 0,
           title: 'Todas as Músicas',
           icon: song.icon,
-          songs: songsForPlaylist);
+          songs: songs.toList());
+      final key = GlobalKey<DetailContainerState>();
+
       songContainers.add(
         LibraryContentContainer(
           title: song.title,
           author: song.author,
           detailContainer: DetailContainer(
             icon: song.icon,
+            key: key,
             actions: [
               SizedBox(
                 width: size.width,
                 height: 30,
                 child: GestureDetector(
                   onTap: () {
+                    key.currentState?.pop();
                     songDataManager.removeSong(song);
                     loadSongs();
                   },
@@ -253,7 +262,7 @@ class _LibraryPageState extends State<LibraryPage>
                     SizedBox(
                       width: iconSize / 2,
                     ),
-                    Text('Remover ', style: buttonTextStyle),
+                    Text('Remover', style: buttonTextStyle),
                   ]),
                 ),
               ),
@@ -262,7 +271,7 @@ class _LibraryPageState extends State<LibraryPage>
                 height: 30,
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.of(context).pop();
+                    key.currentState?.pop();
                     Modular.to.push(
                       MaterialPageRoute(
                         builder: (context) => SongAddPage(
@@ -280,7 +289,7 @@ class _LibraryPageState extends State<LibraryPage>
                     SizedBox(
                       width: iconSize / 2,
                     ),
-                    Text('Editar ', style: buttonTextStyle),
+                    Text('Editar', style: buttonTextStyle),
                   ]),
                 ),
               ),
@@ -290,10 +299,13 @@ class _LibraryPageState extends State<LibraryPage>
           onTap: () {
             Modular.to.popUntil(ModalRoute.withName('/'));
             audioManager.pause();
+
             playlistUIController.setPlaylist(playlist);
+            playlistManager.setPlaylist(playlist,
+                initialIndex: songs.indexOf(song));
+
             Modular.to.pushReplacementNamed(
               '/player',
-              arguments: playlist,
             );
             audioManager.play();
           },
@@ -310,7 +322,11 @@ class _LibraryPageState extends State<LibraryPage>
           detailContainer: PlaylistSnackbar(playlist: playlist),
           onTap: () {
             homeController.setPlaylist(playlist);
-            homeController.setCurrentPage(Pages.playlist);
+            if (mounted) {
+              setState(() {
+                homeController.setCurrentPage(Pages.playlist);
+              });
+            }
           },
           icon: playlist.icon,
         ),
@@ -374,8 +390,11 @@ class _LibraryPageState extends State<LibraryPage>
                         ),
                         child: TabBar(
                           onTap: (value) {
-                            loadSongs();
-                            setState(() {});
+                            if (mounted) {
+                              setState(() {
+                                currentTab = _tabController.index;
+                              });
+                            }
                           },
                           padding: EdgeInsets.zero,
                           indicatorPadding: EdgeInsets.zero,
@@ -397,13 +416,13 @@ class _LibraryPageState extends State<LibraryPage>
                               height: 50,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(15),
-                                color: _tabController.index == 0
+                                color: currentTab == 0
                                     ? accentColor
                                     : backgroundAccent,
                               ),
                               child: Center(
                                 child: Text(
-                                  'Playlists',
+                                  'Musicas',
                                   style: headerStyle,
                                 ),
                               ),
@@ -413,13 +432,13 @@ class _LibraryPageState extends State<LibraryPage>
                               height: 50,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(15),
-                                color: _tabController.index == 1
+                                color: currentTab == 1
                                     ? accentColor
                                     : backgroundAccent,
                               ),
                               child: Center(
                                 child: Text(
-                                  'Músicas',
+                                  'Playlist',
                                   style: headerStyle,
                                 ),
                               ),
@@ -438,13 +457,13 @@ class _LibraryPageState extends State<LibraryPage>
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: x / 2),
                     child: ListView(
-                      children: playlistContainers,
+                      children: songContainers,
                     ),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: x / 2),
                     child: ListView(
-                      children: songContainers,
+                      children: playlistContainers,
                     ),
                   ),
                 ],

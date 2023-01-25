@@ -8,6 +8,8 @@ import 'package:bossa/src/data/youtube_parser.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/playlist/add_to_playlist_page.dart';
+import 'package:bossa/src/ui/playlist/playlist_add_page.dart';
+import 'package:bossa/src/ui/song/song_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -59,6 +61,7 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
       ),
     );
     SongModel? song;
+    PlaylistModel? finalPlaylist;
     if (widget.isSong) {
       song = await parser.convertYoutubeSong(value);
       songDataManager.addSong(song);
@@ -94,7 +97,6 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
         ),
       );
 
-      PlaylistModel? finalPlaylist;
       await for (var playlist in playlistStream) {
         finalPlaylist = playlist;
       }
@@ -122,6 +124,23 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
       );
     } else {
       Modular.to.popUntil(ModalRoute.withName('/'));
+      if (widget.isSong) {
+        Modular.to.push(
+          MaterialPageRoute(
+            builder: (context) => SongAddPage(
+              songToBeEdited: song,
+            ),
+          ),
+        );
+      } else {
+        Modular.to.push(
+          MaterialPageRoute(
+            builder: (context) => PlaylistAddPage(
+              playlistToBeEdited: finalPlaylist,
+            ),
+          ),
+        );
+      }
     }
   }
 

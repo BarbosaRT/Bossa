@@ -25,6 +25,8 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
   Duration delay = const Duration(milliseconds: 250);
   Timer searchTimer = Timer(const Duration(milliseconds: 250), () {});
 
+  bool initiated = false;
+
   List<Widget> videoContainers = [];
 
   final searchTextController = TextEditingController();
@@ -36,6 +38,7 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
   }
 
   void init() async {
+    videoContainers = [];
     final playlistDataManager = Modular.get<PlaylistDataManager>();
     List<PlaylistModel> playlists = await playlistDataManager.loadPlaylists();
     for (PlaylistModel playlist in playlists) {
@@ -58,6 +61,7 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
       ),
     );
 
+    initiated = true;
     if (mounted) {
       setState(() {});
     }
@@ -97,6 +101,9 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!initiated) {
+      init();
+    }
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();

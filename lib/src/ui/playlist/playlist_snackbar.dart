@@ -32,15 +32,18 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
 
     final buttonStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
+    final key = GlobalKey<DetailContainerState>();
     return DetailContainer(
       icon: widget.playlist.icon,
       title: widget.playlist.title,
+      key: key,
       actions: [
         SizedBox(
           width: size.width,
           height: 30,
           child: GestureDetector(
             onTap: () {
+              key.currentState?.pop();
               playlistDataManager.deletePlaylist(widget.playlist);
               homeController.setCurrentPage(Pages.home);
             },
@@ -62,7 +65,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
           height: 30,
           child: GestureDetector(
             onTap: () {
-              Navigator.of(context).pop();
+              key.currentState?.pop();
               Modular.to.push(
                 MaterialPageRoute(
                   builder: (context) => PlaylistAddPage(

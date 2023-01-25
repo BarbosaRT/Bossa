@@ -1,23 +1,13 @@
 import 'dart:async';
-import 'package:asuka/asuka.dart';
-import 'package:bossa/models/playlist_model.dart';
-import 'package:bossa/models/song_model.dart';
-import 'package:bossa/src/audio/playlist_audio_manager.dart';
-import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
-import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
-import 'package:bossa/src/data/youtube_parser.dart';
 import 'package:bossa/src/styles/text_styles.dart';
-import 'package:bossa/src/ui/home/components/home_widget.dart';
-import 'package:bossa/src/ui/library/library_page.dart';
-import 'package:bossa/src/ui/song/song_add_page.dart';
-import 'package:bossa/src/url/youtube_url_add_page.dart';
+import 'package:bossa/src/ui/search/playlist_search.dart';
+import 'package:bossa/src/ui/search/song_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -26,21 +16,37 @@ class SearchPage extends StatefulWidget {
   State<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _SearchPageState extends State<SearchPage>
+    with SingleTickerProviderStateMixin {
   final urlTextController = TextEditingController();
   static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
 
   bool searchLibrary = false;
   bool isSearching = true;
+  bool isSearchingSong = true;
   Duration delay = const Duration(milliseconds: 250);
   Timer searchTimer = Timer(const Duration(milliseconds: 250), () {});
 
-  List<Widget> videoContainers = [];
+  List<Widget> songContainers = [];
+  List<Widget> playlistContainers = [];
+
+  late TabController _tabController;
+  int currentTab = 0;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.index != currentTab && mounted) {
+        setState(() {
+          currentTab = _tabController.index;
+        });
+      }
+    });
+
     final homeController = Modular.get<HomeController>();
 
     if (!searchLibrary) {
@@ -64,238 +70,56 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> search(String searchQuery) async {
-    final size = MediaQuery.of(context).size;
     final homeController = Modular.get<HomeController>();
 
     if (!searchLibrary) {
       homeController.setlastSearchedTopic(searchQuery);
     }
 
-    final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
+    if (isSearchingSong) {
+      songContainers = [];
+    } else {
+      playlistContainers = [];
+    }
 
-    final playlistManager = Modular.get<JustPlaylistManager>();
-    final playlistUIController = Modular.get<PlaylistUIController>();
-    final songDataManager = Modular.get<SongDataManager>();
-    final audioManager = playlistManager.player;
-
-    final buttonTextStyle =
-        TextStyles().boldHeadline2.copyWith(color: contrastColor);
-
-    videoContainers = [];
-
-    if (searchLibrary) {
-      List<SongModel> songs =
-          await songDataManager.searchSongs(searchQuery: searchQuery);
-
-      for (SongModel song in songs) {
-        List<SongModel> songsForPlaylist = songs.toList();
-        songsForPlaylist.remove(song);
-        songsForPlaylist.insert(0, song);
-        PlaylistModel playlist = PlaylistModel(
-            id: 0,
-            title: 'Todas as Músicas',
-            icon: song.icon,
-            songs: songsForPlaylist);
-
-        videoContainers.add(
-          LibraryContentContainer(
-            title: song.title,
-            author: song.author,
-            detailContainer: DetailContainer(
-              icon: song.icon,
-              actions: [
-                SizedBox(
-                  width: size.width,
-                  height: 30,
-                  child: GestureDetector(
-                    onTap: () {
-                      songDataManager.removeSong(song);
-                    },
-                    child: Row(children: [
-                      FaIcon(
-                        FontAwesomeIcons.trash,
-                        size: iconSize,
-                        color: contrastColor,
-                      ),
-                      SizedBox(
-                        width: iconSize / 2,
-                      ),
-                      Text('Remover ', style: buttonTextStyle),
-                    ]),
-                  ),
-                ),
-                SizedBox(
-                  width: size.width,
-                  height: 30,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      Modular.to.push(
-                        MaterialPageRoute(
-                          builder: (context) => SongAddPage(
-                            songToBeEdited: song,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Row(children: [
-                      FaIcon(
-                        FontAwesomeIcons.penToSquare,
-                        size: iconSize,
-                        color: contrastColor,
-                      ),
-                      SizedBox(
-                        width: iconSize / 2,
-                      ),
-                      Text('Editar ', style: buttonTextStyle),
-                    ]),
-                  ),
-                ),
-              ],
-              title: song.title,
-            ),
-            onTap: () {
-              Modular.to.popUntil(ModalRoute.withName('/'));
-              audioManager.pause();
-              playlistUIController.setPlaylist(playlist);
-              Modular.to.pushReplacementNamed(
-                '/player',
-                arguments: playlist,
-              );
-              audioManager.play();
-            },
-            icon: song.icon,
-          ),
+    if (isSearchingSong) {
+      if (searchLibrary) {
+        songContainers = await SongSearch().searchLibrary(
+          searchQuery: searchQuery,
+          context: context,
+        );
+      } else {
+        songContainers = await SongSearch().searchYoutube(
+          searchQuery: searchQuery,
+          context: context,
         );
       }
-      videoContainers.add(
+      songContainers.add(
         SizedBox(
           height: 73 * 2 + x * 2,
         ),
       );
-      if (mounted) {
-        setState(() {});
+    } else {
+      if (searchLibrary) {
+        playlistContainers = await PlaylistSearch().searchLibrary(
+          searchQuery: searchQuery,
+        );
+      } else {
+        playlistContainers = await PlaylistSearch().searchYoutube(
+          searchQuery: searchQuery,
+          context: context,
+        );
       }
-      return;
-    }
-    final yt = YoutubeExplode();
-    final searchResponse = await yt.search.search(searchQuery);
-
-    for (var video in searchResponse.toList()) {
-      final icon = YoutubeParser().getYoutubeThumbnailFromVideo(video);
-      videoContainers.add(
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: x / 2),
-          child: LibraryContentContainer(
-            title: video.title,
-            author: video.author,
-            detailContainer: DetailContainer(
-              icon: icon,
-              actions: [
-                SizedBox(
-                  width: size.width,
-                  height: 30,
-                  child: GestureDetector(
-                    onTap: () async {
-                      Asuka.hideCurrentSnackBar();
-                      Modular.to.push(
-                        MaterialPageRoute(
-                          builder: (context) => YoutubeUrlAddPage(
-                            isSong: true,
-                            url: video.url,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Row(children: [
-                      FaIcon(
-                        FontAwesomeIcons.plus,
-                        size: iconSize,
-                        color: contrastColor,
-                      ),
-                      SizedBox(
-                        width: iconSize / 2,
-                      ),
-                      Text('Adicionar Música', style: buttonTextStyle),
-                    ]),
-                  ),
-                ),
-                SizedBox(
-                  width: size.width,
-                  height: 30,
-                  child: GestureDetector(
-                    onTap: () {
-                      Asuka.hideCurrentSnackBar();
-                      Modular.to.push(
-                        MaterialPageRoute(
-                          builder: (context) => YoutubeUrlAddPage(
-                              isSong: true,
-                              url: video.url,
-                              addToPlaylist: true),
-                        ),
-                      );
-                    },
-                    child: Row(children: [
-                      FaIcon(
-                        FontAwesomeIcons.list,
-                        size: iconSize,
-                        color: contrastColor,
-                      ),
-                      SizedBox(
-                        width: iconSize / 2,
-                      ),
-                      Text('Adicionar á uma playlist ', style: buttonTextStyle),
-                    ]),
-                  ),
-                ),
-              ],
-              title: video.title,
-            ),
-            onTap: () async {
-              Asuka.showSnackBar(
-                SnackBar(
-                  backgroundColor: backgroundAccent,
-                  duration: const Duration(days: 1),
-                  content: Text(
-                    'Carregando a música, por favor aguarde',
-                    style: buttonTextStyle,
-                  ),
-                ),
-              );
-
-              SongModel song =
-                  await YoutubeParser().convertYoutubeSong(video.url);
-
-              Asuka.hideCurrentSnackBar();
-
-              song.id = -1;
-              PlaylistModel playlist = PlaylistModel(
-                  id: 0, title: 'Todas as Músicas', icon: icon, songs: [song]);
-
-              audioManager.pause();
-              playlistUIController.setPlaylist(playlist);
-              Modular.to.pushReplacementNamed(
-                '/player',
-                arguments: playlist,
-              );
-            },
-            icon: icon,
-          ),
+      playlistContainers.add(
+        SizedBox(
+          height: 73 * 2 + UIConsts.spacing,
         ),
       );
     }
 
-    videoContainers.add(
-      SizedBox(
-        height: 73 * 2 + x * 2,
-      ),
-    );
     if (mounted) {
       setState(() {});
     }
-    yt.close();
   }
 
   //
@@ -314,6 +138,8 @@ class _SearchPageState extends State<SearchPage> {
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentScheme.contrastColor;
     final backgroundAccent = colorController.currentScheme.backgroundAccent;
+    final backgroundColor = colorController.currentScheme.backgroundColor;
+    final accentColor = colorController.currentScheme.accentColor;
 
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);
@@ -371,7 +197,6 @@ class _SearchPageState extends State<SearchPage> {
                         textAlign: TextAlign.start,
                         textAlignVertical: TextAlignVertical.center,
                         onChanged: (searchQuery) {
-                          print(searchQuery);
                           searchTimer.cancel();
                           searchTimer = Timer(
                               Duration(milliseconds: delay.inMilliseconds + 50),
@@ -390,13 +215,17 @@ class _SearchPageState extends State<SearchPage> {
                           searchTimer = Timer(
                               Duration(milliseconds: delay.inMilliseconds + 50),
                               () async {
-                            setState(() {
-                              isSearching = true;
-                            });
+                            if (mounted) {
+                              setState(() {
+                                isSearching = true;
+                              });
+                            }
                             await search(searchQuery);
-                            setState(() {
-                              isSearching = false;
-                            });
+                            if (mounted) {
+                              setState(() {
+                                isSearching = false;
+                              });
+                            }
                           });
                         },
                       ),
@@ -404,19 +233,113 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 ),
                 SizedBox(
-                  height: x,
-                ),
-                SizedBox(
-                  height: size.height - x * 5,
+                  height: size.height - 180,
                   width: size.width,
-                  child: isSearching
-                      ? const Align(
-                          alignment: Alignment.topCenter,
-                          child: CircularProgressIndicator(),
-                        )
-                      : ListView(
-                          children: videoContainers,
+                  child: NestedScrollView(
+                    headerSliverBuilder: (BuildContext context, bool isScroll) {
+                      return [
+                        SliverAppBar(
+                          automaticallyImplyLeading: false,
+                          pinned: true,
+                          backgroundColor: backgroundColor,
+                          bottom: PreferredSize(
+                            preferredSize: const Size.fromHeight(20),
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 10.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: backgroundAccent,
+                              ),
+                              child: TabBar(
+                                onTap: (value) {
+                                  isSearchingSong = value == 0;
+                                  setState(() {});
+                                },
+                                padding: EdgeInsets.zero,
+                                indicatorPadding: EdgeInsets.zero,
+                                indicatorSize: TabBarIndicatorSize.label,
+                                labelPadding: EdgeInsets.zero,
+                                controller: _tabController,
+                                isScrollable: true,
+                                indicator: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.transparent,
+                                    ),
+                                  ],
+                                ),
+                                tabs: [
+                                  Container(
+                                    width: (size.width - x / 2) / 2,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      color: _tabController.index == 0
+                                          ? accentColor
+                                          : backgroundAccent,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'Musicas',
+                                        style: headerStyle,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: (size.width - x / 2) / 2,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      color: _tabController.index == 1
+                                          ? accentColor
+                                          : backgroundAccent,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'Playlist',
+                                        style: headerStyle,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
+                      ];
+                    },
+                    controller: _scrollController,
+                    body: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        isSearching
+                            ? Column(
+                                children: [
+                                  SizedBox(
+                                    height: size.height / 3,
+                                  ),
+                                  const CircularProgressIndicator(),
+                                ],
+                              )
+                            : ListView(
+                                children: songContainers,
+                              ),
+                        isSearching
+                            ? Column(
+                                children: [
+                                  SizedBox(
+                                    height: size.height / 3,
+                                  ),
+                                  const CircularProgressIndicator(),
+                                ],
+                              )
+                            : ListView(
+                                children: playlistContainers,
+                              ),
+                      ],
+                    ),
+                  ),
                 ),
                 SizedBox(
                   height: x / 2,

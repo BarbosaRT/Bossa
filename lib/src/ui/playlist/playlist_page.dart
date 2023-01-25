@@ -114,18 +114,21 @@ class _PlaylistPageState extends State<PlaylistPage> {
     List<Widget> songContainers = [];
     for (SongModel song in playlist.songs) {
       final index = playlist.songs.indexOf(song);
+      final key = GlobalKey<DetailContainerState>();
       songContainers.add(
         LibraryContentContainer(
           title: song.title,
           author: song.author,
           detailContainer: DetailContainer(
             icon: song.icon,
+            key: key,
             actions: [
               SizedBox(
                 width: size.width,
                 height: 30,
                 child: GestureDetector(
                   onTap: () {
+                    key.currentState?.pop();
                     songDataManager.removeSong(song);
                     setState(() {});
                   },
@@ -147,7 +150,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                 height: 30,
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.of(context).pop();
+                    key.currentState?.pop();
                     Modular.to.push(
                       MaterialPageRoute(
                         builder: (context) => SongAddPage(
@@ -299,7 +302,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                               ),
                             );
                           },
-                          child: FaIcon(FontAwesomeIcons.bars,
+                          child: FaIcon(FontAwesomeIcons.ellipsisVertical,
                               color: contrastColor),
                         ),
                       ),
@@ -337,6 +340,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                             Modular.to.popUntil(ModalRoute.withName('/'));
                             audioManager.pause();
                             playlistUIController.setPlaylist(playlist);
+
                             Modular.to.pushReplacementNamed(
                               '/player',
                             );

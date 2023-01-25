@@ -271,13 +271,17 @@ class DetailContainer extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<DetailContainer> createState() => _DetailContainerState();
+  State<DetailContainer> createState() => DetailContainerState();
 }
 
-class _DetailContainerState extends State<DetailContainer> {
+class DetailContainerState extends State<DetailContainer> {
   static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
   double imagesSize = 100;
+
+  void pop() {
+    Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -386,15 +390,20 @@ class _HomeWidgetState extends State<HomeWidget> {
     final audioManager = playlistManager.player;
     final buttonStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
+
+    final key = GlobalKey<DetailContainerState>();
+
     return ContentContainer(
       detailContainer: DetailContainer(
         icon: song.icon,
+        key: key,
         actions: [
           SizedBox(
             width: size.width,
             height: 30,
             child: GestureDetector(
               onTap: () {
+                key.currentState?.pop();
                 songDataManager.removeSong(song);
                 loadSongs();
               },
@@ -416,7 +425,34 @@ class _HomeWidgetState extends State<HomeWidget> {
             height: 30,
             child: GestureDetector(
               onTap: () {
-                Asuka.hideCurrentSnackBar();
+                key.currentState?.pop();
+                Modular.to.push(
+                  MaterialPageRoute(
+                    builder: (context) => SongAddPage(
+                      songToBeEdited: song,
+                    ),
+                  ),
+                );
+              },
+              child: Row(children: [
+                FaIcon(
+                  FontAwesomeIcons.penToSquare,
+                  size: iconSize,
+                  color: contrastColor,
+                ),
+                SizedBox(
+                  width: iconSize / 2,
+                ),
+                Text('Editar', style: buttonStyle),
+              ]),
+            ),
+          ),
+          SizedBox(
+            width: size.width,
+            height: 30,
+            child: GestureDetector(
+              onTap: () {
+                key.currentState?.pop();
                 Modular.to.push(
                   MaterialPageRoute(
                     builder: (context) => AddToPlaylistPage(
@@ -446,7 +482,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         audioManager.pause();
 
         playlistUIController.setPlaylist(playlistToBePlayed);
-        playlistManager.setPlaylist(playlistToBePlayed);
+        playlistManager.setPlaylist(playlistToBePlayed,
+            initialIndex: playlistToBePlayed.songs.indexOf(song));
 
         Modular.to.pushReplacementNamed(
           '/player',
@@ -472,14 +509,11 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     List<Widget> songContainers = [];
     for (SongModel song in songs) {
-      List<SongModel> songsForPlaylist = songs.toList();
-      songsForPlaylist.remove(song);
-      songsForPlaylist.insert(0, song);
       PlaylistModel playlist = PlaylistModel(
           id: 0,
           title: 'Todas as Músicas',
           icon: song.icon,
-          songs: songsForPlaylist);
+          songs: songs.toList());
       songContainers.add(songContainerBuilder(song, playlist));
     }
 

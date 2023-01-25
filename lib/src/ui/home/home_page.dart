@@ -92,7 +92,13 @@ class _HomePageState extends State<HomePage> {
     final backgroundColor = colorController.currentScheme.backgroundColor;
 
     final homeController = Modular.get<HomeController>();
-
+    homeController.addListener(() {
+      if (mounted) {
+        setState(() {
+          currentPage = homeController.currentPage;
+        });
+      }
+    });
     final buttonStyle = ButtonStyle(
       padding: MaterialStateProperty.all(EdgeInsets.zero),
       overlayColor: MaterialStateProperty.all(Colors.transparent),
