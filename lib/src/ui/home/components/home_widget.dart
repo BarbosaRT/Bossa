@@ -1,8 +1,10 @@
 import 'package:asuka/asuka.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
+import 'package:bossa/src/ui/components/content_container.dart';
+import 'package:bossa/src/ui/components/detail_container.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/ui/playlist/add_to_playlist_page.dart';
-import 'package:bossa/src/ui/playlist/playlist_snackbar.dart';
+import 'package:bossa/src/ui/playlist/components/playlist_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -14,11 +16,9 @@ import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
-import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:bossa/src/ui/playlist/playlist_add_page.dart';
 import 'package:bossa/src/ui/song/song_add_page.dart';
 import 'package:bossa/src/url/youtube_url_add_page.dart';
-import 'package:text_scroll/text_scroll.dart';
 
 class AddWidget extends StatefulWidget {
   const AddWidget({super.key});
@@ -204,138 +204,6 @@ class _AddWidgetState extends State<AddWidget> {
   }
 }
 
-class ContentContainer extends StatefulWidget {
-  final Widget detailContainer;
-  final String icon;
-  final void Function() onTap;
-
-  const ContentContainer({
-    super.key,
-    required this.icon,
-    required this.detailContainer,
-    required this.onTap,
-  });
-
-  @override
-  State<ContentContainer> createState() => _ContentContainerState();
-}
-
-class _ContentContainerState extends State<ContentContainer> {
-  static double x = UIConsts.spacing;
-  double iconSize = UIConsts.iconSize.toDouble();
-  double imagesSize = 100;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(right: x / 3),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        onLongPress: () {
-          Asuka.showModalBottomSheet(
-            backgroundColor: Colors.transparent,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15),
-              ),
-            ),
-            builder: (context) {
-              return widget.detailContainer;
-            },
-          );
-        },
-        child: Image(
-          image: ImageParser.getImageProviderFromString(
-            widget.icon,
-          ),
-          fit: BoxFit.cover,
-          alignment: FractionalOffset.center,
-          width: imagesSize,
-          height: imagesSize,
-        ),
-      ),
-    );
-  }
-}
-
-class DetailContainer extends StatefulWidget {
-  final String icon;
-  final String title;
-  final List<Widget> actions;
-  const DetailContainer({
-    Key? key,
-    required this.icon,
-    required this.title,
-    required this.actions,
-  }) : super(key: key);
-
-  @override
-  State<DetailContainer> createState() => DetailContainerState();
-}
-
-class DetailContainerState extends State<DetailContainer> {
-  static double x = UIConsts.spacing;
-  double iconSize = UIConsts.iconSize.toDouble();
-  double imagesSize = 100;
-
-  void pop() {
-    Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundColor = colorController.currentScheme.backgroundColor;
-    final titleStyle = TextStyles().headline.copyWith(color: contrastColor);
-
-    return Container(
-      height: size.height / 3,
-      width: size.width,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(15),
-          topRight: Radius.circular(15),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: x),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Image(
-              image: ImageParser.getImageProviderFromString(
-                widget.icon,
-              ),
-              fit: BoxFit.cover,
-              alignment: FractionalOffset.center,
-              width: imagesSize,
-              height: imagesSize,
-            ),
-            SizedBox(
-              width: size.width,
-              child: TextScroll(
-                widget.title,
-                mode: TextScrollMode.endless,
-                velocity: const Velocity(pixelsPerSecond: Offset(100, 0)),
-                delayBefore: const Duration(seconds: 10),
-                pauseBetween: const Duration(seconds: 5),
-                style: titleStyle,
-                textAlign: TextAlign.center,
-                selectable: true,
-              ),
-            ),
-            for (Widget action in widget.actions) action
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class HomeWidget extends StatefulWidget {
   const HomeWidget({super.key});
 
@@ -364,7 +232,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     final songDataManager = Modular.get<SongDataManager>();
     songs = await songDataManager.loadAllSongs();
     songsSortedByTimesPlayed = await songDataManager.loadAllSongs(
-      filter: SongDataManagerFilter.timesPlayedDesc,
+      filter: SongFilter.timesPlayedDesc,
     );
     if (mounted) {
       setState(() {});
@@ -521,7 +389,14 @@ class _HomeWidgetState extends State<HomeWidget> {
     for (PlaylistModel playlist in playlists) {
       playlistContainers.add(
         ContentContainer(
-          detailContainer: PlaylistSnackbar(playlist: playlist),
+          detailContainer: PlaylistSnackbar(
+            playlist: playlist,
+            callback: () {
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
           onTap: () {
             homeController.setPlaylist(playlist);
             if (mounted) {

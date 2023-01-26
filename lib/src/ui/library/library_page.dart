@@ -1,156 +1,24 @@
-import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
+import 'package:bossa/src/ui/components/content_container.dart';
+import 'package:bossa/src/ui/components/detail_container.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
-import 'package:bossa/src/ui/playlist/playlist_snackbar.dart';
+import 'package:bossa/src/ui/library/filter_widget.dart';
+import 'package:bossa/src/ui/library/library_container.dart';
+import 'package:bossa/src/ui/playlist/components/playlist_snackbar.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
-import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:bossa/src/ui/song/song_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:text_scroll/text_scroll.dart';
-
-class LibraryContentContainer extends StatefulWidget {
-  final Widget detailContainer;
-  final void Function() onTap;
-  final String icon;
-  final String title;
-  final String? author;
-  final bool? useDetail;
-  const LibraryContentContainer(
-      {super.key,
-      required this.detailContainer,
-      required this.onTap,
-      required this.icon,
-      required this.title,
-      this.author,
-      this.useDetail});
-
-  @override
-  State<LibraryContentContainer> createState() =>
-      _LibraryContentContainerState();
-}
-
-class _LibraryContentContainerState extends State<LibraryContentContainer> {
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final colorController = Modular.get<ColorController>();
-    final backgroundColor = colorController.currentScheme.backgroundColor;
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final contrastAccent = colorController.currentScheme.contrastAccent;
-
-    TextStyle titleStyle = TextStyles().boldHeadline2.copyWith(
-          color: contrastColor,
-        );
-    TextStyle authorStyle = TextStyles().headline3.copyWith(
-          color: contrastAccent,
-        );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        onLongPress: () {
-          if (widget.useDetail == false) {
-            return;
-          }
-          Asuka.showModalBottomSheet(
-              backgroundColor: backgroundColor,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                ),
-              ),
-              builder: (context) {
-                return widget.detailContainer;
-              });
-        },
-        child: Container(
-          width: size.width,
-          height: 70,
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: 60,
-                height: 60,
-                child: Image(
-                  image: ImageParser.getImageProviderFromString(
-                    widget.icon,
-                  ),
-                  fit: BoxFit.cover,
-                  alignment: FractionalOffset.center,
-                  width: 60,
-                  height: 60,
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: size.width - 160,
-                    height: 20,
-                    child: TextScroll(
-                      widget.title,
-                      mode: TextScrollMode.endless,
-                      velocity: const Velocity(pixelsPerSecond: Offset(100, 0)),
-                      delayBefore: const Duration(seconds: 10),
-                      pauseBetween: const Duration(seconds: 5),
-                      style: titleStyle,
-                      textAlign: TextAlign.right,
-                      selectable: true,
-                    ),
-                  ),
-                  widget.author == null
-                      ? Container()
-                      : Text(
-                          widget.author!,
-                          style: authorStyle,
-                        ),
-                ],
-              ),
-              GestureDetector(
-                onTap: () {
-                  Asuka.showModalBottomSheet(
-                      backgroundColor: backgroundColor,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
-                        ),
-                      ),
-                      builder: (context) {
-                        return widget.detailContainer;
-                      });
-                },
-                child: FaIcon(
-                  FontAwesomeIcons.ellipsisVertical,
-                  color: contrastColor,
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -163,6 +31,10 @@ class _LibraryPageState extends State<LibraryPage>
     with SingleTickerProviderStateMixin {
   double iconSize = UIConsts.iconSize.toDouble();
   static double x = UIConsts.spacing;
+
+  SongFilter _songFilter = SongFilter.idDesc;
+  PlaylistFilter _playlistFilter = PlaylistFilter.idDesc;
+  bool gridEnabled = false;
 
   late TabController _tabController;
   int currentTab = 0;
@@ -188,14 +60,19 @@ class _LibraryPageState extends State<LibraryPage>
 
   void loadSongs() async {
     final songDataManager = Modular.get<SongDataManager>();
-    songs = await songDataManager.loadAllSongs();
-    setState(() {});
+    songs = await songDataManager.loadAllSongs(filter: _songFilter);
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void loadPlaylists() async {
     final playlistDataManager = Modular.get<PlaylistDataManager>();
-    playlists = await playlistDataManager.loadPlaylists();
-    setState(() {});
+    playlists =
+        await playlistDataManager.loadPlaylists(filter: _playlistFilter);
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -216,6 +93,7 @@ class _LibraryPageState extends State<LibraryPage>
 
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);
+
     final buttonTextStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
 
@@ -227,6 +105,8 @@ class _LibraryPageState extends State<LibraryPage>
       backgroundColor: MaterialStateProperty.all(Colors.transparent),
     );
 
+    const tabHeight = 50.0;
+
     List<Widget> songContainers = [];
     for (SongModel song in songs) {
       PlaylistModel playlist = PlaylistModel(
@@ -236,100 +116,160 @@ class _LibraryPageState extends State<LibraryPage>
           songs: songs.toList());
       final key = GlobalKey<DetailContainerState>();
 
-      songContainers.add(
-        LibraryContentContainer(
-          title: song.title,
-          author: song.author,
-          detailContainer: DetailContainer(
-            icon: song.icon,
-            key: key,
-            actions: [
-              SizedBox(
-                width: size.width,
-                height: 30,
-                child: GestureDetector(
-                  onTap: () {
-                    key.currentState?.pop();
-                    songDataManager.removeSong(song);
-                    loadSongs();
-                  },
-                  child: Row(children: [
-                    FaIcon(
-                      FontAwesomeIcons.trash,
-                      size: iconSize,
-                      color: contrastColor,
-                    ),
-                    SizedBox(
-                      width: iconSize / 2,
-                    ),
-                    Text('Remover', style: buttonTextStyle),
-                  ]),
+      DetailContainer detailContainer = DetailContainer(
+        icon: song.icon,
+        key: key,
+        actions: [
+          SizedBox(
+            width: size.width,
+            height: 30,
+            child: GestureDetector(
+              onTap: () {
+                key.currentState?.pop();
+                songDataManager.removeSong(song);
+                loadSongs();
+              },
+              child: Row(children: [
+                FaIcon(
+                  FontAwesomeIcons.trash,
+                  size: iconSize,
+                  color: contrastColor,
                 ),
-              ),
-              SizedBox(
-                width: size.width,
-                height: 30,
-                child: GestureDetector(
-                  onTap: () {
-                    key.currentState?.pop();
-                    Modular.to.push(
-                      MaterialPageRoute(
-                        builder: (context) => SongAddPage(
-                          songToBeEdited: song,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Row(children: [
-                    FaIcon(
-                      FontAwesomeIcons.penToSquare,
-                      size: iconSize,
-                      color: contrastColor,
-                    ),
-                    SizedBox(
-                      width: iconSize / 2,
-                    ),
-                    Text('Editar', style: buttonTextStyle),
-                  ]),
+                SizedBox(
+                  width: iconSize / 2,
                 ),
-              ),
-            ],
-            title: song.title,
+                Text('Remover', style: buttonTextStyle),
+              ]),
+            ),
           ),
-          onTap: () {
-            Modular.to.popUntil(ModalRoute.withName('/'));
-            audioManager.pause();
+          SizedBox(
+            width: size.width,
+            height: 30,
+            child: GestureDetector(
+              onTap: () {
+                key.currentState?.pop();
+                Modular.to.push(
+                  MaterialPageRoute(
+                    builder: (context) => SongAddPage(
+                      songToBeEdited: song,
+                    ),
+                  ),
+                );
+              },
+              child: Row(children: [
+                FaIcon(
+                  FontAwesomeIcons.penToSquare,
+                  size: iconSize,
+                  color: contrastColor,
+                ),
+                SizedBox(
+                  width: iconSize / 2,
+                ),
+                Text('Editar', style: buttonTextStyle),
+              ]),
+            ),
+          ),
+        ],
+        title: song.title,
+      );
 
-            playlistUIController.setPlaylist(playlist);
-            playlistManager.setPlaylist(playlist,
-                initialIndex: songs.indexOf(song));
+      songContainers.add(
+        gridEnabled
+            ? Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ContentContainer(
+                    title: song.title,
+                    author: song.author,
+                    icon: song.icon,
+                    imagesSize: size.width / 2 - x * 0.5,
+                    textWidth: size.width / 2 - x * 1.75,
+                    detailContainer: detailContainer,
+                    onTap: () {
+                      Modular.to.popUntil(ModalRoute.withName('/'));
+                      audioManager.pause();
 
-            Modular.to.pushReplacementNamed(
-              '/player',
-            );
-            audioManager.play();
-          },
-          icon: song.icon,
-        ),
+                      playlistUIController.setPlaylist(playlist);
+                      playlistManager.setPlaylist(playlist,
+                          initialIndex: songs.indexOf(song));
+
+                      Modular.to.pushReplacementNamed(
+                        '/player',
+                      );
+                      audioManager.play();
+                    }),
+              )
+            : LibraryContentContainer(
+                title: song.title,
+                author: song.author,
+                detailContainer: detailContainer,
+                onTap: () {
+                  Modular.to.popUntil(ModalRoute.withName('/'));
+                  audioManager.pause();
+
+                  playlistUIController.setPlaylist(playlist);
+                  playlistManager.setPlaylist(playlist,
+                      initialIndex: songs.indexOf(song));
+
+                  Modular.to.pushReplacementNamed(
+                    '/player',
+                  );
+                  audioManager.play();
+                },
+                icon: song.icon,
+              ),
       );
     }
 
     List<Widget> playlistContainers = [];
     for (PlaylistModel playlist in playlists) {
       playlistContainers.add(
-        LibraryContentContainer(
-          title: playlist.title,
-          detailContainer: PlaylistSnackbar(playlist: playlist),
-          onTap: () {
-            homeController.setPlaylist(playlist);
-            if (mounted) {
-              setState(() {
-                homeController.setCurrentPage(Pages.playlist);
-              });
-            }
-          },
-          icon: playlist.icon,
-        ),
+        gridEnabled
+            ? Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ContentContainer(
+                    title: playlist.title,
+                    author: '${playlist.songs.length} músicas',
+                    icon: playlist.icon,
+                    imagesSize: size.width / 2 - x * 0.5,
+                    textWidth: size.width / 2 - x * 0.5,
+                    detailContainer: PlaylistSnackbar(
+                      playlist: playlist,
+                      callback: () {
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
+                    ),
+                    onTap: () {
+                      homeController.setPlaylist(playlist);
+                      if (mounted) {
+                        setState(() {
+                          homeController.setCurrentPage(Pages.playlist);
+                        });
+                      }
+                    }),
+              )
+            : LibraryContentContainer(
+                title: playlist.title,
+                author: '${playlist.songs.length} músicas',
+                detailContainer: PlaylistSnackbar(
+                  playlist: playlist,
+                  callback: () {
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  },
+                ),
+                onTap: () {
+                  homeController.setPlaylist(playlist);
+                  if (mounted) {
+                    setState(() {
+                      homeController.setCurrentPage(Pages.playlist);
+                    });
+                  }
+                },
+                icon: playlist.icon,
+              ),
       );
     }
 
@@ -373,101 +313,147 @@ class _LibraryPageState extends State<LibraryPage>
           SizedBox(
             height: size.height - 180,
             width: size.width,
-            child: NestedScrollView(
-              headerSliverBuilder: (BuildContext context, bool isScroll) {
-                return [
-                  SliverAppBar(
-                    automaticallyImplyLeading: false,
-                    pinned: true,
-                    backgroundColor: backgroundColor,
-                    bottom: PreferredSize(
-                      preferredSize: const Size.fromHeight(15),
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 5.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: backgroundAccent,
-                        ),
-                        child: TabBar(
-                          onTap: (value) {
-                            if (mounted) {
-                              setState(() {
-                                currentTab = _tabController.index;
-                              });
-                            }
-                          },
-                          padding: EdgeInsets.zero,
-                          indicatorPadding: EdgeInsets.zero,
-                          indicatorSize: TabBarIndicatorSize.label,
-                          labelPadding: EdgeInsets.zero,
-                          controller: _tabController,
-                          isScrollable: true,
-                          indicator: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.transparent,
+            child: Stack(
+              children: [
+                NestedScrollView(
+                  headerSliverBuilder: (BuildContext context, bool isScroll) {
+                    return [
+                      SliverAppBar(
+                        automaticallyImplyLeading: false,
+                        pinned: true,
+                        backgroundColor: backgroundColor,
+                        bottom: PreferredSize(
+                          preferredSize: const Size.fromHeight(tabHeight),
+                          child: Container(
+                            margin: EdgeInsets.only(
+                                bottom: tabHeight * 0.5 + iconSize),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: backgroundAccent,
+                            ),
+                            child: TabBar(
+                              onTap: (value) {
+                                if (mounted) {
+                                  setState(() {
+                                    currentTab = _tabController.index;
+                                  });
+                                }
+                              },
+                              padding: EdgeInsets.zero,
+                              indicatorPadding: EdgeInsets.zero,
+                              indicatorSize: TabBarIndicatorSize.label,
+                              labelPadding: EdgeInsets.zero,
+                              controller: _tabController,
+                              isScrollable: true,
+                              indicator: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Colors.transparent,
+                                  ),
+                                ],
                               ),
-                            ],
+                              tabs: [
+                                Container(
+                                  width: (size.width - x / 2) / 2,
+                                  height: tabHeight,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15),
+                                    color: currentTab == 0
+                                        ? accentColor
+                                        : backgroundAccent,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Musicas',
+                                      style: headerStyle,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: (size.width - x / 2) / 2,
+                                  height: tabHeight,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15),
+                                    color: currentTab == 1
+                                        ? accentColor
+                                        : backgroundAccent,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Playlist',
+                                      style: headerStyle,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          tabs: [
-                            Container(
-                              width: (size.width - x / 2) / 2,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: currentTab == 0
-                                    ? accentColor
-                                    : backgroundAccent,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Musicas',
-                                  style: headerStyle,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: (size.width - x / 2) / 2,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: currentTab == 1
-                                    ? accentColor
-                                    : backgroundAccent,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Playlist',
-                                  style: headerStyle,
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
-                    ),
+                    ];
+                  },
+                  controller: _scrollController,
+                  body: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: x / 2),
+                        child: gridEnabled
+                            ? AlignedGridView.count(
+                                crossAxisCount: 2,
+                                itemCount: songContainers.length,
+                                itemBuilder: (context, index) {
+                                  return songContainers[index];
+                                },
+                              )
+                            : ListView(
+                                children: songContainers,
+                              ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: x / 2),
+                        child: gridEnabled
+                            ? AlignedGridView.count(
+                                crossAxisCount: 2,
+                                itemCount: playlistContainers.length,
+                                itemBuilder: (context, index) {
+                                  return playlistContainers[index];
+                                },
+                              )
+                            : ListView(
+                                children: playlistContainers,
+                              ),
+                      ),
+                    ],
                   ),
-                ];
-              },
-              controller: _scrollController,
-              body: TabBarView(
-                controller: _tabController,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: x / 2),
-                    child: ListView(
-                      children: songContainers,
-                    ),
+                ),
+                //
+                // Filters
+                //
+                Positioned(
+                  top: tabHeight + iconSize * 0.25,
+                  left: UIConsts.spacing,
+                  child: FilterWidget(
+                    isSong: currentTab == 0,
+                    filterCallback: (v) {
+                      if (currentTab == 0) {
+                        _songFilter = v as SongFilter;
+                        loadSongs();
+                        return;
+                      }
+                      _playlistFilter = v as PlaylistFilter;
+                      loadPlaylists();
+                    },
+                    gridCallback: (v) {
+                      gridEnabled = v;
+                      if (mounted) {
+                        setState(() {});
+                      }
+                    },
                   ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: x / 2),
-                    child: ListView(
-                      children: playlistContainers,
-                    ),
-                  ),
-                ],
-              ),
+                )
+              ],
             ),
           ),
         ],

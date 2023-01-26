@@ -1,12 +1,11 @@
 import 'dart:async';
-
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
-import 'package:bossa/src/ui/library/library_page.dart';
+import 'package:bossa/src/ui/library/library_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -45,6 +44,7 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
       videoContainers.add(
         LibraryContentContainer(
           title: playlist.title,
+          author: '${playlist.songs.length} músicas',
           useDetail: false,
           detailContainer: Container(),
           onTap: () {
@@ -79,6 +79,7 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
       videoContainers.add(
         LibraryContentContainer(
           title: playlist.title,
+          author: '${playlist.songs.length} músicas',
           useDetail: false,
           detailContainer: Container(),
           onTap: () async {

@@ -3,6 +3,8 @@ import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/data_manager.dart';
 
+enum PlaylistFilter { idAsc, idDesc, asc, desc }
+
 class PlaylistDataManager {
   final DataManager localDataManagerInstance;
   PlaylistDataManager({
@@ -36,7 +38,7 @@ class PlaylistDataManager {
         where: 'playlists.id = ?', whereArgs: [playlist.id]);
   }
 
-  void editPlaylist(PlaylistModel editedPlaylist) async {
+  Future<void> editPlaylist(PlaylistModel editedPlaylist) async {
     var database = await localDataManagerInstance.database();
 
     database.update(
@@ -65,9 +67,13 @@ class PlaylistDataManager {
     return PlaylistModel.fromMap(result[0]);
   }
 
-  Future<List<PlaylistModel>> loadPlaylists() async {
+  Future<List<PlaylistModel>> loadPlaylists(
+      {PlaylistFilter filter = PlaylistFilter.idDesc}) async {
     var database = await localDataManagerInstance.database();
-    List<Map> playlistsFromQuery = await database.query('playlists');
+    List<Map> playlistsFromQuery = await database.query(
+      'playlists',
+      orderBy: _getOrderBy(filter),
+    );
     List<PlaylistModel> playlists = [];
 
     for (Map playlistFromQuery in playlistsFromQuery) {
@@ -79,12 +85,28 @@ class PlaylistDataManager {
     return playlists;
   }
 
-  Future<List<PlaylistModel>> searchPlaylists({
-    required String searchQuery,
-  }) async {
+  String _getOrderBy(PlaylistFilter filter) {
+    switch (filter) {
+      case PlaylistFilter.idAsc:
+        return 'id';
+      case PlaylistFilter.idDesc:
+        return 'id desc';
+      case PlaylistFilter.asc:
+        return 'title';
+      case PlaylistFilter.desc:
+        return 'title desc';
+      default:
+        return 'id desc';
+    }
+  }
+
+  Future<List<PlaylistModel>> searchPlaylists(
+      {required String searchQuery,
+      PlaylistFilter filter = PlaylistFilter.idDesc}) async {
     var database = await localDataManagerInstance.database();
     List<Map<String, dynamic>> playlistsFromQuery = await database.query(
       'playlists',
+      orderBy: _getOrderBy(filter),
       where: 'title like "${searchQuery.trim()}%"',
     );
 

@@ -6,11 +6,11 @@ import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
-import 'package:bossa/src/ui/home/components/home_widget.dart';
+import 'package:bossa/src/ui/components/detail_container.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
-import 'package:bossa/src/ui/library/library_page.dart';
-import 'package:bossa/src/ui/playlist/playlist_snackbar.dart';
+import 'package:bossa/src/ui/library/library_container.dart';
+import 'package:bossa/src/ui/playlist/components/playlist_snackbar.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:bossa/src/ui/song/song_add_page.dart';
@@ -83,9 +83,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
     final colorController = Modular.get<ColorController>();
     final accentColor = colorController.currentScheme.accentColor;
     final contrastColor = colorController.currentScheme.contrastColor;
-    //final contrastAccent = colorController.currentScheme.contrastAccent;
     final backgroundColor = colorController.currentScheme.backgroundColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
 
     final titleStyle = TextStyles().boldHeadline.copyWith(color: contrastColor);
     final songDataManager = Modular.get<SongDataManager>();
@@ -282,24 +280,17 @@ class _PlaylistPageState extends State<PlaylistPage> {
                         child: ElevatedButton(
                           style: buttonStyle,
                           onPressed: () {
-                            Asuka.showSnackBar(
-                              SnackBar(
-                                padding: EdgeInsets.zero,
-                                backgroundColor: Colors.transparent,
-                                duration: const Duration(days: 1),
-                                content: Container(
-                                  height: size.height / 3,
-                                  width: size.width,
-                                  decoration: BoxDecoration(
-                                    color: backgroundAccent,
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                  ),
-                                  child: PlaylistSnackbar(playlist: playlist),
+                            Asuka.showModalBottomSheet(
+                              backgroundColor: backgroundColor,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(15),
+                                  topRight: Radius.circular(15),
                                 ),
                               ),
+                              builder: (context) {
+                                return PlaylistSnackbar(playlist: playlist);
+                              },
                             );
                           },
                           child: FaIcon(FontAwesomeIcons.ellipsisVertical,

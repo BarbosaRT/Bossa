@@ -74,7 +74,9 @@ class _PlayerPageState extends State<PlayerPage> {
     });
   }
 
-  String durationFormatter(Duration duration, {int length = 0}) {
+  String durationFormatter(Duration duration, {int length = 4}) {
+    length = length < 4 ? 4 : length;
+
     String durationString = duration.toString().split('.')[0];
     String replacement = zerosBeforeDuration(duration);
     String replacedString = durationString.replaceFirst(replacement, '');

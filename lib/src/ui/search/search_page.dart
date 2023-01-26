@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'package:bossa/src/data/playlist_data_manager.dart';
+import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
+import 'package:bossa/src/ui/library/filter_widget.dart';
 import 'package:bossa/src/ui/search/playlist_search.dart';
 import 'package:bossa/src/ui/search/song_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SearchPage extends StatefulWidget {
@@ -30,6 +34,11 @@ class _SearchPageState extends State<SearchPage>
 
   List<Widget> songContainers = [];
   List<Widget> playlistContainers = [];
+
+  String lastSearchQuery = '';
+  SongFilter _songFilter = SongFilter.idDesc;
+  PlaylistFilter _playlistFilter = PlaylistFilter.idDesc;
+  bool gridEnabled = false;
 
   late TabController _tabController;
   int currentTab = 0;
@@ -70,6 +79,7 @@ class _SearchPageState extends State<SearchPage>
   }
 
   Future<void> search(String searchQuery) async {
+    lastSearchQuery = searchQuery.toString();
     final homeController = Modular.get<HomeController>();
 
     if (!searchLibrary) {
@@ -87,11 +97,14 @@ class _SearchPageState extends State<SearchPage>
         songContainers = await SongSearch().searchLibrary(
           searchQuery: searchQuery,
           context: context,
+          filter: _songFilter,
+          gridEnabled: gridEnabled,
         );
       } else {
         songContainers = await SongSearch().searchYoutube(
           searchQuery: searchQuery,
           context: context,
+          gridEnabled: gridEnabled,
         );
       }
       songContainers.add(
@@ -103,11 +116,15 @@ class _SearchPageState extends State<SearchPage>
       if (searchLibrary) {
         playlistContainers = await PlaylistSearch().searchLibrary(
           searchQuery: searchQuery,
+          context: context,
+          filter: _playlistFilter,
+          gridEnabled: gridEnabled,
         );
       } else {
         playlistContainers = await PlaylistSearch().searchYoutube(
           searchQuery: searchQuery,
           context: context,
+          gridEnabled: gridEnabled,
         );
       }
       playlistContainers.add(
@@ -119,6 +136,20 @@ class _SearchPageState extends State<SearchPage>
 
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  Future<void> searchCommand(String searchQuery) async {
+    if (mounted) {
+      setState(() {
+        isSearching = true;
+      });
+    }
+    await search(searchQuery);
+    if (mounted) {
+      setState(() {
+        isSearching = false;
+      });
     }
   }
 
@@ -145,6 +176,50 @@ class _SearchPageState extends State<SearchPage>
         TextStyles().boldHeadline.copyWith(color: contrastColor);
     TextStyle titleStyle =
         TextStyles().headline2.copyWith(color: contrastColor);
+
+    Widget songWidget = Column(
+      children: [
+        SizedBox(
+          height: size.height / 3,
+        ),
+        const CircularProgressIndicator(),
+      ],
+    );
+    Widget playlistWidget = Column(
+      children: [
+        SizedBox(
+          height: size.height / 3,
+        ),
+        const CircularProgressIndicator(),
+      ],
+    );
+    if (!isSearching) {
+      songWidget = ListView(
+        children: songContainers,
+      );
+      playlistWidget = ListView(
+        children: playlistContainers,
+      );
+      if (searchLibrary || gridEnabled) {
+        songWidget = AlignedGridView.count(
+          crossAxisCount: 2,
+          itemCount: songContainers.length,
+          itemBuilder: (context, index) {
+            return songContainers[index];
+          },
+        );
+
+        playlistWidget = AlignedGridView.count(
+          crossAxisCount: 2,
+          itemCount: playlistContainers.length,
+          itemBuilder: (context, index) {
+            return playlistContainers[index];
+          },
+        );
+      }
+    }
+
+    double tabHeight = 50.0;
 
     return GestureDetector(
       onTap: () {
@@ -201,13 +276,7 @@ class _SearchPageState extends State<SearchPage>
                           searchTimer = Timer(
                               Duration(milliseconds: delay.inMilliseconds + 50),
                               () async {
-                            setState(() {
-                              isSearching = true;
-                            });
-                            await search(searchQuery);
-                            setState(() {
-                              isSearching = false;
-                            });
+                            searchCommand(searchQuery);
                           });
                         },
                         onSubmitted: (searchQuery) {
@@ -215,17 +284,7 @@ class _SearchPageState extends State<SearchPage>
                           searchTimer = Timer(
                               Duration(milliseconds: delay.inMilliseconds + 50),
                               () async {
-                            if (mounted) {
-                              setState(() {
-                                isSearching = true;
-                              });
-                            }
-                            await search(searchQuery);
-                            if (mounted) {
-                              setState(() {
-                                isSearching = false;
-                              });
-                            }
+                            searchCommand(searchQuery);
                           });
                         },
                       ),
@@ -233,112 +292,124 @@ class _SearchPageState extends State<SearchPage>
                   ),
                 ),
                 SizedBox(
+                  height: x / 2,
+                ),
+                SizedBox(
                   height: size.height - 180,
                   width: size.width,
-                  child: NestedScrollView(
-                    headerSliverBuilder: (BuildContext context, bool isScroll) {
-                      return [
-                        SliverAppBar(
-                          automaticallyImplyLeading: false,
-                          pinned: true,
-                          backgroundColor: backgroundColor,
-                          bottom: PreferredSize(
-                            preferredSize: const Size.fromHeight(20),
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 10.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: backgroundAccent,
-                              ),
-                              child: TabBar(
-                                onTap: (value) {
-                                  isSearchingSong = value == 0;
-                                  setState(() {});
-                                },
-                                padding: EdgeInsets.zero,
-                                indicatorPadding: EdgeInsets.zero,
-                                indicatorSize: TabBarIndicatorSize.label,
-                                labelPadding: EdgeInsets.zero,
-                                controller: _tabController,
-                                isScrollable: true,
-                                indicator: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Colors.transparent,
+                  child: Stack(
+                    children: [
+                      NestedScrollView(
+                        headerSliverBuilder:
+                            (BuildContext context, bool isScroll) {
+                          return [
+                            SliverAppBar(
+                              automaticallyImplyLeading: false,
+                              pinned: true,
+                              backgroundColor: backgroundColor,
+                              bottom: PreferredSize(
+                                preferredSize: Size.fromHeight(tabHeight),
+                                child: Container(
+                                  margin: EdgeInsets.only(
+                                      bottom: tabHeight * 0.5 + iconSize),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15),
+                                    color: backgroundAccent,
+                                  ),
+                                  child: TabBar(
+                                    onTap: (value) {
+                                      isSearchingSong = value == 0;
+                                      setState(() {});
+                                    },
+                                    padding: EdgeInsets.zero,
+                                    indicatorPadding: EdgeInsets.zero,
+                                    indicatorSize: TabBarIndicatorSize.label,
+                                    labelPadding: EdgeInsets.zero,
+                                    controller: _tabController,
+                                    isScrollable: true,
+                                    indicator: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Colors.transparent,
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                    tabs: [
+                                      Container(
+                                        width: (size.width - x / 2) / 2,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          color: _tabController.index == 0
+                                              ? accentColor
+                                              : backgroundAccent,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            'Musicas',
+                                            style: headerStyle,
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: (size.width - x / 2) / 2,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          color: _tabController.index == 1
+                                              ? accentColor
+                                              : backgroundAccent,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            'Playlist',
+                                            style: headerStyle,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                tabs: [
-                                  Container(
-                                    width: (size.width - x / 2) / 2,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(15),
-                                      color: _tabController.index == 0
-                                          ? accentColor
-                                          : backgroundAccent,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        'Musicas',
-                                        style: headerStyle,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    width: (size.width - x / 2) / 2,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(15),
-                                      color: _tabController.index == 1
-                                          ? accentColor
-                                          : backgroundAccent,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        'Playlist',
-                                        style: headerStyle,
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ),
                             ),
-                          ),
+                          ];
+                        },
+                        controller: _scrollController,
+                        body: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            songWidget,
+                            playlistWidget,
+                          ],
                         ),
-                      ];
-                    },
-                    controller: _scrollController,
-                    body: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        isSearching
-                            ? Column(
-                                children: [
-                                  SizedBox(
-                                    height: size.height / 3,
-                                  ),
-                                  const CircularProgressIndicator(),
-                                ],
-                              )
-                            : ListView(
-                                children: songContainers,
-                              ),
-                        isSearching
-                            ? Column(
-                                children: [
-                                  SizedBox(
-                                    height: size.height / 3,
-                                  ),
-                                  const CircularProgressIndicator(),
-                                ],
-                              )
-                            : ListView(
-                                children: playlistContainers,
-                              ),
-                      ],
-                    ),
+                      ),
+                      //
+                      // Filters
+                      //
+                      Positioned(
+                        top: tabHeight + iconSize * 0.25,
+                        left: UIConsts.spacing,
+                        child: FilterWidget(
+                          enableDropbutton: searchLibrary,
+                          isSong: currentTab == 0,
+                          filterCallback: (v) async {
+                            if (currentTab == 0) {
+                              _songFilter = v as SongFilter;
+                            } else {
+                              _playlistFilter = v as PlaylistFilter;
+                            }
+                            searchCommand(lastSearchQuery);
+                          },
+                          gridCallback: (v) async {
+                            gridEnabled = v;
+                            searchCommand(lastSearchQuery);
+                          },
+                        ),
+                      )
+                    ],
                   ),
                 ),
                 SizedBox(

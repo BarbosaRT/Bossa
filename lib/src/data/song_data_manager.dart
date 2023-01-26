@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/data_manager.dart';
 
-enum SongDataManagerFilter { idDesc, idAsc, timesPlayedDesc, timesPlayedAsc }
+enum SongFilter { idDesc, idAsc, timesPlayedDesc, timesPlayedAsc, desc, asc }
 
 class SongDataManager {
   final DataManager localDataManagerInstance;
@@ -28,7 +28,7 @@ class SongDataManager {
         VALUES("${song.title}","${song.icon}","${song.url}","${song.path}", "${song.author}", "${song.timesPlayed}")''');
   }
 
-  Future<void> deleteFile(String path) async {
+  Future<void> _deleteFile(String path) async {
     try {
       await File(path).delete();
     } catch (e) {
@@ -39,7 +39,7 @@ class SongDataManager {
   void removeSong(SongModel song) async {
     var database = await localDataManagerInstance.database();
     if (SongParser().isSongFromYoutube(song.url)) {
-      deleteFile(song.path);
+      _deleteFile(song.path);
     }
 
     database.rawDelete(
@@ -56,7 +56,7 @@ class SongDataManager {
   }
 
   Future<List<SongModel>> loadAllSongs(
-      {SongDataManagerFilter filter = SongDataManagerFilter.idDesc}) async {
+      {SongFilter filter = SongFilter.idDesc}) async {
     var database = await localDataManagerInstance.database();
     List<Map<String, dynamic>> results =
         await database.query('songs', orderBy: _getOrderBy(filter));
@@ -71,7 +71,7 @@ class SongDataManager {
 
   Future<List<SongModel>> searchSongs(
       {required String searchQuery,
-      SongDataManagerFilter filter = SongDataManagerFilter.idDesc}) async {
+      SongFilter filter = SongFilter.idDesc}) async {
     var database = await localDataManagerInstance.database();
     List<Map<String, dynamic>> results = await database.query(
       'songs',
@@ -87,16 +87,20 @@ class SongDataManager {
     return output;
   }
 
-  String _getOrderBy(SongDataManagerFilter filter) {
+  String _getOrderBy(SongFilter filter) {
     switch (filter) {
-      case SongDataManagerFilter.idAsc:
+      case SongFilter.idAsc:
         return 'id';
-      case SongDataManagerFilter.idDesc:
+      case SongFilter.idDesc:
         return 'id desc';
-      case SongDataManagerFilter.timesPlayedAsc:
+      case SongFilter.timesPlayedAsc:
         return 'timesPlayed';
-      case SongDataManagerFilter.timesPlayedDesc:
+      case SongFilter.timesPlayedDesc:
         return 'timesPlayed desc';
+      case SongFilter.asc:
+        return 'title';
+      case SongFilter.desc:
+        return 'title desc';
       default:
         return 'id desc';
     }

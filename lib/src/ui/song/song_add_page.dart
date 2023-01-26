@@ -103,6 +103,9 @@ class _SongAddPageState extends State<SongAddPage> {
     TextStyle authorStyle =
         TextStyles().headline2.copyWith(color: contrastColor);
 
+    TextStyle snackbarStyle =
+        TextStyles().boldHeadline2.copyWith(color: contrastColor);
+
     ImageProvider iconImage =
         ImageParser.getImageProviderFromString(songToBeAdded.icon);
 
@@ -121,7 +124,7 @@ class _SongAddPageState extends State<SongAddPage> {
           children: [
             Text(
               'Disponivel offline',
-              style: authorStyle,
+              style: snackbarStyle,
             ),
             Switch(
               value: songToBeAdded.path.isNotEmpty,
@@ -160,7 +163,7 @@ class _SongAddPageState extends State<SongAddPage> {
                     duration: const Duration(days: 1),
                     content: Text(
                       'Baixando a música, por favor aguarde',
-                      style: authorStyle,
+                      style: snackbarStyle,
                     ),
                   ),
                 );
@@ -174,7 +177,7 @@ class _SongAddPageState extends State<SongAddPage> {
                     backgroundColor: accentColor,
                     content: Text(
                       'Música baixada com sucesso',
-                      style: authorStyle,
+                      style: snackbarStyle,
                     ),
                   ),
                 );
@@ -221,7 +224,7 @@ class _SongAddPageState extends State<SongAddPage> {
                               Expanded(
                                 child: Text(
                                   'Você têm mudanças não salvas, você deseja realmente sair?',
-                                  style: authorStyle,
+                                  style: snackbarStyle,
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -249,7 +252,7 @@ class _SongAddPageState extends State<SongAddPage> {
                                             padding: const EdgeInsets.all(8),
                                             child: Text(
                                               'Sim',
-                                              style: authorStyle,
+                                              style: snackbarStyle,
                                             ),
                                           ),
                                         ),
@@ -274,7 +277,7 @@ class _SongAddPageState extends State<SongAddPage> {
                                             padding: const EdgeInsets.all(8),
                                             child: Text(
                                               'Não',
-                                              style: authorStyle,
+                                              style: snackbarStyle,
                                             ),
                                           ),
                                         ),
