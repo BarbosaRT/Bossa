@@ -2,10 +2,12 @@ import 'dart:async';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
+import 'package:bossa/src/ui/components/content_container.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/library/filter_widget.dart';
+import 'package:bossa/src/ui/library/library_container.dart';
 import 'package:bossa/src/ui/search/playlist_search.dart';
 import 'package:bossa/src/ui/search/song_search.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +51,7 @@ class _SearchPageState extends State<SearchPage>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
+      searchCommand(lastSearchQuery);
       if (_tabController.index != currentTab && mounted) {
         setState(() {
           currentTab = _tabController.index;
@@ -177,46 +180,46 @@ class _SearchPageState extends State<SearchPage>
     TextStyle titleStyle =
         TextStyles().headline2.copyWith(color: contrastColor);
 
-    Widget songWidget = Column(
-      children: [
-        SizedBox(
-          height: size.height / 3,
-        ),
-        const CircularProgressIndicator(),
-      ],
+    Widget songWidget = ListView(
+      children: songContainers,
     );
-    Widget playlistWidget = Column(
-      children: [
-        SizedBox(
-          height: size.height / 3,
-        ),
-        const CircularProgressIndicator(),
-      ],
+    Widget playlistWidget = ListView(
+      children: playlistContainers,
     );
-    if (!isSearching) {
-      songWidget = ListView(
-        children: songContainers,
+    if (isSearching) {
+      songWidget = Column(
+        children: [
+          SizedBox(
+            height: size.height / 3,
+          ),
+          const CircularProgressIndicator(),
+        ],
       );
-      playlistWidget = ListView(
-        children: playlistContainers,
+      playlistWidget = Column(
+        children: [
+          SizedBox(
+            height: size.height / 3,
+          ),
+          const CircularProgressIndicator(),
+        ],
       );
-      if (searchLibrary || gridEnabled) {
-        songWidget = AlignedGridView.count(
-          crossAxisCount: 2,
-          itemCount: songContainers.length,
-          itemBuilder: (context, index) {
-            return songContainers[index];
-          },
-        );
+    }
+    if (gridEnabled) {
+      songWidget = AlignedGridView.count(
+        crossAxisCount: 2,
+        itemCount: songContainers.length,
+        itemBuilder: (context, index) {
+          return songContainers[index];
+        },
+      );
 
-        playlistWidget = AlignedGridView.count(
-          crossAxisCount: 2,
-          itemCount: playlistContainers.length,
-          itemBuilder: (context, index) {
-            return playlistContainers[index];
-          },
-        );
-      }
+      playlistWidget = AlignedGridView.count(
+        crossAxisCount: 2,
+        itemCount: playlistContainers.length,
+        itemBuilder: (context, index) {
+          return playlistContainers[index];
+        },
+      );
     }
 
     double tabHeight = 50.0;
@@ -319,7 +322,7 @@ class _SearchPageState extends State<SearchPage>
                                   child: TabBar(
                                     onTap: (value) {
                                       isSearchingSong = value == 0;
-                                      setState(() {});
+                                      searchCommand(lastSearchQuery);
                                     },
                                     padding: EdgeInsets.zero,
                                     indicatorPadding: EdgeInsets.zero,

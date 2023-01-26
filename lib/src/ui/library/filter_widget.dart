@@ -137,7 +137,7 @@ class _FilterWidgetState extends State<FilterWidget> {
                       return;
                     }
                     _playlistFilter = v as PlaylistFilter;
-                    widget.filterCallback(_songFilter);
+                    widget.filterCallback(_playlistFilter);
                   },
                 )
               : const Spacer(),
