@@ -32,12 +32,23 @@ class _FilterWidgetState extends State<FilterWidget> {
   PlaylistFilter _playlistFilter = PlaylistFilter.idDesc;
 
   @override
+  void initState() {
+    super.initState();
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundAccent = colorController.currentTheme.backgroundAccent;
 
     final dropdownStyle = TextStyles().headline3.copyWith(color: contrastColor);
 

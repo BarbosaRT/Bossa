@@ -46,6 +46,14 @@ class _LibraryPageState extends State<LibraryPage>
   @override
   void initState() {
     super.initState();
+
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (_tabController.index != currentTab && mounted) {
@@ -80,10 +88,10 @@ class _LibraryPageState extends State<LibraryPage>
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final accentColor = colorController.currentScheme.accentColor;
-    final backgroundColor = colorController.currentScheme.backgroundColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final accentColor = colorController.currentTheme.accentColor;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
+    final backgroundAccent = colorController.currentTheme.backgroundAccent;
 
     final songDataManager = Modular.get<SongDataManager>();
     final playlistManager = Modular.get<JustPlaylistManager>();

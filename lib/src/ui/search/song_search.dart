@@ -20,26 +20,33 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class SongSearch {
-  Future<List<Widget>> searchLibrary(
-      {required String searchQuery,
+  Future<List<SongModel>> searchLibrary({
+    required String searchQuery,
+    SongFilter filter = SongFilter.idDesc,
+  }) async {
+    final songDataManager = Modular.get<SongDataManager>();
+    List<SongModel> songs = await songDataManager.searchSongs(
+        searchQuery: searchQuery, filter: filter);
+    return songs;
+  }
+
+  List<Widget> getLibraryWidgets(
+      {required List<SongModel> songs,
       required BuildContext context,
-      SongFilter filter = SongFilter.idDesc,
-      bool gridEnabled = false}) async {
+      required bool gridEnabled}) {
     final size = MediaQuery.of(context).size;
+    final songDataManager = Modular.get<SongDataManager>();
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
 
     final playlistManager = Modular.get<JustPlaylistManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
-    final songDataManager = Modular.get<SongDataManager>();
     final audioManager = playlistManager.player;
 
     final buttonTextStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
 
     List<Widget> songContainers = [];
-    List<SongModel> songs = await songDataManager.searchSongs(
-        searchQuery: searchQuery, filter: filter);
 
     for (SongModel song in songs) {
       PlaylistModel playlist = PlaylistModel(
@@ -150,28 +157,45 @@ class SongSearch {
     return songContainers;
   }
 
-  Future<List<Widget>> searchYoutube({
+  Future<List<SongModel>> searchYoutube({
     required String searchQuery,
-    required BuildContext context,
-    bool gridEnabled = false,
   }) async {
-    final size = MediaQuery.of(context).size;
-    final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-
-    final buttonTextStyle =
-        TextStyles().boldHeadline2.copyWith(color: contrastColor);
-
-    List<Widget> songContainers = [];
+    List<SongModel> songs = [];
 
     final yt = YoutubeExplode();
     final searchResponse = await yt.search.search(searchQuery);
 
     for (var video in searchResponse.toList()) {
       final icon = YoutubeParser().getYoutubeThumbnail(video.thumbnails);
+      songs.add(SongModel(
+        id: -1,
+        icon: icon,
+        title: video.title,
+        author: video.author,
+        url: video.url,
+      ));
+    }
+
+    return songs;
+  }
+
+  List<Widget> getYoutubeWidgets(
+      {required List<SongModel> songs,
+      required BuildContext context,
+      required bool gridEnabled}) {
+    final size = MediaQuery.of(context).size;
+    final colorController = Modular.get<ColorController>();
+    final contrastColor = colorController.currentTheme.contrastColor;
+
+    final buttonTextStyle =
+        TextStyles().boldHeadline2.copyWith(color: contrastColor);
+
+    List<Widget> songContainers = [];
+
+    for (var song in songs) {
       final key = GlobalKey<DetailContainerState>();
       final detailContainer = DetailContainer(
-        icon: icon,
+        icon: song.icon,
         key: key,
         actions: [
           SizedBox(
@@ -184,7 +208,7 @@ class SongSearch {
                   MaterialPageRoute(
                     builder: (context) => YoutubeUrlAddPage(
                       isSong: true,
-                      url: video.url,
+                      url: song.url,
                     ),
                   ),
                 );
@@ -211,7 +235,7 @@ class SongSearch {
                 Modular.to.push(
                   MaterialPageRoute(
                     builder: (context) => YoutubeUrlAddPage(
-                        isSong: true, url: video.url, addToPlaylist: true),
+                        isSong: true, url: song.url, addToPlaylist: true),
                   ),
                 );
               },
@@ -229,42 +253,42 @@ class SongSearch {
             ),
           ),
         ],
-        title: video.title,
+        title: song.title,
       );
       songContainers.add(gridEnabled
           ? Padding(
               padding: const EdgeInsets.all(8.0),
               child: ContentContainer(
-                  title: video.title,
-                  author: video.author,
-                  icon: icon,
+                  title: song.title,
+                  author: song.author,
+                  icon: song.icon,
                   imagesSize: size.width / 2 - UIConsts.spacing * 0.5,
                   textWidth: size.width / 2 - UIConsts.spacing * 1.75,
                   detailContainer: detailContainer,
                   onTap: () async {
-                    await onYoutubeTap(video, icon);
+                    await onYoutubeTap(song.url, song.icon);
                   }),
             )
           : Padding(
               padding: EdgeInsets.symmetric(horizontal: UIConsts.spacing / 2),
               child: LibraryContentContainer(
-                title: video.title,
-                author: video.author,
+                title: song.title,
+                author: song.author,
                 detailContainer: detailContainer,
                 onTap: () async {
-                  await onYoutubeTap(video, icon);
+                  await onYoutubeTap(song.url, song.icon);
                 },
-                icon: icon,
+                icon: song.icon,
               ),
             ));
     }
     return songContainers;
   }
 
-  Future<void> onYoutubeTap(Video video, String icon) async {
+  Future<void> onYoutubeTap(String url, String icon) async {
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundAccent = colorController.currentTheme.backgroundAccent;
 
     final playlistManager = Modular.get<JustPlaylistManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
@@ -284,7 +308,7 @@ class SongSearch {
       ),
     );
 
-    SongModel song = await YoutubeParser().convertYoutubeSong(video.url);
+    SongModel song = await YoutubeParser().convertYoutubeSong(url);
 
     Asuka.hideCurrentSnackBar();
 

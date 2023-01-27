@@ -1,13 +1,13 @@
 import 'dart:async';
+import 'package:bossa/models/playlist_model.dart';
+import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
-import 'package:bossa/src/ui/components/content_container.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/library/filter_widget.dart';
-import 'package:bossa/src/ui/library/library_container.dart';
 import 'package:bossa/src/ui/search/playlist_search.dart';
 import 'package:bossa/src/ui/search/song_search.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +34,9 @@ class _SearchPageState extends State<SearchPage>
   Duration delay = const Duration(milliseconds: 250);
   Timer searchTimer = Timer(const Duration(milliseconds: 250), () {});
 
+  List<SongModel> songList = [];
+  List<PlaylistModel> playlistList = [];
+
   List<Widget> songContainers = [];
   List<Widget> playlistContainers = [];
 
@@ -49,6 +52,14 @@ class _SearchPageState extends State<SearchPage>
   @override
   void initState() {
     super.initState();
+
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       searchCommand(lastSearchQuery);
@@ -90,55 +101,35 @@ class _SearchPageState extends State<SearchPage>
     }
 
     if (isSearchingSong) {
-      songContainers = [];
+      songList = [];
     } else {
-      playlistContainers = [];
+      playlistList = [];
     }
 
     if (isSearchingSong) {
       if (searchLibrary) {
-        songContainers = await SongSearch().searchLibrary(
+        songList = await SongSearch().searchLibrary(
           searchQuery: searchQuery,
-          context: context,
           filter: _songFilter,
-          gridEnabled: gridEnabled,
         );
       } else {
-        songContainers = await SongSearch().searchYoutube(
+        songList = await SongSearch().searchYoutube(
           searchQuery: searchQuery,
-          context: context,
-          gridEnabled: gridEnabled,
         );
       }
-      songContainers.add(
-        SizedBox(
-          height: 73 * 2 + x * 2,
-        ),
-      );
+      loadSongs();
     } else {
       if (searchLibrary) {
-        playlistContainers = await PlaylistSearch().searchLibrary(
+        playlistList = await PlaylistSearch().searchLibrary(
           searchQuery: searchQuery,
-          context: context,
           filter: _playlistFilter,
-          gridEnabled: gridEnabled,
         );
       } else {
-        playlistContainers = await PlaylistSearch().searchYoutube(
+        playlistList = await PlaylistSearch().searchYoutube(
           searchQuery: searchQuery,
-          context: context,
-          gridEnabled: gridEnabled,
         );
       }
-      playlistContainers.add(
-        SizedBox(
-          height: 73 * 2 + UIConsts.spacing,
-        ),
-      );
-    }
-
-    if (mounted) {
-      setState(() {});
+      loadPlaylists();
     }
   }
 
@@ -156,6 +147,50 @@ class _SearchPageState extends State<SearchPage>
     }
   }
 
+  void loadSongs() {
+    songContainers = searchLibrary
+        ? SongSearch().getLibraryWidgets(
+            songs: songList,
+            context: context,
+            gridEnabled: gridEnabled,
+          )
+        : SongSearch().getYoutubeWidgets(
+            songs: songList,
+            context: context,
+            gridEnabled: gridEnabled,
+          );
+    songContainers.add(
+      SizedBox(
+        height: 73 * 2 + x * 2,
+      ),
+    );
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void loadPlaylists() {
+    playlistContainers = searchLibrary
+        ? PlaylistSearch().getLibraryWidgets(
+            playlists: playlistList,
+            context: context,
+            gridEnabled: gridEnabled,
+          )
+        : PlaylistSearch().getYoutubeWidgets(
+            playlists: playlistList,
+            context: context,
+            gridEnabled: gridEnabled,
+          );
+    playlistContainers.add(
+      SizedBox(
+        height: 73 * 2 + UIConsts.spacing,
+      ),
+    );
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   //
   // Build
   //
@@ -166,20 +201,21 @@ class _SearchPageState extends State<SearchPage>
     final homeController = Modular.get<HomeController>();
     if (homeController.searchLibrary != searchLibrary) {
       searchLibrarySetter();
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     }
 
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
-    final backgroundColor = colorController.currentScheme.backgroundColor;
-    final accentColor = colorController.currentScheme.accentColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundAccent = colorController.currentTheme.backgroundAccent;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
+    final accentColor = colorController.currentTheme.accentColor;
 
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);
     TextStyle titleStyle =
         TextStyles().headline2.copyWith(color: contrastColor);
-
     Widget songWidget = ListView(
       children: songContainers,
     );
@@ -215,7 +251,7 @@ class _SearchPageState extends State<SearchPage>
 
       playlistWidget = AlignedGridView.count(
         crossAxisCount: 2,
-        itemCount: playlistContainers.length,
+        itemCount: playlistList.length,
         itemBuilder: (context, index) {
           return playlistContainers[index];
         },
@@ -322,7 +358,6 @@ class _SearchPageState extends State<SearchPage>
                                   child: TabBar(
                                     onTap: (value) {
                                       isSearchingSong = value == 0;
-                                      searchCommand(lastSearchQuery);
                                     },
                                     padding: EdgeInsets.zero,
                                     indicatorPadding: EdgeInsets.zero,
@@ -408,7 +443,8 @@ class _SearchPageState extends State<SearchPage>
                           },
                           gridCallback: (v) async {
                             gridEnabled = v;
-                            searchCommand(lastSearchQuery);
+                            loadSongs();
+                            loadPlaylists();
                           },
                         ),
                       )

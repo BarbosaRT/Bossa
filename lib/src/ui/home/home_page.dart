@@ -70,6 +70,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
     final homeController = Modular.get<HomeController>();
     currentPage = homeController.currentPage;
     homeController.addListener(() {
@@ -88,8 +96,8 @@ class _HomePageState extends State<HomePage> {
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundColor = colorController.currentScheme.backgroundColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
 
     final homeController = Modular.get<HomeController>();
     homeController.addListener(() {

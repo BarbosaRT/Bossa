@@ -32,6 +32,14 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
   @override
   void initState() {
     super.initState();
+
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
     if (widget.url != null) {
       urlTextController.text = widget.url!;
     }
@@ -39,8 +47,8 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
 
   void addCommand(String value) async {
     final colorController = Modular.get<ColorController>();
-    final snackbarColor = colorController.currentScheme.backgroundAccent;
-    final contrastColor = colorController.currentScheme.contrastColor;
+    final snackbarColor = colorController.currentTheme.backgroundAccent;
+    final contrastColor = colorController.currentTheme.contrastColor;
 
     final songDataManager = Modular.get<SongDataManager>();
     final playlistDataManager = Modular.get<PlaylistDataManager>();
@@ -149,9 +157,9 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundColor = colorController.currentScheme.backgroundColor;
-    final accentColor = colorController.currentScheme.accentColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
+    final accentColor = colorController.currentTheme.accentColor;
 
     TextStyle titleStyle =
         TextStyles().headline2.copyWith(color: contrastColor);

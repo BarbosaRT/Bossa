@@ -31,14 +31,24 @@ class ContentContainer extends StatefulWidget {
 }
 
 class _ContentContainerState extends State<ContentContainer> {
-  static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
+
+  @override
+  void initState() {
+    super.initState();
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final contrastAccent = colorController.currentScheme.contrastAccent;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final contrastAccent = colorController.currentTheme.contrastAccent;
     final textStyle = TextStyles().boldHeadline2.copyWith(color: contrastColor);
     final authorStyle = TextStyles().headline3.copyWith(color: contrastAccent);
 

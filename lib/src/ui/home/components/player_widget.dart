@@ -25,6 +25,12 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   @override
   void initState() {
     super.initState();
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -43,9 +49,9 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     );
 
     final colorController = Modular.get<ColorController>();
-    final contrastAccent = colorController.currentScheme.contrastAccent;
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
+    final contrastAccent = colorController.currentTheme.contrastAccent;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundAccent = colorController.currentTheme.backgroundAccent;
 
     Stream<bool> playingStream = playlistManager.player.playingStream;
     Stream<SequenceState?> songsStream =

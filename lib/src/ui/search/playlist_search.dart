@@ -20,21 +20,28 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class PlaylistSearch {
-  Future<List<Widget>> searchLibrary(
-      {required String searchQuery,
-      required BuildContext context,
-      PlaylistFilter filter = PlaylistFilter.idDesc,
-      bool gridEnabled = false}) async {
-    final size = MediaQuery.of(context).size;
-
-    List<Widget> playlistContainers = [];
+  Future<List<PlaylistModel>> searchLibrary({
+    required String searchQuery,
+    PlaylistFilter filter = PlaylistFilter.idDesc,
+  }) async {
     final playlistDataManager = Modular.get<PlaylistDataManager>();
-    final homeController = Modular.get<HomeController>();
 
     List<PlaylistModel> playlists = await playlistDataManager.searchPlaylists(
       searchQuery: searchQuery,
       filter: filter,
     );
+
+    return playlists;
+  }
+
+  List<Widget> getLibraryWidgets(
+      {required List<PlaylistModel> playlists,
+      required BuildContext context,
+      required bool gridEnabled}) {
+    final size = MediaQuery.of(context).size;
+
+    List<Widget> playlistContainers = [];
+    final homeController = Modular.get<HomeController>();
 
     for (PlaylistModel playlist in playlists) {
       playlistContainers.add(
@@ -69,18 +76,9 @@ class PlaylistSearch {
     return playlistContainers;
   }
 
-  Future<List<Widget>> searchYoutube(
-      {required String searchQuery,
-      required BuildContext context,
-      bool gridEnabled = false}) async {
-    final size = MediaQuery.of(context).size;
-    List<Widget> playlistContainers = [];
-
-    final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-
-    final buttonTextStyle =
-        TextStyles().boldHeadline2.copyWith(color: contrastColor);
+  Future<List<PlaylistModel>> searchYoutube(
+      {required String searchQuery}) async {
+    List<PlaylistModel> playlistContainers = [];
 
     final yt = YoutubeExplode();
     final searchResponse =
@@ -95,13 +93,45 @@ class PlaylistSearch {
       await for (var video in videoStream) {
         icon = YoutubeParser().getYoutubeThumbnail(video.thumbnails);
       }
-      final key = GlobalKey<DetailContainerState>();
 
       int videoCount =
           playlistData.videoCount == null ? 0 : playlistData.videoCount!;
 
+      List<SongModel> songs = List.generate(videoCount,
+          (index) => SongModel(id: 0, title: '', icon: icon, url: ''));
+
+      playlistContainers.add(
+        PlaylistModel(
+          id: -1,
+          title: playlistData.title,
+          icon: icon,
+          songs: songs.toList(),
+        ),
+      );
+    }
+
+    yt.close();
+    return playlistContainers;
+  }
+
+  List<Widget> getYoutubeWidgets(
+      {required BuildContext context,
+      required List<PlaylistModel> playlists,
+      required bool gridEnabled}) {
+    final size = MediaQuery.of(context).size;
+
+    final colorController = Modular.get<ColorController>();
+    final contrastColor = colorController.currentTheme.contrastColor;
+
+    final buttonTextStyle =
+        TextStyles().boldHeadline2.copyWith(color: contrastColor);
+
+    List<Widget> output = [];
+
+    for (PlaylistModel playlist in playlists) {
+      final key = GlobalKey<DetailContainerState>();
       final detailContainer = DetailContainer(
-        icon: icon,
+        icon: playlist.icon,
         key: key,
         actions: [
           SizedBox(
@@ -114,7 +144,7 @@ class PlaylistSearch {
                   MaterialPageRoute(
                     builder: (context) => YoutubeUrlAddPage(
                       isSong: false,
-                      url: playlistData.url,
+                      url: playlist.url,
                     ),
                   ),
                 );
@@ -133,47 +163,47 @@ class PlaylistSearch {
             ),
           ),
         ],
-        title: playlistData.title,
+        title: playlist.title,
       );
-
-      playlistContainers.add(
+      output.add(
         gridEnabled
             ? Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ContentContainer(
-                    title: playlistData.title,
-                    author: '${playlistData.author}, $videoCount músicas',
-                    icon: icon,
-                    imagesSize: size.width / 2 - UIConsts.spacing * 0.5,
-                    textWidth: size.width / 2 - UIConsts.spacing * 0.5,
-                    detailContainer: detailContainer,
-                    onTap: () async {
-                      await onYoutubeTap(videoCount, playlistData);
-                    }),
+                  title: playlist.title,
+                  author: '${playlist.songs.length} músicas',
+                  icon: playlist.icon,
+                  imagesSize: size.width / 2 - UIConsts.spacing * 0.5,
+                  textWidth: size.width / 2 - UIConsts.spacing * 0.5,
+                  detailContainer: detailContainer,
+                  onTap: () async {
+                    await PlaylistSearch()
+                        .onYoutubeTap(playlist.songs.length, playlist);
+                  },
+                ),
               )
             : Padding(
                 padding: EdgeInsets.symmetric(horizontal: UIConsts.spacing / 2),
                 child: LibraryContentContainer(
-                  title: playlistData.title,
-                  author: '${playlistData.author}, $videoCount músicas',
+                  title: playlist.title,
+                  author: '${playlist.songs.length} músicas',
                   detailContainer: detailContainer,
                   onTap: () async {
-                    await onYoutubeTap(videoCount, playlistData);
+                    await onYoutubeTap(playlist.songs.length, playlist);
                   },
-                  icon: icon,
+                  icon: playlist.icon,
                 ),
               ),
       );
     }
 
-    yt.close();
-    return playlistContainers;
+    return output;
   }
 
-  Future<void> onYoutubeTap(int videoCount, Playlist playlistData) async {
+  Future<void> onYoutubeTap(int videoCount, PlaylistModel playlist) async {
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundAccent = colorController.currentTheme.backgroundAccent;
 
     final homeController = Modular.get<HomeController>();
 
@@ -193,8 +223,9 @@ class PlaylistSearch {
 
     videoCount = videoCount > 10 ? 10 : videoCount;
     List<SongModel> finalSongs = [];
-    var songStream =
-        getPlaylistSongs(playlistData.id, videoCount).asBroadcastStream();
+    var songStream = getPlaylistSongs(
+            YoutubeParser().parseYoutubePlaylist(playlist.url!), videoCount)
+        .asBroadcastStream();
 
     Asuka.showSnackBar(
       SnackBar(
@@ -222,7 +253,7 @@ class PlaylistSearch {
 
     final finalPlaylist = PlaylistModel(
         id: 0,
-        title: playlistData.title,
+        title: playlist.title,
         icon: finalSongs[0].icon,
         songs: finalSongs);
     Asuka.hideCurrentSnackBar();
@@ -233,8 +264,7 @@ class PlaylistSearch {
     );
   }
 
-  Stream<List<SongModel>> getPlaylistSongs(
-      PlaylistId id, int videoCount) async* {
+  Stream<List<SongModel>> getPlaylistSongs(String id, int videoCount) async* {
     final youtubeExplode = YoutubeExplode();
     List<SongModel> songs = [];
 

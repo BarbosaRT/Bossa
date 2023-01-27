@@ -30,6 +30,17 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
   double iconSize = UIConsts.iconSize.toDouble();
   bool canTapOffline = true;
 
+  @override
+  void initState() {
+    super.initState();
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
   Stream<List<SongModel>> downloadPlaylistSongs() async* {
     List<SongModel> output = [];
     for (SongModel song in widget.playlist.songs) {
@@ -47,9 +58,9 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
-    final accentColor = colorController.currentScheme.accentColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundAccent = colorController.currentTheme.backgroundAccent;
+    final accentColor = colorController.currentTheme.accentColor;
 
     final playlistDataManager = Modular.get<PlaylistDataManager>();
     final songDataManager = Modular.get<SongDataManager>();

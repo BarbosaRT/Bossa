@@ -26,6 +26,17 @@ class DetailContainerState extends State<DetailContainer> {
   double iconSize = UIConsts.iconSize.toDouble();
   double imagesSize = 100;
 
+  @override
+  void initState() {
+    super.initState();
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
   void pop() {
     Navigator.of(context).pop();
   }
@@ -34,8 +45,8 @@ class DetailContainerState extends State<DetailContainer> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundColor = colorController.currentScheme.backgroundColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
     final titleStyle = TextStyles().headline.copyWith(color: contrastColor);
 
     final height = size.height / 2;

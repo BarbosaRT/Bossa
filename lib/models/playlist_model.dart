@@ -4,12 +4,14 @@ class PlaylistModel {
   int id = 0;
   String title = '';
   String icon = '';
+  String? url = '';
   List<SongModel> songs = [];
   PlaylistModel(
       {required this.id,
       required this.title,
       required this.icon,
-      required this.songs});
+      required this.songs,
+      this.url});
 
   factory PlaylistModel.fromMap(Map map) {
     List<SongModel> songs = [];

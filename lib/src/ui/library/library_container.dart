@@ -31,12 +31,23 @@ class LibraryContentContainer extends StatefulWidget {
 
 class _LibraryContentContainerState extends State<LibraryContentContainer> {
   @override
+  void initState() {
+    super.initState();
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
-    final backgroundColor = colorController.currentScheme.backgroundColor;
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final contrastAccent = colorController.currentScheme.contrastAccent;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final contrastAccent = colorController.currentTheme.contrastAccent;
 
     TextStyle titleStyle = TextStyles().boldHeadline2.copyWith(
           color: contrastColor,

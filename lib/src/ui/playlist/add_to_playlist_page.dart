@@ -33,6 +33,12 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
   @override
   void initState() {
     super.initState();
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     init();
   }
 
@@ -108,9 +114,9 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundColor = colorController.currentScheme.backgroundColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
+    final backgroundAccent = colorController.currentTheme.backgroundAccent;
 
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);

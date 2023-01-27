@@ -53,6 +53,14 @@ class _SongAddPageState extends State<SongAddPage> {
   @override
   void initState() {
     super.initState();
+
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
     if (widget.songToBeEdited != null) {
       songToBeAdded = SongModel.fromMap(widget.songToBeEdited!.toMap());
       editing = true;
@@ -93,10 +101,10 @@ class _SongAddPageState extends State<SongAddPage> {
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
-    final accentColor = colorController.currentScheme.accentColor;
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundColor = colorController.currentScheme.backgroundColor;
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
+    final accentColor = colorController.currentTheme.accentColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
+    final backgroundAccent = colorController.currentTheme.backgroundAccent;
 
     TextStyle titleStyle = TextStyles().headline.copyWith(color: contrastColor);
 

@@ -51,6 +51,13 @@ class _PlaylistPageState extends State<PlaylistPage> {
   void initState() {
     super.initState();
 
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
     final homeController = Modular.get<HomeController>();
     playlist = PlaylistModel.fromMap(homeController.currentPlaylist.toMap());
 
@@ -81,9 +88,9 @@ class _PlaylistPageState extends State<PlaylistPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
-    final accentColor = colorController.currentScheme.accentColor;
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundColor = colorController.currentScheme.backgroundColor;
+    final accentColor = colorController.currentTheme.accentColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
 
     final titleStyle = TextStyles().boldHeadline.copyWith(color: contrastColor);
     final songDataManager = Modular.get<SongDataManager>();

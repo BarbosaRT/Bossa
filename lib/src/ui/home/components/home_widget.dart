@@ -31,6 +31,17 @@ class _AddWidgetState extends State<AddWidget> {
   double iconSize = UIConsts.iconSize.toDouble();
   static double x = UIConsts.spacing;
 
+  @override
+  void initState() {
+    super.initState();
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
   Widget addWidget({
     required String addText,
     required String fromYoutubeText,
@@ -41,8 +52,8 @@ class _AddWidgetState extends State<AddWidget> {
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
-    final backgroundColor = colorController.currentScheme.backgroundColor;
-    final contrastColor = colorController.currentScheme.contrastColor;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
 
     final popupStyle = TextStyles().headline2.copyWith(color: contrastColor);
 
@@ -109,8 +120,8 @@ class _AddWidgetState extends State<AddWidget> {
     );
 
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundColor = colorController.currentScheme.backgroundColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
 
     final addSongWidget = addWidget(
       onFilePress: (BuildContext ctx) {
@@ -254,7 +265,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     final playlistManager = Modular.get<JustPlaylistManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
     final audioManager = playlistManager.player;
     final buttonStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
@@ -367,7 +378,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
     final homeController = Modular.get<HomeController>();
 
     final textStyle = TextStyles().headline.copyWith(color: contrastColor);

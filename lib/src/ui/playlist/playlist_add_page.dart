@@ -30,6 +30,12 @@ class _PlaylistSongContainerState extends State<PlaylistSongContainer> {
   @override
   void initState() {
     super.initState();
+    final colorController = Modular.get<ColorController>();
+    colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     if (widget.addSong != null) {
       isAdding = true;
     }
@@ -39,9 +45,9 @@ class _PlaylistSongContainerState extends State<PlaylistSongContainer> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
-    final backgroundAccent = colorController.currentScheme.backgroundAccent;
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final contrastAccent = colorController.currentScheme.contrastAccent;
+    final backgroundAccent = colorController.currentTheme.backgroundAccent;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final contrastAccent = colorController.currentTheme.contrastAccent;
 
     TextStyle titleStyle = TextStyles().headline2.copyWith(
           color: contrastColor,
@@ -195,8 +201,8 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
     final playlistDataManager = Modular.get<PlaylistDataManager>();
 
     final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentScheme.contrastColor;
-    final backgroundColor = colorController.currentScheme.backgroundColor;
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
 
     TextStyle titleStyle = TextStyles().headline.copyWith(color: contrastColor);
 
