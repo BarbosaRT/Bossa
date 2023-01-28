@@ -123,7 +123,8 @@ class SongSearch {
                       Modular.to.popUntil(ModalRoute.withName('/'));
                       audioManager.pause();
 
-                      playlistUIController.setPlaylist(playlist);
+                      playlistUIController.setPlaylist(playlist,
+                          index: songs.indexOf(song));
                       playlistManager.setPlaylist(playlist,
                           initialIndex: songs.indexOf(song));
 
@@ -141,7 +142,8 @@ class SongSearch {
                   Modular.to.popUntil(ModalRoute.withName('/'));
                   audioManager.pause();
 
-                  playlistUIController.setPlaylist(playlist);
+                  playlistUIController.setPlaylist(playlist,
+                      index: songs.indexOf(song));
                   await playlistManager.setPlaylist(playlist,
                       initialIndex: songs.indexOf(song));
 

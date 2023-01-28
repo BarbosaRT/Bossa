@@ -196,7 +196,8 @@ class _LibraryPageState extends State<LibraryPage>
                       Modular.to.popUntil(ModalRoute.withName('/'));
                       audioManager.pause();
 
-                      playlistUIController.setPlaylist(playlist);
+                      playlistUIController.setPlaylist(playlist,
+                          index: songs.indexOf(song));
                       playlistManager.setPlaylist(playlist,
                           initialIndex: songs.indexOf(song));
 
@@ -214,7 +215,8 @@ class _LibraryPageState extends State<LibraryPage>
                   Modular.to.popUntil(ModalRoute.withName('/'));
                   audioManager.pause();
 
-                  playlistUIController.setPlaylist(playlist);
+                  playlistUIController.setPlaylist(playlist,
+                      index: songs.indexOf(song));
                   playlistManager.setPlaylist(playlist,
                       initialIndex: songs.indexOf(song));
 
@@ -329,6 +331,7 @@ class _LibraryPageState extends State<LibraryPage>
                       SliverAppBar(
                         automaticallyImplyLeading: false,
                         pinned: true,
+                        elevation: 0,
                         backgroundColor: backgroundColor,
                         bottom: PreferredSize(
                           preferredSize: const Size.fromHeight(tabHeight),
@@ -340,6 +343,7 @@ class _LibraryPageState extends State<LibraryPage>
                               color: backgroundAccent,
                             ),
                             child: TabBar(
+                              dividerColor: Colors.transparent,
                               onTap: (value) {
                                 if (mounted) {
                                   setState(() {
@@ -368,12 +372,12 @@ class _LibraryPageState extends State<LibraryPage>
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15),
                                     color: currentTab == 0
-                                        ? accentColor
+                                        ? accentColor.withOpacity(0.5)
                                         : backgroundAccent,
                                   ),
                                   child: Center(
                                     child: Text(
-                                      'Musicas',
+                                      'Músicas',
                                       style: headerStyle,
                                     ),
                                   ),
@@ -384,7 +388,7 @@ class _LibraryPageState extends State<LibraryPage>
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15),
                                     color: currentTab == 1
-                                        ? accentColor
+                                        ? accentColor.withOpacity(0.5)
                                         : backgroundAccent,
                                   ),
                                   child: Center(

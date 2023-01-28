@@ -61,7 +61,9 @@ class _PlaylistPageState extends State<PlaylistPage> {
     final homeController = Modular.get<HomeController>();
     playlist = PlaylistModel.fromMap(homeController.currentPlaylist.toMap());
 
-    updatePalette(playlist.songs[0].icon);
+    if (playlist.songs.isNotEmpty) {
+      updatePalette(playlist.songs[0].icon);
+    }
 
     final settingsController = Modular.get<SettingsController>();
     settingsController.addListener(() {
@@ -75,7 +77,9 @@ class _PlaylistPageState extends State<PlaylistPage> {
     });
     homeController.addListener(() async {
       playlist = homeController.currentPlaylist;
-      updatePalette(playlist.songs[0].icon);
+      if (playlist.songs.isNotEmpty) {
+        updatePalette(playlist.songs[0].icon);
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {});
@@ -182,7 +186,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
           ),
           onTap: () {
             audioManager.pause();
-            playlistUIController.setPlaylist(playlist);
+            playlistUIController.setPlaylist(playlist, index: index);
             playlistManager.setPlaylist(playlist, initialIndex: index);
             Modular.to.pushReplacementNamed(
               '/player',

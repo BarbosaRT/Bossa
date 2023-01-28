@@ -18,15 +18,15 @@ class PlaylistDataManager {
     database.delete('playlists_songs');
   }
 
-  void addPlaylist(PlaylistModel playlist) async {
+  Future<void> addPlaylist(PlaylistModel playlist) async {
     var database = await localDataManagerInstance.database();
-    database.rawInsert(
+    await database.rawInsert(
         'INSERT INTO playlists(title, icon) VALUES("${playlist.title}", "${playlist.icon}")');
 
     // Insert Songs into playlist
-    var playlists = await loadPlaylists();
+    var retrievedPlaylist = await loadLastAddedPlaylist();
     for (SongModel song in playlist.songs) {
-      appendToPlaylist(song, playlists[playlists.length - 1]);
+      await appendToPlaylist(song, retrievedPlaylist);
     }
   }
 
@@ -64,7 +64,9 @@ class PlaylistDataManager {
     List<Map<String, dynamic>> result = await database
         .rawQuery('SELECT * FROM playlists ORDER BY id DESC LIMIT 1');
 
-    return PlaylistModel.fromMap(result[0]);
+    PlaylistModel playlist = PlaylistModel.fromMap(result[0]);
+    playlist.songs = await _loadSongsFromPlaylist(playlist);
+    return playlist;
   }
 
   Future<List<PlaylistModel>> loadPlaylists(
@@ -107,7 +109,7 @@ class PlaylistDataManager {
     List<Map<String, dynamic>> playlistsFromQuery = await database.query(
       'playlists',
       orderBy: _getOrderBy(filter),
-      where: 'title like "${searchQuery.trim()}%"',
+      where: 'title like "%${searchQuery.trim()}%"',
     );
 
     List<PlaylistModel> playlists = [];

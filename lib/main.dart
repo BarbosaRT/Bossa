@@ -16,5 +16,7 @@ void main() async {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
+
+  Paint.enableDithering = true;
   runApp(ModularApp(module: AppModule(), child: const AppWidget()));
 }

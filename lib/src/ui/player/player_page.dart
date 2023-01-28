@@ -7,6 +7,7 @@ import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:bossa/src/ui/settings/settings_controller.dart';
+import 'package:contrast_checker/contrast_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -58,10 +59,9 @@ class _PlayerPageState extends State<PlayerPage> {
     playlist =
         PlaylistModel.fromMap(playlistUIController.currentPlaylist.toMap());
 
-    final playlistManager = Modular.get<JustPlaylistManager>();
-    playlistManager.setPlaylist(playlist);
-
-    updatePalette(playlist.songs[0].icon);
+    if (playlist.songs.isNotEmpty) {
+      updatePalette(playlist.songs[0].icon);
+    }
 
     final settingsController = Modular.get<SettingsController>();
     settingsController.addListener(() {
@@ -73,8 +73,9 @@ class _PlayerPageState extends State<PlayerPage> {
     });
     playlistUIController.addListener(() async {
       playlist = playlistUIController.playlist;
-      playlistManager.setPlaylist(playlist);
-      updatePalette(playlist.songs[0].icon);
+      if (playlist.songs.isNotEmpty) {
+        updatePalette(playlist.songs[0].icon);
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {});
       });
@@ -129,8 +130,6 @@ class _PlayerPageState extends State<PlayerPage> {
     final playlistManager = Modular.get<JustPlaylistManager>();
     final songDataManager = Modular.get<SongDataManager>();
 
-    final headerStyle = GoogleFonts.poppins(
-        color: contrastColor, fontSize: 14, fontWeight: FontWeight.normal);
     final titleStyle = GoogleFonts.poppins(
         color: contrastColor, fontSize: 15, fontWeight: FontWeight.bold);
     final authorStyle = GoogleFonts.poppins(
@@ -162,6 +161,13 @@ class _PlayerPageState extends State<PlayerPage> {
           gradient ? palette!.dominantColor!.color : backgroundColor;
     }
 
+    bool isContrast = ContrastChecker()
+        .contrastCheck(18.6, gradientColor, contrastColor, WCAG.AA);
+    final headerStyle = GoogleFonts.poppins(
+      color: isContrast ? contrastColor : backgroundColor,
+      fontSize: 14,
+      fontWeight: FontWeight.normal,
+    );
     final imageSize =
         size.width > size.height ? size.height * 0.75 : size.width;
     double imageWidth = imageSize - sliderSpacing * 2;
@@ -177,7 +183,10 @@ class _PlayerPageState extends State<PlayerPage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [gradientColor, backgroundColor],
+                colors: [
+                  gradientColor,
+                  backgroundColor,
+                ],
               ),
             ),
           ),
@@ -202,7 +211,7 @@ class _PlayerPageState extends State<PlayerPage> {
                           child: FaIcon(
                             FontAwesomeIcons.angleDown,
                             size: iconSize,
-                            color: contrastColor,
+                            color: isContrast ? contrastColor : backgroundColor,
                           ),
                         ),
                       ),
@@ -401,8 +410,8 @@ class _PlayerPageState extends State<PlayerPage> {
                                             return SizedBox(
                                               width: iconSize * 1.5,
                                               child: ElevatedButton(
-                                                onPressed: () {
-                                                  playlistManager
+                                                onPressed: () async {
+                                                  await playlistManager
                                                       .setShuffleModeEnabled(
                                                           !shuffle);
                                                 },
@@ -450,8 +459,9 @@ class _PlayerPageState extends State<PlayerPage> {
                                       SizedBox(
                                         width: 3 * iconSize / 2,
                                         child: ElevatedButton(
-                                          onPressed: () {
-                                            playlistManager.seekToPrevious();
+                                          onPressed: () async {
+                                            await playlistManager
+                                                .seekToPrevious();
                                           },
                                           style: buttonStyle,
                                           child: FaIcon(
@@ -471,10 +481,12 @@ class _PlayerPageState extends State<PlayerPage> {
                                             return SizedBox(
                                               width: 3 * iconSize / 2,
                                               child: ElevatedButton(
-                                                onPressed: () {
+                                                onPressed: () async {
                                                   playing
-                                                      ? audioManager.pause()
-                                                      : audioManager.play();
+                                                      ? await audioManager
+                                                          .pause()
+                                                      : await audioManager
+                                                          .play();
                                                 },
                                                 style: buttonStyle,
                                                 child: FaIcon(
@@ -492,8 +504,8 @@ class _PlayerPageState extends State<PlayerPage> {
                                       SizedBox(
                                         width: 3 * iconSize / 2,
                                         child: ElevatedButton(
-                                          onPressed: () {
-                                            playlistManager.seekToNext();
+                                          onPressed: () async {
+                                            await playlistManager.seekToNext();
                                           },
                                           style: buttonStyle,
                                           child: FaIcon(
@@ -517,8 +529,9 @@ class _PlayerPageState extends State<PlayerPage> {
                                           return SizedBox(
                                             width: 3 * iconSize / 2,
                                             child: ElevatedButton(
-                                              onPressed: () {
-                                                playlistManager.setLoopMode(
+                                              onPressed: () async {
+                                                await playlistManager
+                                                    .setLoopMode(
                                                   isRepeating
                                                       ? LoopMode.all
                                                       : LoopMode.one,

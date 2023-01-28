@@ -34,10 +34,10 @@ class LightTheme extends AppColors {
   get backgroundAccent => const Color.fromRGBO(220, 220, 220, 1);
 
   @override
-  get contrastColor => const Color.fromRGBO(100, 100, 100, 1);
+  get contrastColor => const Color.fromRGBO(50, 50, 50, 1);
 
   @override
-  get contrastAccent => const Color.fromRGBO(120, 120, 120, 1);
+  get contrastAccent => const Color.fromRGBO(70, 70, 70, 1);
 }
 
 class Themes {

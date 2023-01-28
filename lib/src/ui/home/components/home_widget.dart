@@ -360,7 +360,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         Modular.to.popUntil(ModalRoute.withName('/'));
         audioManager.pause();
 
-        playlistUIController.setPlaylist(playlistToBePlayed);
+        playlistUIController.setPlaylist(playlistToBePlayed,
+            index: playlistToBePlayed.songs.indexOf(song));
         playlistManager.setPlaylist(playlistToBePlayed,
             initialIndex: playlistToBePlayed.songs.indexOf(song));
 

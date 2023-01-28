@@ -76,7 +76,7 @@ class SongDataManager {
     List<Map<String, dynamic>> results = await database.query(
       'songs',
       orderBy: _getOrderBy(filter),
-      where: 'title like "${searchQuery.trim()}%"',
+      where: 'title like "%${searchQuery.trim()}%"',
     );
 
     List<SongModel> output = [];

@@ -101,16 +101,17 @@ class _AppWidgetState extends State<AppWidget> {
   Widget build(BuildContext context) {
     Modular.setObservers([Asuka.asukaHeroController]);
     final colorController = Modular.get<ColorController>();
-
     return MaterialApp.router(
       builder: Asuka.builder,
       debugShowCheckedModeBanner: false,
-      title: 'Wave',
+      title: 'Bossa',
       theme: ThemeData(
+        //useMaterial3: true,
         scrollbarTheme: ScrollbarThemeData(
             trackVisibility:
                 MaterialStateProperty.resolveWith((states) => true)),
         primarySwatch: colorController.currentCustomColor,
+        //colorSchemeSeed: colorController.currentCustomColor,
       ),
       routeInformationParser: Modular.routeInformationParser,
       routerDelegate: Modular.routerDelegate,

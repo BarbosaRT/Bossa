@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:audio_session/audio_session.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
@@ -18,8 +17,8 @@ abstract class PlaylistAudioManager {
   Future<void> setLoopMode(LoopMode loopMode);
   Future<void> setShuffleModeEnabled(bool enabled);
 
-  Future<void> add(String path);
-  Future<void> insert(int index, String path);
+  Future<void> add(AudioSource audioSource);
+  Future<void> insert(int index, AudioSource audioSource);
   Future<void> removeAt(int index);
 }
 
@@ -31,17 +30,13 @@ class JustPlaylistManager implements PlaylistAudioManager {
     children: [],
   );
 
-  List<bool> isYoutubeSongList = [];
-
   @override
-  Future<void> add(String path) async {
-    AudioSource audioSource = await getAudioSourceFromString(path);
+  Future<void> add(AudioSource audioSource) async {
     await playlistAudioSource.add(audioSource);
   }
 
   @override
-  Future<void> insert(int index, String path) async {
-    AudioSource audioSource = await getAudioSourceFromString(path);
+  Future<void> insert(int index, AudioSource audioSource) async {
     await playlistAudioSource.insert(index, audioSource);
   }
 
@@ -78,8 +73,18 @@ class JustPlaylistManager implements PlaylistAudioManager {
   @override
   Future<void> setPlaylist(PlaylistModel playlist,
       {int initialIndex = 0, initialPosition = Duration.zero}) async {
-    List<AudioSource> songs = [];
-    for (SongModel song in playlist.songs) {
+    List<AudioSource> songAudioSources = [];
+    List<SongModel> songs = playlist.songs.toList();
+
+    print('print: $initialIndex ${songs[0].title}');
+
+    // Pre-load
+    int length = playlist.songs.length > 2 ? 2 : playlist.songs.length;
+    for (int index = 0; index < length; index++) {
+      if (initialIndex + index >= songs.length) {
+        break;
+      }
+      SongModel song = songs[initialIndex + index];
       String path = song.path.isEmpty ? song.url : song.path;
 
       MediaItem tag = MediaItem(
@@ -90,25 +95,50 @@ class JustPlaylistManager implements PlaylistAudioManager {
       );
 
       AudioSource audioSource = await getAudioSourceFromString(path, tag: tag);
-      songs.add(audioSource);
-      isYoutubeSongList.add(SongParser().isSongFromYoutube(path));
+      songAudioSources.add(audioSource);
     }
 
     playlistAudioSource = ConcatenatingAudioSource(
       useLazyPreparation: true,
       shuffleOrder: DefaultShuffleOrder(),
-      children: songs,
+      children: songAudioSources,
     );
 
-    AndroidLoudnessEnhancer loudnessEnhancer = AndroidLoudnessEnhancer();
-    loudnessEnhancer.setEnabled(true);
-    loudnessEnhancer.setTargetGain(40);
-
-    await player.setAndroidAudioAttributes(const AndroidAudioAttributes());
     await player.setAudioSource(playlistAudioSource,
-        initialIndex: initialIndex, initialPosition: initialPosition);
-
+        initialPosition: initialPosition);
     await setLoopMode(LoopMode.all);
+
+    // Loads the other part of the songs
+    for (int index = initialIndex + length; index < songs.length; index++) {
+      SongModel song = songs[index];
+      String path = song.path.isEmpty ? song.url : song.path;
+
+      MediaItem tag = MediaItem(
+        id: song.id.toString(),
+        title: song.title,
+        album: playlist.title,
+        artUri: getUriFromString(song.icon),
+      );
+
+      AudioSource audioSource = await getAudioSourceFromString(path, tag: tag);
+      await add(audioSource);
+    }
+
+    // Loads the first part
+    for (int index = 0; index < initialIndex; index++) {
+      SongModel song = songs[index];
+      String path = song.path.isEmpty ? song.url : song.path;
+
+      MediaItem tag = MediaItem(
+        id: song.id.toString(),
+        title: song.title,
+        album: playlist.title,
+        artUri: getUriFromString(song.icon),
+      );
+
+      AudioSource audioSource = await getAudioSourceFromString(path, tag: tag);
+      await add(audioSource);
+    }
   }
 
   Uri getUriFromString(String string) {
@@ -126,11 +156,12 @@ class JustPlaylistManager implements PlaylistAudioManager {
       String parsedUrl = SongParser().parseYoutubeSongUrl(string);
       var videoManifest =
           await youtube.videos.streamsClient.getManifest(parsedUrl);
-
-      var streamInf = videoManifest.audioOnly.sortByBitrate();
-      var streamInfo = streamInf[streamInf.length - 1];
+      // var streamInf = videoManifest.audioOnly.sortByBitrate();
+      // var streamInfo = streamInf[streamInf.length - 1];
       // For Highest Bitrate
-      // var streamInfo = videoManifest.audioOnly.withHighestBitrate();
+      var streamInfo = videoManifest.audioOnly.withHighestBitrate();
+
+      youtube.close();
 
       return LockCachingAudioSource(
         streamInfo.url,

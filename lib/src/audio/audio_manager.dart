@@ -1,5 +1,7 @@
-import 'package:bossa/src/url/url_parser.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:just_audio/just_audio.dart';
+
+import 'package:bossa/src/url/url_parser.dart';
 
 abstract class AudioManager {
   Future<void> load(String path);
@@ -18,7 +20,17 @@ AudioManager audioManagerInstance = JustAudioManager();
 JustAudioManager justAudioManagerInstance = JustAudioManager();
 
 class JustAudioManager implements AudioManager {
-  final player = AudioPlayer();
+  var player = AudioPlayer();
+
+  JustAudioManager() {
+    AndroidLoudnessEnhancer loudnessEnhancer = AndroidLoudnessEnhancer();
+    loudnessEnhancer.setEnabled(true);
+    loudnessEnhancer.setTargetGain(40);
+    AudioPipeline audioPipeline =
+        AudioPipeline(androidAudioEffects: [loudnessEnhancer]);
+    player = AudioPlayer(audioPipeline: audioPipeline);
+    player.setSkipSilenceEnabled(true);
+  }
 
   @override
   Duration getPosition() {

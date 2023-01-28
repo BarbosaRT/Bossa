@@ -93,11 +93,11 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
           content: StreamBuilder<PlaylistModel>(
             stream: playlistStream,
             builder: (context, snapshot) {
-              final downloaded =
-                  snapshot.data == null ? 0 : snapshot.data!.songs.length;
+              int downloaded =
+                  snapshot.data != null ? snapshot.data!.songs.length : 0;
               final progress = ((downloaded / videoCount) * 100).toInt();
               return Text(
-                'Progresso: $progress%',
+                'Progresso ($downloaded / $videoCount): $progress%',
                 style: textStyle,
               );
             },
@@ -108,8 +108,8 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
       await for (var playlist in playlistStream) {
         finalPlaylist = playlist;
       }
-
-      playlistDataManager.addPlaylist(finalPlaylist!);
+      await playlistDataManager.addPlaylist(finalPlaylist!);
+      finalPlaylist = await playlistDataManager.loadLastAddedPlaylist();
     }
     Asuka.hideCurrentSnackBar();
     Asuka.showSnackBar(
@@ -192,7 +192,7 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
               SizedBox(
                 width: size.width,
                 child: Text(
-                  'Insira a Url da $content',
+                  'Insira a url da $content',
                   style: headerStyle,
                   textAlign: TextAlign.center,
                 ),
