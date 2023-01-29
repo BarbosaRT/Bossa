@@ -95,7 +95,11 @@ class _HomePageState extends State<HomePage> {
 
   void makeTransition(Pages newPage) {
     final homeController = Modular.get<HomeController>();
-    transition = true;
+    if (mounted) {
+      setState(() {
+        transition = true;
+      });
+    }
     Future.delayed(transitionDuration).then((value) {
       homeController.setCurrentPage(Pages.home);
       transition = false;
