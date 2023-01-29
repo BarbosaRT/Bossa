@@ -1,6 +1,7 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/color/contrast_checker.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
 import 'package:bossa/src/ui/components/detail_container.dart';
@@ -283,6 +284,8 @@ class _LibraryPageState extends State<LibraryPage>
       );
     }
 
+    bool isContrast = ContrastCheck().contrastCheck(accentColor, contrastColor);
+
     return SafeArea(
       child: Column(
         children: [
@@ -372,13 +375,17 @@ class _LibraryPageState extends State<LibraryPage>
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15),
                                     color: currentTab == 0
-                                        ? accentColor.withOpacity(0.5)
+                                        ? accentColor
                                         : backgroundAccent,
                                   ),
                                   child: Center(
                                     child: Text(
                                       'Músicas',
-                                      style: headerStyle,
+                                      style: headerStyle.copyWith(
+                                        color: (currentTab == 0 && isContrast)
+                                            ? backgroundColor
+                                            : contrastColor,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -388,13 +395,17 @@ class _LibraryPageState extends State<LibraryPage>
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15),
                                     color: currentTab == 1
-                                        ? accentColor.withOpacity(0.5)
+                                        ? accentColor
                                         : backgroundAccent,
                                   ),
                                   child: Center(
                                     child: Text(
                                       'Playlist',
-                                      style: headerStyle,
+                                      style: headerStyle.copyWith(
+                                        color: (currentTab == 1 && isContrast)
+                                            ? backgroundColor
+                                            : contrastColor,
+                                      ),
                                     ),
                                   ),
                                 ),

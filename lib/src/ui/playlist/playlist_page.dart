@@ -18,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:palette_generator/palette_generator.dart';
-import 'package:text_scroll/text_scroll.dart';
 
 class PlaylistPage extends StatefulWidget {
   const PlaylistPage({super.key});
@@ -150,7 +149,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                     SizedBox(
                       width: iconSize / 2,
                     ),
-                    Text('Remover ', style: buttonTextStyle),
+                    Text('Remover', style: buttonTextStyle),
                   ]),
                 ),
               ),
@@ -177,7 +176,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                     SizedBox(
                       width: iconSize / 2,
                     ),
-                    Text('Editar ', style: buttonTextStyle),
+                    Text('Editar', style: buttonTextStyle),
                   ]),
                 ),
               ),
@@ -213,18 +212,17 @@ class _PlaylistPageState extends State<PlaylistPage> {
             ),
           ),
           SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: x / 2),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: x / 2,
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
+            child: ListView(
+              children: [
+                SizedBox(
+                  height: x / 2,
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: x / 2),
+                      child: SizedBox(
                         width: iconSize,
                         height: iconSize,
                         child: ElevatedButton(
@@ -239,138 +237,137 @@ class _PlaylistPageState extends State<PlaylistPage> {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        width: iconSize / 2,
+                    ),
+                    const Spacer(),
+                    Image(
+                      image: ImageParser.getImageProviderFromString(
+                        playlist.icon,
                       ),
-                      Expanded(
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: Image(
-                            image: ImageParser.getImageProviderFromString(
-                              playlist.icon,
-                            ),
-                            fit: BoxFit.cover,
-                            alignment: FractionalOffset.center,
-                            width: 200,
-                            height: 200,
-                          ),
-                        ),
+                      fit: BoxFit.cover,
+                      alignment: FractionalOffset.center,
+                      width: 200,
+                      height: 200,
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: EdgeInsets.only(left: x / 2),
+                      child: SizedBox(
+                        width: iconSize,
+                        height: iconSize,
                       ),
-                      SizedBox(
-                        width: iconSize * 1.5,
-                        height: iconSize * 1.5,
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: x / 2,
-                  ),
-                  SizedBox(
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: x / 2,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: x / 2),
+                  child: SizedBox(
                     width: size.width - x / 2,
                     height: 40,
-                    child: TextScroll(
-                      playlist.title,
-                      mode: TextScrollMode.endless,
-                      velocity: const Velocity(pixelsPerSecond: Offset(100, 0)),
-                      delayBefore: const Duration(seconds: 10),
-                      pauseBetween: const Duration(seconds: 5),
-                      style: titleStyle,
-                      textAlign: TextAlign.center,
-                      selectable: true,
+                    child: TextStyles().getConstrainedTextByWidth(
+                      textStyle: titleStyle,
+                      text: playlist.title,
+                      textWidth: size.width,
                     ),
                   ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        width: 5,
-                      ),
-                      SizedBox(
-                        width: iconSize * 1.5,
-                        height: iconSize * 1.5,
-                        child: ElevatedButton(
-                          style: buttonStyle,
-                          onPressed: () {
-                            Asuka.showModalBottomSheet(
-                              backgroundColor: backgroundColor,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(15),
-                                  topRight: Radius.circular(15),
-                                ),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    SizedBox(
+                      width: iconSize * 1.5,
+                      height: iconSize * 1.5,
+                      child: ElevatedButton(
+                        style: buttonStyle,
+                        onPressed: () {
+                          Asuka.showModalBottomSheet(
+                            backgroundColor: backgroundColor,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(15),
+                                topRight: Radius.circular(15),
                               ),
-                              builder: (context) {
-                                return PlaylistSnackbar(playlist: playlist);
-                              },
-                            );
-                          },
-                          child: FaIcon(FontAwesomeIcons.ellipsisVertical,
-                              color: contrastColor),
-                        ),
+                            ),
+                            builder: (context) {
+                              return PlaylistSnackbar(playlist: playlist);
+                            },
+                          );
+                        },
+                        child: FaIcon(FontAwesomeIcons.ellipsisVertical,
+                            color: contrastColor),
                       ),
-                      const Spacer(
-                        flex: 1,
-                      ),
-                      SizedBox(
-                        width: iconSize * 1.5,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Modular.to.popUntil(ModalRoute.withName('/'));
-                            audioManager.pause();
-                            playlistUIController.setPlaylist(playlist);
-                            playlistManager.setShuffleModeEnabled(true);
-                            Modular.to.pushReplacementNamed(
-                              '/player',
-                            );
-                            audioManager.play();
-                          },
-                          style: buttonStyle,
-                          child: FaIcon(
-                            FontAwesomeIcons.shuffle,
-                            size: iconSize,
-                            color: contrastColor,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 5,
-                      ),
-                      SizedBox(
-                        width: 3 * iconSize / 2,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Modular.to.popUntil(ModalRoute.withName('/'));
-                            audioManager.pause();
-                            playlistUIController.setPlaylist(playlist);
-
-                            Modular.to.pushReplacementNamed(
-                              '/player',
-                            );
-                            audioManager.play();
-                          },
-                          style: buttonStyle,
-                          child: FaIcon(
-                            FontAwesomeIcons.solidCirclePlay,
-                            size: iconSize * 1.5,
-                            color: accentColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: x / 2,
-                  ),
-                  Expanded(
-                    child: ListView(
-                      children: songContainers,
                     ),
+                    const Spacer(
+                      flex: 1,
+                    ),
+                    SizedBox(
+                      width: iconSize * 1.5,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Modular.to.popUntil(ModalRoute.withName('/'));
+                          audioManager.pause();
+                          playlistUIController.setPlaylist(playlist);
+                          playlistManager.setShuffleModeEnabled(true);
+                          Modular.to.pushReplacementNamed(
+                            '/player',
+                          );
+                          audioManager.play();
+                        },
+                        style: buttonStyle,
+                        child: FaIcon(
+                          FontAwesomeIcons.shuffle,
+                          size: iconSize,
+                          color: contrastColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    SizedBox(
+                      width: 3 * iconSize / 2,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Modular.to.popUntil(ModalRoute.withName('/'));
+                          audioManager.pause();
+                          playlistUIController.setPlaylist(playlist);
+
+                          Modular.to.pushReplacementNamed(
+                            '/player',
+                          );
+                          audioManager.play();
+                        },
+                        style: buttonStyle,
+                        child: FaIcon(
+                          FontAwesomeIcons.solidCirclePlay,
+                          size: iconSize * 1.5,
+                          color: accentColor,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: x / 2,
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: x / 2,
+                ),
+                SizedBox(
+                  height: size.height / 2,
+                  child: ListView(
+                    children: songContainers,
                   ),
-                  SizedBox(
-                    height: x * 2,
-                  ),
-                ],
-              ),
+                ),
+                SizedBox(
+                  height: x * 2,
+                ),
+              ],
             ),
           ),
         ],

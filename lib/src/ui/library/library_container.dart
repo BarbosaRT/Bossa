@@ -6,7 +6,6 @@ import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:text_scroll/text_scroll.dart';
 
 class LibraryContentContainer extends StatefulWidget {
   final Widget detailContainer;
@@ -114,16 +113,10 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
                       SizedBox(
                         width: size.width - 160,
                         height: 20,
-                        child: TextScroll(
-                          widget.title,
-                          mode: TextScrollMode.endless,
-                          velocity:
-                              const Velocity(pixelsPerSecond: Offset(100, 0)),
-                          delayBefore: const Duration(seconds: 10),
-                          pauseBetween: const Duration(seconds: 5),
-                          style: titleStyle,
-                          textAlign: TextAlign.right,
-                          selectable: true,
+                        child: TextStyles().getConstrainedTextByWidth(
+                          textStyle: titleStyle,
+                          text: widget.title,
+                          textWidth: size.width,
                         ),
                       ),
                       widget.author == null

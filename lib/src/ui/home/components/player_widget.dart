@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:text_scroll/text_scroll.dart';
 
 class PlayerWidget extends StatefulWidget {
   const PlayerWidget({super.key});
@@ -128,18 +127,11 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                                     SizedBox(
                                       width: size.width - x * 7,
                                       height: 20,
-                                      child: TextScroll(
-                                        currentSong.title,
-                                        mode: TextScrollMode.endless,
-                                        velocity: const Velocity(
-                                            pixelsPerSecond: Offset(100, 0)),
-                                        delayBefore:
-                                            const Duration(seconds: 10),
-                                        pauseBetween:
-                                            const Duration(seconds: 5),
-                                        style: titleStyle,
-                                        textAlign: TextAlign.right,
-                                        selectable: true,
+                                      child: TextStyles()
+                                          .getConstrainedTextByWidth(
+                                        textStyle: titleStyle,
+                                        text: currentSong.title,
+                                        textWidth: size.width,
                                       ),
                                     ),
                                     Text(

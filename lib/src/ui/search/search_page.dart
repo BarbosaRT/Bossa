@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/color/contrast_checker.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
@@ -223,20 +224,32 @@ class _SearchPageState extends State<SearchPage>
       children: playlistContainers,
     );
     if (isSearching) {
-      songWidget = Column(
+      songWidget = ListView(
         children: [
           SizedBox(
             height: size.height / 3,
           ),
-          const CircularProgressIndicator(),
+          const SizedBox(
+            width: 30,
+            height: 30,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
         ],
       );
-      playlistWidget = Column(
+      playlistWidget = ListView(
         children: [
           SizedBox(
             height: size.height / 3,
           ),
-          const CircularProgressIndicator(),
+          const SizedBox(
+            width: 30,
+            height: 30,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
         ],
       );
     }
@@ -258,6 +271,7 @@ class _SearchPageState extends State<SearchPage>
       );
     }
 
+    bool isContrast = ContrastCheck().contrastCheck(accentColor, contrastColor);
     double tabHeight = 50.0;
 
     return GestureDetector(
@@ -387,7 +401,12 @@ class _SearchPageState extends State<SearchPage>
                                         child: Center(
                                           child: Text(
                                             'Musicas',
-                                            style: headerStyle,
+                                            style: headerStyle.copyWith(
+                                              color: (currentTab == 0 &&
+                                                      isContrast)
+                                                  ? backgroundColor
+                                                  : contrastColor,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -404,7 +423,12 @@ class _SearchPageState extends State<SearchPage>
                                         child: Center(
                                           child: Text(
                                             'Playlist',
-                                            style: headerStyle,
+                                            style: headerStyle.copyWith(
+                                              color: (currentTab == 1 &&
+                                                      isContrast)
+                                                  ? backgroundColor
+                                                  : contrastColor,
+                                            ),
                                           ),
                                         ),
                                       ),

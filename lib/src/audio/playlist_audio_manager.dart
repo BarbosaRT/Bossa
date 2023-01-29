@@ -76,8 +76,6 @@ class JustPlaylistManager implements PlaylistAudioManager {
     List<AudioSource> songAudioSources = [];
     List<SongModel> songs = playlist.songs.toList();
 
-    print('print: $initialIndex ${songs[0].title}');
-
     // Pre-load
     int length = playlist.songs.length > 2 ? 2 : playlist.songs.length;
     for (int index = 0; index < length; index++) {

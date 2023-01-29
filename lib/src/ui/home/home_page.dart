@@ -67,10 +67,12 @@ class _HomePageState extends State<HomePage> {
     Pages.search: SearchPage(key: UniqueKey()),
   };
 
+  Duration transitionDuration = const Duration(milliseconds: 300);
+  bool transition = false;
+
   @override
   void initState() {
     super.initState();
-
     final colorController = Modular.get<ColorController>();
     colorController.addListener(() {
       if (mounted) {
@@ -88,6 +90,20 @@ class _HomePageState extends State<HomePage> {
           });
         }
       });
+    });
+  }
+
+  void makeTransition(Pages newPage) {
+    final homeController = Modular.get<HomeController>();
+    transition = true;
+    Future.delayed(transitionDuration).then((value) {
+      homeController.setCurrentPage(Pages.home);
+      transition = false;
+      if (mounted) {
+        setState(() {
+          currentPage = newPage;
+        });
+      }
     });
   }
 
@@ -123,7 +139,11 @@ class _HomePageState extends State<HomePage> {
           height: size.height,
           child: Stack(
             children: [
-              widgetPage,
+              AnimatedOpacity(
+                duration: transitionDuration,
+                opacity: transition ? 0 : 1,
+                child: widgetPage,
+              ),
               //
               // Player Part
               //
@@ -169,10 +189,7 @@ class _HomePageState extends State<HomePage> {
                                   child: ElevatedButton(
                                     style: buttonStyle,
                                     onPressed: () {
-                                      homeController.setCurrentPage(Pages.home);
-                                      setState(() {
-                                        currentPage = Pages.home;
-                                      });
+                                      makeTransition(Pages.home);
                                     },
                                     child: FaIcon(
                                       FontAwesomeIcons.house,
@@ -188,11 +205,7 @@ class _HomePageState extends State<HomePage> {
                                     style: buttonStyle,
                                     onPressed: () {
                                       homeController.setSearchLibrary(false);
-                                      homeController
-                                          .setCurrentPage(Pages.search);
-                                      setState(() {
-                                        currentPage = Pages.search;
-                                      });
+                                      makeTransition(Pages.search);
                                     },
                                     child: FaIcon(
                                       FontAwesomeIcons.magnifyingGlass,
@@ -207,11 +220,7 @@ class _HomePageState extends State<HomePage> {
                                   child: ElevatedButton(
                                     style: buttonStyle,
                                     onPressed: () {
-                                      homeController
-                                          .setCurrentPage(Pages.library);
-                                      setState(() {
-                                        currentPage = Pages.library;
-                                      });
+                                      makeTransition(Pages.library);
                                     },
                                     child: FaIcon(
                                       FontAwesomeIcons.list,
@@ -226,11 +235,7 @@ class _HomePageState extends State<HomePage> {
                                   child: ElevatedButton(
                                     style: buttonStyle,
                                     onPressed: () {
-                                      homeController
-                                          .setCurrentPage(Pages.settings);
-                                      setState(() {
-                                        currentPage = Pages.settings;
-                                      });
+                                      makeTransition(Pages.settings);
                                     },
                                     child: FaIcon(
                                       FontAwesomeIcons.gear,

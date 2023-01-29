@@ -12,7 +12,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:text_scroll/text_scroll.dart';
 
 class PlaylistSongContainer extends StatefulWidget {
   final SongModel song;
@@ -93,16 +92,10 @@ class _PlaylistSongContainerState extends State<PlaylistSongContainer> {
                       SizedBox(
                         width: size.width - 150,
                         height: 20,
-                        child: TextScroll(
-                          widget.song.title,
-                          mode: TextScrollMode.endless,
-                          velocity:
-                              const Velocity(pixelsPerSecond: Offset(100, 0)),
-                          delayBefore: const Duration(seconds: 10),
-                          pauseBetween: const Duration(seconds: 5),
-                          style: titleStyle,
-                          textAlign: TextAlign.right,
-                          selectable: true,
+                        child: TextStyles().getConstrainedTextByWidth(
+                          textStyle: titleStyle,
+                          text: widget.song.title,
+                          textWidth: size.width,
                         ),
                       ),
                       Text(
