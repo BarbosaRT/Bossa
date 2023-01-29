@@ -67,7 +67,8 @@ class _HomePageState extends State<HomePage> {
     Pages.search: SearchPage(key: UniqueKey()),
   };
 
-  Duration transitionDuration = const Duration(milliseconds: 300);
+  Duration transitionDuration = const Duration(milliseconds: 100);
+  Duration transitionWait = const Duration(milliseconds: 200);
   bool transition = false;
 
   @override
@@ -100,8 +101,11 @@ class _HomePageState extends State<HomePage> {
         transition = true;
       });
     }
-    Future.delayed(transitionDuration).then((value) {
-      homeController.setCurrentPage(Pages.home);
+    Future.delayed(Duration(
+      milliseconds:
+          transitionDuration.inMilliseconds + transitionWait.inMilliseconds,
+    )).then((value) {
+      homeController.setCurrentPage(newPage);
       transition = false;
       if (mounted) {
         setState(() {
