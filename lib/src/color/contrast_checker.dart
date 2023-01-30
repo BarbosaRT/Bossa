@@ -4,6 +4,6 @@ import 'package:flutter/material.dart';
 class ContrastCheck {
   bool contrastCheck(Color firstColor, Color secondColor) {
     return ContrastChecker()
-        .contrastCheck(10, firstColor, secondColor, WCAG.AAA);
+        .contrastCheck(10, firstColor, secondColor, WCAG.AA);
   }
 }

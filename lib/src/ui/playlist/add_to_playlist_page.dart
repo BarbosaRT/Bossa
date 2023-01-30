@@ -6,6 +6,7 @@ import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/library/library_container.dart';
+import 'package:bossa/src/ui/playlist/playlist_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -24,8 +25,6 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
   Duration delay = const Duration(milliseconds: 250);
   Timer searchTimer = Timer(const Duration(milliseconds: 250), () {});
 
-  bool initiated = false;
-
   List<Widget> videoContainers = [];
 
   final searchTextController = TextEditingController();
@@ -39,41 +38,11 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
         setState(() {});
       }
     });
-    init();
-  }
-
-  void init() async {
-    videoContainers = [];
-    final playlistDataManager = Modular.get<PlaylistDataManager>();
-    List<PlaylistModel> playlists = await playlistDataManager.loadPlaylists();
-    for (PlaylistModel playlist in playlists) {
-      videoContainers.add(
-        LibraryContentContainer(
-          title: playlist.title,
-          author: '${playlist.songs.length} músicas',
-          useDetail: false,
-          detailContainer: Container(),
-          onTap: () {
-            playlistDataManager.appendToPlaylist(widget.song, playlist);
-            Modular.to.popUntil(ModalRoute.withName('/'));
-          },
-          icon: playlist.icon,
-        ),
-      );
-    }
-    videoContainers.add(
-      SizedBox(
-        height: 73 * 2 + x * 2,
-      ),
-    );
-
-    initiated = true;
-    if (mounted) {
-      setState(() {});
-    }
+    search('');
   }
 
   void search(String searchQuery) async {
+    final size = MediaQuery.of(context).size;
     final playlistDataManager = Modular.get<PlaylistDataManager>();
 
     videoContainers = [];
@@ -96,21 +65,61 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
         ),
       );
     }
-    videoContainers.add(
-      SizedBox(
-        height: 73 * 2 + x * 2,
-      ),
-    );
+
+    bool isHorizontal = size.width > size.height;
+
+    videoContainers.add(createPlaylistButton());
+    if (isHorizontal) {
+      videoContainers.add(
+        SizedBox(
+          height: 73 * 2 + x * 2,
+        ),
+      );
+    }
+
     if (mounted) {
       setState(() {});
     }
   }
 
+  Widget createPlaylistButton() {
+    final colorController = Modular.get<ColorController>();
+    final contrastColor = colorController.currentTheme.contrastColor;
+
+    final playlistDataController = Modular.get<PlaylistDataManager>();
+
+    TextStyle titleStyle =
+        TextStyles().headline2.copyWith(color: contrastColor);
+
+    return ElevatedButton(
+      onPressed: () async {
+        PlaylistModel playlist = PlaylistModel(
+          id: 0,
+          title: 'Nova Playlist',
+          icon: widget.song.icon,
+          songs: [
+            widget.song,
+          ],
+        );
+        await playlistDataController.addPlaylist(playlist);
+        playlist = await playlistDataController.loadLastAddedPlaylist();
+        Modular.to.push(
+          MaterialPageRoute(
+            builder: (context) => PlaylistAddPage(
+              playlistToBeEdited: playlist,
+            ),
+          ),
+        );
+      },
+      child: Text(
+        'Criar uma nova playlist',
+        style: titleStyle,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (!initiated) {
-      init();
-    }
     final size = MediaQuery.of(context).size;
 
     final colorController = Modular.get<ColorController>();

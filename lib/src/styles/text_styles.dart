@@ -26,7 +26,8 @@ class TextStyles {
       text: text,
       style: textStyle,
     );
-    var tp = TextPainter(text: textSpan, textDirection: TextDirection.ltr);
+    var tp = TextPainter(
+        text: textSpan, textDirection: TextDirection.ltr, maxLines: 1);
     tp.layout();
 
     double fontSize = textStyle.fontSize == null ? 15 : textStyle.fontSize!;

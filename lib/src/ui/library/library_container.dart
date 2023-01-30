@@ -55,10 +55,12 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
           color: contrastAccent,
         );
 
+    bool isHorizontal = size.width > size.height;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Container(
-        width: size.width,
+        width: isHorizontal ? size.width * 0.5 : size.width,
         height: 70,
         decoration: BoxDecoration(
           color: Colors.transparent,
@@ -111,12 +113,17 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(
-                        width: size.width - 160,
+                        width: (isHorizontal
+                                ? size.width * (1 - UIConsts.leftBarRatio)
+                                : size.width) -
+                            160,
                         height: 20,
                         child: TextStyles().getConstrainedTextByWidth(
                           textStyle: titleStyle,
                           text: widget.title,
-                          textWidth: size.width,
+                          textWidth: isHorizontal
+                              ? size.width * (1 - UIConsts.leftBarRatio)
+                              : size.width,
                         ),
                       ),
                       widget.author == null

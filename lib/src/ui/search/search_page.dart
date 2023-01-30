@@ -149,6 +149,8 @@ class _SearchPageState extends State<SearchPage>
   }
 
   void loadSongs() {
+    final size = MediaQuery.of(context).size;
+    bool isHorizontal = size.width > size.height;
     songContainers = searchLibrary
         ? SongSearch().getLibraryWidgets(
             songs: songList,
@@ -160,17 +162,22 @@ class _SearchPageState extends State<SearchPage>
             context: context,
             gridEnabled: gridEnabled,
           );
-    songContainers.add(
-      SizedBox(
-        height: 73 * 2 + x * 2,
-      ),
-    );
+    if (!isHorizontal) {
+      playlistContainers.add(
+        SizedBox(
+          height: 73 * 2 + UIConsts.spacing,
+        ),
+      );
+    }
     if (mounted) {
       setState(() {});
     }
   }
 
   void loadPlaylists() {
+    final size = MediaQuery.of(context).size;
+    bool isHorizontal = size.width > size.height;
+
     playlistContainers = searchLibrary
         ? PlaylistSearch().getLibraryWidgets(
             playlists: playlistList,
@@ -182,11 +189,13 @@ class _SearchPageState extends State<SearchPage>
             context: context,
             gridEnabled: gridEnabled,
           );
-    playlistContainers.add(
-      SizedBox(
-        height: 73 * 2 + UIConsts.spacing,
-      ),
-    );
+    if (!isHorizontal) {
+      playlistContainers.add(
+        SizedBox(
+          height: 73 * 2 + UIConsts.spacing,
+        ),
+      );
+    }
     if (mounted) {
       setState(() {});
     }
@@ -274,6 +283,9 @@ class _SearchPageState extends State<SearchPage>
     bool isContrast = ContrastCheck().contrastCheck(accentColor, contrastColor);
     double tabHeight = 50.0;
 
+    bool isHorizontal = size.width > size.height;
+    double width =
+        isHorizontal ? size.width * (1 - UIConsts.leftBarRatio) : size.width;
     return GestureDetector(
       onTap: () {
         FocusScopeNode currentFocus = FocusScope.of(context);
@@ -349,7 +361,9 @@ class _SearchPageState extends State<SearchPage>
                 ),
                 SizedBox(
                   height: size.height - 180,
-                  width: size.width,
+                  width: isHorizontal
+                      ? size.width * (1 - UIConsts.leftBarRatio)
+                      : size.width,
                   child: Stack(
                     children: [
                       NestedScrollView(
@@ -389,7 +403,7 @@ class _SearchPageState extends State<SearchPage>
                                     ),
                                     tabs: [
                                       Container(
-                                        width: (size.width - x / 2) / 2,
+                                        width: (width - x / 2) / 2,
                                         height: 50,
                                         decoration: BoxDecoration(
                                           borderRadius:
@@ -411,7 +425,7 @@ class _SearchPageState extends State<SearchPage>
                                         ),
                                       ),
                                       Container(
-                                        width: (size.width - x / 2) / 2,
+                                        width: (width - x / 2) / 2,
                                         height: 50,
                                         decoration: BoxDecoration(
                                           borderRadius:

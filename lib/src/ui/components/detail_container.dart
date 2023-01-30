@@ -51,6 +51,64 @@ class DetailContainerState extends State<DetailContainer> {
     final height = size.height / 2;
     const textHeight = 50;
 
+    bool isHorizontal = size.width > size.height;
+    final widgets = [
+      Column(
+        children: [
+          SizedBox(
+            height: UIConsts.spacing,
+          ),
+          Container(
+            width: imagesSize,
+            height: imagesSize,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: ImageParser.getImageProviderFromString(
+                  widget.icon,
+                ),
+                fit: BoxFit.cover,
+                alignment: FractionalOffset.center,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: isHorizontal ? size.width / 3 : size.width,
+            height: textHeight.toDouble(),
+            child: Center(
+              child: TextStyles().getConstrainedTextByWidth(
+                textStyle: titleStyle,
+                text: widget.title,
+                textWidth: isHorizontal ? size.width / 4 : size.width,
+              ),
+            ),
+          ),
+        ],
+      ),
+      Column(
+        children: [
+          isHorizontal
+              ? SizedBox(
+                  height: UIConsts.spacing,
+                )
+              : Container(),
+          SizedBox(
+            width: isHorizontal ? size.width * 0.4 : size.width,
+            height: height -
+                UIConsts.spacing -
+                (isHorizontal ? 0 : textHeight + imagesSize),
+            child: ListView.builder(
+              itemCount: widget.actions.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: widget.actions[index],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    ];
     return Container(
       height: height,
       width: size.width,
@@ -63,50 +121,13 @@ class DetailContainerState extends State<DetailContainer> {
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: x),
-        child: Column(
-          children: [
-            SizedBox(
-              height: UIConsts.spacing,
-            ),
-            Container(
-              width: imagesSize,
-              height: imagesSize,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: ImageParser.getImageProviderFromString(
-                    widget.icon,
-                  ),
-                  fit: BoxFit.cover,
-                  alignment: FractionalOffset.center,
-                ),
+        child: isHorizontal
+            ? Row(
+                children: widgets,
+              )
+            : Column(
+                children: widgets,
               ),
-            ),
-            SizedBox(
-              width: size.width,
-              height: textHeight.toDouble(),
-              child: Center(
-                child: TextStyles().getConstrainedTextByWidth(
-                  textStyle: titleStyle,
-                  text: widget.title,
-                  textWidth: size.width,
-                ),
-              ),
-            ),
-            SizedBox(
-              width: size.width,
-              height: height - textHeight - imagesSize - UIConsts.spacing,
-              child: ListView.builder(
-                itemCount: widget.actions.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    child: widget.actions[index],
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -102,7 +102,6 @@ class _AppWidgetState extends State<AppWidget> {
     Modular.setObservers([Asuka.asukaHeroController]);
     final colorController = Modular.get<ColorController>();
     return MaterialApp.router(
-      debugShowMaterialGrid: false,
       builder: Asuka.builder,
       debugShowCheckedModeBanner: false,
       title: 'Bossa',

@@ -65,11 +65,10 @@ class _PlayerPageState extends State<PlayerPage> {
 
     final settingsController = Modular.get<SettingsController>();
     settingsController.addListener(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          gradient = settingsController.gradientOnPlayer;
-        });
-      });
+      gradient = settingsController.gradient;
+      if (mounted) {
+        setState(() {});
+      }
     });
     playlistUIController.addListener(() async {
       playlist = playlistUIController.playlist;
@@ -117,7 +116,7 @@ class _PlayerPageState extends State<PlayerPage> {
     return replacement;
   }
 
-  Widget playerWidget({bool isHorizontal = true}) {
+  Widget playerWidget({bool isHorizontal = false}) {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
     final accentColor = colorController.currentTheme.accentColor;

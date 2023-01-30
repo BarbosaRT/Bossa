@@ -285,6 +285,9 @@ class _LibraryPageState extends State<LibraryPage>
     }
 
     bool isContrast = ContrastCheck().contrastCheck(accentColor, contrastColor);
+    bool isHorizontal = size.width > size.height;
+    double width =
+        isHorizontal ? size.width * (1 - UIConsts.leftBarRatio) : size.width;
 
     return SafeArea(
       child: Column(
@@ -324,8 +327,10 @@ class _LibraryPageState extends State<LibraryPage>
             ),
           ),
           SizedBox(
-            height: size.height - 180,
-            width: size.width,
+            height: size.height - (isHorizontal ? 100 : 180),
+            width: isHorizontal
+                ? size.width * (1 - UIConsts.leftBarRatio)
+                : size.width,
             child: Stack(
               children: [
                 NestedScrollView(
@@ -370,7 +375,7 @@ class _LibraryPageState extends State<LibraryPage>
                               ),
                               tabs: [
                                 Container(
-                                  width: (size.width - x / 2) / 2,
+                                  width: (width - x / 2) / 2,
                                   height: tabHeight,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15),
@@ -390,7 +395,7 @@ class _LibraryPageState extends State<LibraryPage>
                                   ),
                                 ),
                                 Container(
-                                  width: (size.width - x / 2) / 2,
+                                  width: (width - x / 2) / 2,
                                   height: tabHeight,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15),

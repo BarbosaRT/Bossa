@@ -435,6 +435,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       songsSortedWidgets.add(songContainerBuilder(song, playlist));
     }
 
+    bool isHorizontal = size.width > size.height;
+
     return SafeArea(
       child: SizedBox(
         width: size.width,
@@ -464,7 +466,9 @@ class _HomeWidgetState extends State<HomeWidget> {
               left: x / 2,
               child: SizedBox(
                 height: size.height,
-                width: size.width,
+                width: isHorizontal
+                    ? size.width * (1 - UIConsts.leftBarRatio)
+                    : size.width,
                 child: ListView(
                   children: [
                     SizedBox(

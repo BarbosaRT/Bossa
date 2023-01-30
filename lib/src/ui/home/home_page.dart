@@ -1,11 +1,13 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
+import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
 import 'package:bossa/src/ui/home/components/player_widget.dart';
 import 'package:bossa/src/ui/library/library_page.dart';
 import 'package:bossa/src/ui/playlist/playlist_page.dart';
 import 'package:bossa/src/ui/search/search_page.dart';
+import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:bossa/src/ui/settings/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -68,12 +70,22 @@ class _HomePageState extends State<HomePage> {
   };
 
   Duration transitionDuration = const Duration(milliseconds: 100);
-  Duration transitionWait = const Duration(milliseconds: 200);
+  Duration transitionWait = const Duration(milliseconds: 100);
   bool transition = false;
+  bool gradient = true;
 
   @override
   void initState() {
     super.initState();
+    final settingsController = Modular.get<SettingsController>();
+    gradient = settingsController.gradient;
+    settingsController.addListener(() {
+      gradient = settingsController.gradient;
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
     final colorController = Modular.get<ColorController>();
     colorController.addListener(() {
       if (mounted) {
@@ -84,13 +96,10 @@ class _HomePageState extends State<HomePage> {
     final homeController = Modular.get<HomeController>();
     currentPage = homeController.currentPage;
     homeController.addListener(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            currentPage = homeController.currentPage;
-          });
-        }
-      });
+      currentPage = homeController.currentPage;
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -115,22 +124,38 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Widget getIcon(Widget icon, String text) {
+    final size = MediaQuery.of(context).size;
+    bool isHorizontal = size.width > size.height;
+    final colorController = Modular.get<ColorController>();
+    final contrastColor = colorController.currentTheme.contrastColor;
+    final textStyle = TextStyles().headline2.copyWith(color: contrastColor);
+    return isHorizontal
+        ? Row(
+            children: [
+              icon,
+              const SizedBox(
+                width: 5,
+              ),
+              Text(
+                text,
+                style: textStyle,
+              )
+            ],
+          )
+        : icon;
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final homeController = Modular.get<HomeController>();
 
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentTheme.contrastColor;
+    final accentColor = colorController.currentTheme.accentColor;
     final backgroundColor = colorController.currentTheme.backgroundColor;
 
-    final homeController = Modular.get<HomeController>();
-    homeController.addListener(() {
-      if (mounted) {
-        setState(() {
-          currentPage = homeController.currentPage;
-        });
-      }
-    });
     final buttonStyle = ButtonStyle(
       padding: MaterialStateProperty.all(EdgeInsets.zero),
       overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -138,7 +163,87 @@ class _HomePageState extends State<HomePage> {
       shadowColor: MaterialStateProperty.all(Colors.transparent),
       backgroundColor: MaterialStateProperty.all(Colors.transparent),
     );
-    Widget widgetPage = pageWidgets[currentPage]!;
+
+    Widget widgetPage = AnimatedOpacity(
+      duration: transitionDuration,
+      opacity: transition ? 0 : 1,
+      child: pageWidgets[currentPage]!,
+    );
+
+    bool isHorizontal = size.width > size.height;
+
+    final buttons = [
+      SizedBox(
+        height: 3 * iconSize / 2,
+        child: ElevatedButton(
+          style: buttonStyle,
+          onPressed: () {
+            makeTransition(Pages.home);
+          },
+          child: getIcon(
+            FaIcon(
+              FontAwesomeIcons.house,
+              color: contrastColor,
+              size: iconSize,
+            ),
+            'Início',
+          ),
+        ),
+      ),
+      SizedBox(
+        height: 3 * iconSize / 2,
+        child: ElevatedButton(
+          style: buttonStyle,
+          onPressed: () {
+            homeController.setSearchLibrary(false);
+            makeTransition(Pages.search);
+          },
+          child: getIcon(
+            FaIcon(
+              FontAwesomeIcons.magnifyingGlass,
+              color: contrastColor,
+              size: iconSize,
+            ),
+            'Pesquisa',
+          ),
+        ),
+      ),
+      SizedBox(
+        height: 3 * iconSize / 2,
+        child: ElevatedButton(
+          style: buttonStyle,
+          onPressed: () {
+            makeTransition(Pages.library);
+          },
+          child: getIcon(
+            FaIcon(
+              FontAwesomeIcons.list,
+              color: contrastColor,
+              size: iconSize,
+            ),
+            'Sua Biblioteca',
+          ),
+        ),
+      ),
+      SizedBox(
+        height: 3 * iconSize / 2,
+        child: ElevatedButton(
+          style: buttonStyle,
+          onPressed: () {
+            makeTransition(Pages.settings);
+          },
+          child: getIcon(
+            FaIcon(
+              FontAwesomeIcons.gear,
+              color: contrastColor,
+              size: iconSize,
+            ),
+            'Configurações',
+          ),
+        ),
+      ),
+    ];
+
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SafeArea(
@@ -147,123 +252,113 @@ class _HomePageState extends State<HomePage> {
           height: size.height,
           child: Stack(
             children: [
-              AnimatedOpacity(
-                duration: transitionDuration,
-                opacity: transition ? 0 : 1,
-                child: widgetPage,
-              ),
+              isHorizontal
+                  ? SizedBox(
+                      height: size.height,
+                      width: size.width,
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: size.width * UIConsts.leftBarRatio,
+                          ),
+                          SizedBox(
+                            height: size.height,
+                            width: size.width * (1 - UIConsts.leftBarRatio),
+                            child: widgetPage,
+                          ),
+                        ],
+                      ),
+                    )
+                  : widgetPage,
+
+              isHorizontal
+                  ? Container(
+                      width: size.width * UIConsts.leftBarRatio,
+                      decoration: BoxDecoration(
+                        color:
+                            gradient ? null : contrastColor.withOpacity(0.05),
+                        gradient: gradient
+                            ? LinearGradient(
+                                colors: [
+                                  accentColor.withOpacity(0.2),
+                                  accentColor.withOpacity(0)
+                                ],
+                              )
+                            : null,
+                      ))
+                  : Container(),
+              //
+              // Bottom App Bar
+              //
+              isHorizontal
+                  ? SizedBox(
+                      width: size.width * UIConsts.leftBarRatio,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: ListView(
+                          children: [
+                            SizedBox(
+                              height: x / 2,
+                            ),
+                            for (var button in buttons)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 5,
+                                ),
+                                child: button,
+                              )
+                          ],
+                        ),
+                      ),
+                    )
+                  : Positioned(
+                      bottom: 0,
+                      child: Container(
+                        width: size.width,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              backgroundColor.withAlpha(0),
+                              backgroundColor,
+                            ],
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: x,
+                            ),
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: x / 2,
+                                ),
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: buttons,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: x / 2,
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
               //
               // Player Part
               //
               Positioned(
-                bottom: x + iconSize / 2,
-                left: x / 4,
+                bottom: isHorizontal ? 10 : x + iconSize / 2,
+                left: isHorizontal ? 0 : x / 4,
                 child: const PlayerWidget(),
               ),
-              //
-              // Bottom Part
-              //
-              Positioned(
-                bottom: 0,
-                child: Container(
-                  width: size.width,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        backgroundColor.withAlpha(0),
-                        backgroundColor,
-                      ],
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: x,
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: x / 2,
-                          ),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                  width: 3 * iconSize / 2,
-                                  height: 3 * iconSize / 2,
-                                  child: ElevatedButton(
-                                    style: buttonStyle,
-                                    onPressed: () {
-                                      makeTransition(Pages.home);
-                                    },
-                                    child: FaIcon(
-                                      FontAwesomeIcons.house,
-                                      color: contrastColor,
-                                      size: iconSize,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 3 * iconSize / 2,
-                                  height: 3 * iconSize / 2,
-                                  child: ElevatedButton(
-                                    style: buttonStyle,
-                                    onPressed: () {
-                                      homeController.setSearchLibrary(false);
-                                      makeTransition(Pages.search);
-                                    },
-                                    child: FaIcon(
-                                      FontAwesomeIcons.magnifyingGlass,
-                                      color: contrastColor,
-                                      size: iconSize,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 3 * iconSize / 2,
-                                  height: 3 * iconSize / 2,
-                                  child: ElevatedButton(
-                                    style: buttonStyle,
-                                    onPressed: () {
-                                      makeTransition(Pages.library);
-                                    },
-                                    child: FaIcon(
-                                      FontAwesomeIcons.list,
-                                      color: contrastColor,
-                                      size: iconSize,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 3 * iconSize / 2,
-                                  height: 3 * iconSize / 2,
-                                  child: ElevatedButton(
-                                    style: buttonStyle,
-                                    onPressed: () {
-                                      makeTransition(Pages.settings);
-                                    },
-                                    child: FaIcon(
-                                      FontAwesomeIcons.gear,
-                                      color: contrastColor,
-                                      size: iconSize,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            width: x / 2,
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              )
             ],
           ),
         ),

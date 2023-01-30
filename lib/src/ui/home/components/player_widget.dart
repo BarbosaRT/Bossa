@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:text_scroll/text_scroll.dart';
 
 class PlayerWidget extends StatefulWidget {
   const PlayerWidget({super.key});
@@ -51,6 +52,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     final contrastAccent = colorController.currentTheme.contrastAccent;
     final contrastColor = colorController.currentTheme.contrastColor;
     final backgroundAccent = colorController.currentTheme.backgroundAccent;
+    final backgroundColor = colorController.currentTheme.backgroundColor;
 
     Stream<bool> playingStream = playlistManager.player.playingStream;
     Stream<SequenceState?> songsStream =
@@ -60,6 +62,8 @@ class _PlayerWidgetState extends State<PlayerWidget> {
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
 
     final authorStyle = TextStyles().headline3.copyWith(color: contrastAccent);
+
+    bool isHorizontal = size.width > size.height;
 
     return StreamBuilder<bool>(
       stream: playingStream,
@@ -76,6 +80,140 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                     currentSong =
                         playlistUIController.playlist.songs[state.currentIndex];
                   }
+                  final color =
+                      isHorizontal ? backgroundColor : backgroundAccent;
+
+                  final widgets = [
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: Image(
+                            image: ImageParser.getImageProviderFromString(
+                              currentSong.icon,
+                            ),
+                            fit: BoxFit.cover,
+                            alignment: FractionalOffset.center,
+                            width: 60,
+                            height: 60,
+                          ),
+                        ),
+                        SizedBox(
+                          width: x / 4,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                                width: isHorizontal
+                                    ? size.width * UIConsts.leftBarRatio - x * 2
+                                    : size.width - x * 8 - 5,
+                                height: 20,
+                                child: Stack(
+                                  children: [
+                                    SizedBox(
+                                      width: (isHorizontal
+                                              ? size.width *
+                                                      UIConsts.leftBarRatio -
+                                                  x * 2
+                                              : size.width - x * 8) -
+                                          10,
+                                      child: TextScroll(
+                                        currentSong.title,
+                                        style: titleStyle,
+                                        mode: TextScrollMode.endless,
+                                        velocity: const Velocity(
+                                            pixelsPerSecond: Offset(100, 0)),
+                                        delayBefore: const Duration(seconds: 5),
+                                        pauseBetween:
+                                            const Duration(seconds: 5),
+                                        textAlign: TextAlign.right,
+                                        selectable: false,
+                                        intervalSpaces: 20,
+                                      ),
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          stops: const [0.75, 1],
+                                          colors: [color.withOpacity(0), color],
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                )),
+                            Text(
+                              currentSong.author,
+                              style: authorStyle,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 3 * iconSize / 2,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              playlistManager.seekToPrevious();
+                            },
+                            style: buttonStyle,
+                            child: FaIcon(
+                              FontAwesomeIcons.backwardStep,
+                              size: iconSize,
+                              color: contrastColor,
+                            ),
+                          ),
+                        ),
+                        isHorizontal
+                            ? const Spacer()
+                            : SizedBox(
+                                width: x / 2,
+                              ),
+                        SizedBox(
+                          width: 3 * iconSize / 2,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              playing
+                                  ? audioManager.pause()
+                                  : audioManager.play();
+                            },
+                            style: buttonStyle,
+                            child: FaIcon(
+                              playing
+                                  ? FontAwesomeIcons.solidCirclePause
+                                  : FontAwesomeIcons.solidCirclePlay,
+                              size: iconSize * 1.5,
+                              color: contrastColor,
+                            ),
+                          ),
+                        ),
+                        isHorizontal
+                            ? const Spacer()
+                            : SizedBox(
+                                width: x / 2,
+                              ),
+                        SizedBox(
+                          width: 3 * iconSize / 2,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              playlistManager.seekToNext();
+                            },
+                            style: buttonStyle,
+                            child: FaIcon(
+                              FontAwesomeIcons.forwardStep,
+                              size: iconSize,
+                              color: contrastColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ];
                   return GestureDetector(
                     onTap: () {
                       Modular.to.pop();
@@ -89,100 +227,25 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                       }
                     },
                     child: Container(
-                      height: 60,
-                      width: size.width - x / 2,
+                      height: isHorizontal ? 120 : 60,
+                      width: isHorizontal
+                          ? size.width * UIConsts.leftBarRatio
+                          : size.width - x / 2,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
-                        color: backgroundAccent,
+                        color: isHorizontal ? null : backgroundAccent,
                       ),
                       child: Padding(
                         padding: EdgeInsets.symmetric(
-                            vertical: 5, horizontal: x / 2),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                SizedBox(
-                                  width: 50,
-                                  height: 50,
-                                  child: Image(
-                                    image:
-                                        ImageParser.getImageProviderFromString(
-                                      currentSong.icon,
-                                    ),
-                                    fit: BoxFit.cover,
-                                    alignment: FractionalOffset.center,
-                                    width: 60,
-                                    height: 60,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: x / 4,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SizedBox(
-                                      width: size.width - x * 7,
-                                      height: 20,
-                                      child: TextStyles()
-                                          .getConstrainedTextByWidth(
-                                        textStyle: titleStyle,
-                                        text: currentSong.title,
-                                        textWidth: size.width,
-                                      ),
-                                    ),
-                                    Text(
-                                      currentSong.author,
-                                      style: authorStyle,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                SizedBox(
-                                  width: 3 * iconSize / 2,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      playing
-                                          ? audioManager.pause()
-                                          : audioManager.play();
-                                    },
-                                    style: buttonStyle,
-                                    child: FaIcon(
-                                      playing
-                                          ? FontAwesomeIcons.solidCirclePause
-                                          : FontAwesomeIcons.solidCirclePlay,
-                                      size: iconSize * 1.5,
-                                      color: contrastColor,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: x / 2,
-                                ),
-                                SizedBox(
-                                  width: 3 * iconSize / 2,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      playlistManager.seekToNext();
-                                    },
-                                    style: buttonStyle,
-                                    child: FaIcon(
-                                      FontAwesomeIcons.forwardStep,
-                                      size: iconSize,
-                                      color: contrastColor,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
+                            vertical: 5, horizontal: isHorizontal ? 0 : x / 2),
+                        child: isHorizontal
+                            ? Column(
+                                children: widgets,
+                              )
+                            : Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: widgets),
                       ),
                     ),
                   );

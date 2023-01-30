@@ -29,12 +29,12 @@ class _SettingsPageState extends State<SettingsPage> {
     });
 
     final settingsController = Modular.get<SettingsController>();
-    gradient = settingsController.gradientOnPlayer;
+    gradient = settingsController.gradient;
     settingsController.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {
-            gradient = settingsController.gradientOnPlayer;
+            gradient = settingsController.gradient;
           });
         }
       });
@@ -77,7 +77,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 SizedBox(
                   width: x / 2,
                 ),
-                Text('Gradiente no player', style: settingStyle),
+                Text('Usar gradiente', style: settingStyle),
                 const Spacer(),
                 Switch(
                   value: gradient,
