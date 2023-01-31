@@ -12,12 +12,13 @@ class DataManager {
   Timer closeDatabaseTimer = Timer(_closeDatabaseDelay, () {});
   sql.Database? _db;
   String databasePath = '';
+  String get databaseName => 'database.db';
 
   DataManager({required this.filePath, this.databasePath = '/database.db'});
 
   Future<String> getDatabasePath() async {
     final workingDirectory = await filePath.getDocumentsDirectory();
-    return '$workingDirectory/database.db';
+    return '$workingDirectory/$databaseName';
   }
 
   Future<void> createTables(sql.Database database) async {

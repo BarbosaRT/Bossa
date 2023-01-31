@@ -1,7 +1,7 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
-import 'package:bossa/src/color/contrast_checker.dart';
+import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
 import 'package:bossa/src/ui/components/detail_container.dart';

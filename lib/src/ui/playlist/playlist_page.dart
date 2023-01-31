@@ -91,7 +91,6 @@ class _PlaylistPageState extends State<PlaylistPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
-    final accentColor = colorController.currentTheme.accentColor;
     final contrastColor = colorController.currentTheme.contrastColor;
     final backgroundColor = colorController.currentTheme.backgroundColor;
 
@@ -371,7 +370,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                         child: FaIcon(
                           FontAwesomeIcons.solidCirclePlay,
                           size: iconSize * 1.5,
-                          color: accentColor,
+                          color: contrastColor,
                         ),
                       ),
                     ),

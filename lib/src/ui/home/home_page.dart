@@ -355,7 +355,7 @@ class _HomePageState extends State<HomePage> {
               // Player Part
               //
               Positioned(
-                bottom: isHorizontal ? 10 : x + iconSize / 2,
+                bottom: isHorizontal ? 0 : x + iconSize / 2,
                 left: isHorizontal ? 0 : x / 4,
                 child: const PlayerWidget(),
               ),

@@ -1,14 +1,17 @@
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
+import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:palette_generator/palette_generator.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class PlayerWidget extends StatefulWidget {
@@ -21,12 +24,34 @@ class PlayerWidget extends StatefulWidget {
 class _PlayerWidgetState extends State<PlayerWidget> {
   static double x = UIConsts.spacing;
   double iconSize = UIConsts.iconSize.toDouble();
+  bool gradient = true;
+  PaletteGenerator? palette;
+  int currentIndex = -1;
 
   @override
   void initState() {
     super.initState();
     final colorController = Modular.get<ColorController>();
     colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    final settingsController = Modular.get<SettingsController>();
+    gradient = settingsController.gradient;
+    settingsController.addListener(() {
+      gradient = settingsController.gradient;
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  Future<void> updatePalette(String image) async {
+    palette = await PaletteGenerator.fromImageProvider(
+      ImageParser.getImageProviderFromString(image),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {});
       }
@@ -58,13 +83,6 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     Stream<SequenceState?> songsStream =
         playlistManager.player.sequenceStateStream;
 
-    final titleStyle =
-        TextStyles().boldHeadline2.copyWith(color: contrastColor);
-
-    final authorStyle = TextStyles().headline3.copyWith(color: contrastAccent);
-
-    bool isHorizontal = size.width > size.height;
-
     return StreamBuilder<bool>(
       stream: playingStream,
       builder: (context, snapshot) {
@@ -76,12 +94,39 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                   SongModel currentSong =
                       playlistUIController.playlist.songs[0];
                   SequenceState? state = snapshot.data;
+
+                  bool isHorizontal = size.width > size.height;
+                  Color gradientColor = backgroundAccent;
+                  if (palette != null) {
+                    gradientColor = gradient
+                        ? palette!.dominantColor!.color
+                        : gradientColor;
+                  }
+
+                  final color = isHorizontal ? backgroundColor : gradientColor;
+
+                  Color finalContrastColor = contrastColor;
+                  Color finalContrastAccent = contrastAccent;
+                  if (!ContrastCheck()
+                      .contrastCheck(finalContrastColor, gradientColor)) {
+                    finalContrastColor = backgroundColor;
+                    finalContrastAccent = backgroundAccent;
+                  }
+                  final titleStyle = TextStyles()
+                      .boldHeadline2
+                      .copyWith(color: finalContrastColor);
+                  final authorStyle = TextStyles()
+                      .headline3
+                      .copyWith(color: finalContrastAccent);
+
                   if (state != null) {
                     currentSong =
                         playlistUIController.playlist.songs[state.currentIndex];
+                    if (state.currentIndex != currentIndex) {
+                      currentIndex = state.currentIndex;
+                      updatePalette(currentSong.icon);
+                    }
                   }
-                  final color =
-                      isHorizontal ? backgroundColor : backgroundAccent;
 
                   final widgets = [
                     Row(
@@ -165,7 +210,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                             child: FaIcon(
                               FontAwesomeIcons.backwardStep,
                               size: iconSize,
-                              color: contrastColor,
+                              color: finalContrastColor,
                             ),
                           ),
                         ),
@@ -188,7 +233,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                                   ? FontAwesomeIcons.solidCirclePause
                                   : FontAwesomeIcons.solidCirclePlay,
                               size: iconSize * 1.5,
-                              color: contrastColor,
+                              color: finalContrastColor,
                             ),
                           ),
                         ),
@@ -207,7 +252,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                             child: FaIcon(
                               FontAwesomeIcons.forwardStep,
                               size: iconSize,
-                              color: contrastColor,
+                              color: finalContrastColor,
                             ),
                           ),
                         ),
@@ -232,8 +277,17 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                           ? size.width * UIConsts.leftBarRatio
                           : size.width - x / 2,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: isHorizontal ? null : backgroundAccent,
+                        borderRadius:
+                            isHorizontal ? null : BorderRadius.circular(15),
+                        color: isHorizontal ? null : gradientColor,
+                        // gradient: gradient
+                        //     ? LinearGradient(
+                        //         colors: [
+                        //           gradientColor.withOpacity(0.2),
+                        //           gradientColor.withOpacity(0)
+                        //         ],
+                        //       )
+                        //     : null,
                       ),
                       child: Padding(
                         padding: EdgeInsets.symmetric(

@@ -26,6 +26,8 @@ dependencies:
   http: ^0.13.5
   html: ^0.15.1 
   permission_handler: ^8.3.0
+  package_info_plus: ^3.0.2
+  url_launcher: ^6.1.8
   
   just_audio: ^0.9.30
   just_audio_mpv: ^0.1.6
