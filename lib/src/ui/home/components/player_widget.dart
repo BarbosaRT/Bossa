@@ -103,7 +103,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                         : gradientColor;
                   }
 
-                  final color = isHorizontal ? backgroundColor : gradientColor;
+                  final color = gradientColor;
 
                   Color finalContrastColor = contrastColor;
                   Color finalContrastAccent = contrastAccent;
@@ -279,7 +279,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                       decoration: BoxDecoration(
                         borderRadius:
                             isHorizontal ? null : BorderRadius.circular(15),
-                        color: isHorizontal ? null : gradientColor,
+                        color: gradientColor,
                         // gradient: gradient
                         //     ? LinearGradient(
                         //         colors: [

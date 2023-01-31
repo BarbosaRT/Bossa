@@ -106,12 +106,10 @@ class _AppWidgetState extends State<AppWidget> {
       debugShowCheckedModeBanner: false,
       title: 'Bossa',
       theme: ThemeData(
-        //useMaterial3: true,
         scrollbarTheme: ScrollbarThemeData(
             trackVisibility:
                 MaterialStateProperty.resolveWith((states) => true)),
         primarySwatch: colorController.currentCustomColor,
-        //colorSchemeSeed: colorController.currentCustomColor,
       ),
       routeInformationParser: Modular.routeInformationParser,
       routerDelegate: Modular.routerDelegate,
