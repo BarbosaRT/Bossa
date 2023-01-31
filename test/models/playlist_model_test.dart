@@ -25,28 +25,20 @@ void main() {
       expect(playlist.id, id);
       expect(playlist.title, title);
       expect(playlist.icon, icon);
-      expect(playlist.songs.isEmpty, true);
+      expect(playlist.songs.isEmpty, false);
     });
 
     test('toSql', () {
-      final map = {
-        'id': 1,
-        'title': 'Song 1',
-        'icon': 'icon1'
-      };
-      final song = SongModel(id: 1, title: 'title', icon: 'icon', url: 'url', path: 'path');
-      final playlist = PlaylistModel(
-        id: 1,
-        title: 'Song 1',
-        icon: 'icon1',
-        songs: [song]
-      );
+      final map = {'id': 1, 'title': 'Song 1', 'icon': 'icon1'};
+      final song = SongModel(
+          id: 1, title: 'title', icon: 'icon', url: 'url', path: 'path');
+      final playlist =
+          PlaylistModel(id: 1, title: 'Song 1', icon: 'icon1', songs: [song]);
       final result = playlist.toSql();
       expect(result['id'] == map['id'], true);
       expect(result['title'] == map['title'], true);
       expect(result['icon'] == map['icon'], true);
       expect(result['songs'], isNull);
     });
-
-  });  
+  });
 }

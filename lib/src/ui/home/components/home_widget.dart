@@ -435,6 +435,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       songsSortedWidgets.add(songContainerBuilder(song, playlist));
     }
 
+    bool isHorizontal = size.width > size.height;
+
     return SafeArea(
       child: SizedBox(
         width: size.width,
@@ -464,7 +466,9 @@ class _HomeWidgetState extends State<HomeWidget> {
               left: x / 2,
               child: SizedBox(
                 height: size.height,
-                width: size.width,
+                width: isHorizontal
+                    ? size.width * (1 - UIConsts.leftBarRatio)
+                    : size.width,
                 child: ListView(
                   children: [
                     SizedBox(
@@ -477,7 +481,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
-                              children: songContainers,
+                              children: [
+                                for (var song in songContainers) song,
+                                SizedBox(
+                                  width: x / 2,
+                                )
+                              ],
                             ),
                           ),
                         ],
@@ -493,7 +502,13 @@ class _HomeWidgetState extends State<HomeWidget> {
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
-                              children: playlistContainers,
+                              children: [
+                                for (var playlist in playlistContainers)
+                                  playlist,
+                                SizedBox(
+                                  width: x / 2,
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -513,7 +528,13 @@ class _HomeWidgetState extends State<HomeWidget> {
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
-                              children: songsSortedWidgets,
+                              children: [
+                                for (var songSorted in songsSortedWidgets)
+                                  songSorted,
+                                SizedBox(
+                                  width: x / 2,
+                                ),
+                              ],
                             ),
                           ),
                         ],

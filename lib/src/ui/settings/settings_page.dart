@@ -1,11 +1,18 @@
+import 'dart:io';
+import 'package:asuka/asuka.dart';
 import 'package:bossa/src/color/app_colors.dart';
 import 'package:bossa/src/color/color_controller.dart';
+import 'package:bossa/src/data/data_manager.dart';
+import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/settings/settings_controller.dart';
+import 'package:bossa/src/url/download_service.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -29,37 +36,62 @@ class _SettingsPageState extends State<SettingsPage> {
     });
 
     final settingsController = Modular.get<SettingsController>();
-    gradient = settingsController.gradientOnPlayer;
+    gradient = settingsController.gradient;
     settingsController.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {
-            gradient = settingsController.gradientOnPlayer;
+            gradient = settingsController.gradient;
           });
         }
       });
     });
   }
 
+  Future<bool> saveDatabase() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+    );
+
+    if (result != null) {
+      PlatformFile file = result.files.first;
+      if (file.path!.endsWith('.db')) {
+        String databasePath = await dataManagerInstance.getDatabasePath();
+        await File(file.path!).copy(databasePath);
+        return true;
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final settingsController = Modular.get<SettingsController>();
+    final downloadService = Modular.get<HttpDownloadService>();
 
     final colorController = Modular.get<ColorController>();
     final backgroundColor = colorController.currentTheme.backgroundColor;
+    final backgroundAccent = colorController.currentTheme.backgroundAccent;
     final contrastColor = colorController.currentTheme.contrastColor;
 
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);
 
     final settingStyle = TextStyles().headline2.copyWith(color: contrastColor);
+    final buttonStyle = ButtonStyle(
+      padding: MaterialStateProperty.all(EdgeInsets.zero),
+      overlayColor: MaterialStateProperty.all(Colors.transparent),
+      foregroundColor: MaterialStateProperty.all(Colors.transparent),
+      shadowColor: MaterialStateProperty.all(Colors.transparent),
+      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+    );
 
     return SafeArea(
       child: SizedBox(
         width: size.width,
         height: size.height,
-        child: Column(
+        child: ListView(
           children: [
             SizedBox(
               height: x / 2,
@@ -77,7 +109,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 SizedBox(
                   width: x / 2,
                 ),
-                Text('Gradiente no player', style: settingStyle),
+                Text('Usar gradiente', style: settingStyle),
                 const Spacer(),
                 Switch(
                   value: gradient,
@@ -90,12 +122,15 @@ class _SettingsPageState extends State<SettingsPage> {
                       gradient = value;
                     });
                   },
-                )
+                ),
+                SizedBox(
+                  width: x / 2,
+                ),
               ],
             ),
-            SizedBox(
-              height: x / 2,
-            ),
+            //
+            // Accent Color
+            //
             Row(
               children: [
                 SizedBox(
@@ -117,36 +152,242 @@ class _SettingsPageState extends State<SettingsPage> {
                       colorController.changeAccentColor(newColor);
                     },
                   ),
+                SizedBox(
+                  width: x / 2,
+                ),
               ],
             ),
-            Row(children: [
-              SizedBox(
-                width: x / 2,
-              ),
-              Text('Mudar tema', style: settingStyle),
-              const Spacer(),
-              DropdownButton<AppColors>(
-                dropdownColor: backgroundColor,
-                items: [
-                  DropdownMenuItem<DarkTheme>(
-                    value: DarkTheme(),
-                    child: Text('Tema Escuro', style: settingStyle),
+            //
+            // Change Theme
+            //
+            Row(
+              children: [
+                SizedBox(
+                  width: x / 2,
+                ),
+                Text('Mudar tema', style: settingStyle),
+                const Spacer(),
+                DropdownButton<AppColors>(
+                  dropdownColor: backgroundColor,
+                  items: [
+                    DropdownMenuItem<DarkTheme>(
+                      value: DarkTheme(),
+                      child: Text('Tema Escuro', style: settingStyle),
+                    ),
+                    DropdownMenuItem<LightTheme>(
+                      value: LightTheme(),
+                      child: Text('Tema Claro', style: settingStyle),
+                    ),
+                  ],
+                  onChanged: (v) async {
+                    if (v == null) {
+                      return;
+                    }
+                    final prefs = await SharedPreferences.getInstance();
+                    prefs.setInt('currentTheme', Themes().indexOf(v));
+                    colorController.changeTheme(v);
+                  },
+                ),
+                SizedBox(
+                  width: x / 2,
+                ),
+              ],
+            ),
+            //
+            // Updates
+            //
+            Row(
+              children: [
+                SizedBox(
+                  width: x / 2,
+                ),
+                Text('Verificar Updates', style: settingStyle),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: () async {
+                    bool hasUpdate = await settingsController.hasUpdate();
+                    if (hasUpdate) {
+                      Asuka.showSnackBar(
+                        SnackBar(
+                          padding: EdgeInsets.zero,
+                          backgroundColor: Colors.transparent,
+                          duration: const Duration(days: 1),
+                          content: Container(
+                            height: 100,
+                            width: size.width,
+                            decoration: BoxDecoration(
+                              color: backgroundAccent,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(15),
+                                topRight: Radius.circular(15),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  await launchUrl(
+                                    Uri.parse(
+                                      'https://github.com/BarbosaRT/Bossa/releases',
+                                    ),
+                                  );
+                                },
+                                style: buttonStyle,
+                                child: Text(
+                                  'Update encontrado, aperte para ir à pagina de downloads',
+                                  style: settingStyle.copyWith(
+                                    color: Colors.blue,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: Text(
+                    'Verificar',
+                    style: settingStyle,
                   ),
-                  DropdownMenuItem<LightTheme>(
-                    value: LightTheme(),
-                    child: Text('Tema Claro', style: settingStyle),
+                ),
+                SizedBox(
+                  width: x / 2,
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  width: x / 2,
+                ),
+                Text('Backups', style: settingStyle),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (await saveDatabase()) {
+                      Asuka.showSnackBar(
+                        SnackBar(
+                          padding: EdgeInsets.zero,
+                          backgroundColor: Colors.transparent,
+                          content: Container(
+                            height: 80,
+                            width: size.width,
+                            decoration: BoxDecoration(
+                              color: backgroundAccent,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(15),
+                                topRight: Radius.circular(15),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: Text(
+                                'Backup carregado com sucesso',
+                                style: settingStyle,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      Asuka.showSnackBar(
+                        SnackBar(
+                          padding: EdgeInsets.zero,
+                          backgroundColor: Colors.transparent,
+                          content: Container(
+                            height: 50,
+                            width: size.width,
+                            decoration: BoxDecoration(
+                              color: backgroundAccent,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(15),
+                                topRight: Radius.circular(15),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: Text(
+                                'Houve um erro, tente novamente',
+                                style: settingStyle,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: Text(
+                    'Importar',
+                    style: settingStyle,
                   ),
-                ],
-                onChanged: (v) async {
-                  if (v == null) {
-                    return;
-                  }
-                  final prefs = await SharedPreferences.getInstance();
-                  prefs.setInt('currentTheme', Themes().indexOf(v));
-                  colorController.changeTheme(v);
-                },
-              ),
-            ])
+                ),
+                SizedBox(
+                  width: x / 4,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final databasePath =
+                        await dataManagerInstance.getDatabasePath();
+                    String externalDirectory = '';
+                    if (Platform.isAndroid) {
+                      bool hasPermission =
+                          await downloadService.requestWritePermission();
+                      if (!hasPermission) throw Exception('Permission Denied');
+                      externalDirectory =
+                          await FilePathImpl().getExternalDirectory();
+                    } else if (!Platform.isIOS) {
+                      String? outputFile = await FilePicker.platform.saveFile(
+                        dialogTitle: 'Selecione uma pasta:',
+                        fileName: dataManagerInstance.databaseName,
+                      );
+
+                      if (outputFile != null) {
+                        externalDirectory = outputFile;
+                      }
+                    }
+                    await Directory(externalDirectory).create();
+                    File(databasePath).copy(
+                        '$externalDirectory/${dataManagerInstance.databaseName}');
+                    Asuka.showSnackBar(
+                      SnackBar(
+                        padding: EdgeInsets.zero,
+                        backgroundColor: Colors.transparent,
+                        content: Container(
+                          height: 80,
+                          width: size.width,
+                          decoration: BoxDecoration(
+                            color: backgroundAccent,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(15),
+                              topRight: Radius.circular(15),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Text(
+                              'Backup salvo em: $externalDirectory/${dataManagerInstance.databaseName}',
+                              style: settingStyle,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    'Exportar',
+                    style: settingStyle,
+                  ),
+                ),
+                SizedBox(
+                  width: x / 2,
+                ),
+              ],
+            ),
           ],
         ),
       ),

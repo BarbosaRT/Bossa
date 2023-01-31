@@ -128,8 +128,12 @@ class _FilterWidgetState extends State<FilterWidget> {
       ),
     ];
 
+    bool isHorizontal = size.width > size.height;
+
+    double width =
+        isHorizontal ? size.width * (1 - UIConsts.leftBarRatio) : size.width;
     return SizedBox(
-      width: size.width - UIConsts.spacing * 1.5,
+      width: width - UIConsts.spacing * 1.5,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

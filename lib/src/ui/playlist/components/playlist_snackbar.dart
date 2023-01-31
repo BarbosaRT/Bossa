@@ -43,11 +43,13 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
 
   Stream<List<SongModel>> downloadPlaylistSongs() async* {
     List<SongModel> output = [];
+    final songDataManager = Modular.get<SongDataManager>();
     for (SongModel song in widget.playlist.songs) {
       song = await SongParser().parseSongBeforeSave(
         song,
         saveOffline: true,
       );
+      songDataManager.editSong(song);
       output.add(song);
       yield output;
     }

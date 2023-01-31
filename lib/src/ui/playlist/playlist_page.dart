@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'package:text_scroll/text_scroll.dart';
 
 class PlaylistPage extends StatefulWidget {
   const PlaylistPage({super.key});
@@ -66,11 +67,10 @@ class _PlaylistPageState extends State<PlaylistPage> {
 
     final settingsController = Modular.get<SettingsController>();
     settingsController.addListener(() {
+      gradient = settingsController.gradient;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          setState(() {
-            gradient = settingsController.gradientOnPlayer;
-          });
+          setState(() {});
         }
       });
     });
@@ -91,7 +91,6 @@ class _PlaylistPageState extends State<PlaylistPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
-    final accentColor = colorController.currentTheme.accentColor;
     final contrastColor = colorController.currentTheme.contrastColor;
     final backgroundColor = colorController.currentTheme.backgroundColor;
 
@@ -99,8 +98,16 @@ class _PlaylistPageState extends State<PlaylistPage> {
     final songDataManager = Modular.get<SongDataManager>();
     final playlistManager = Modular.get<JustPlaylistManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
+    final settingsController = Modular.get<SettingsController>();
     final homeController = Modular.get<HomeController>();
     final audioManager = playlistManager.player;
+
+    if (settingsController.gradient != gradient) {
+      gradient = settingsController.gradient;
+      if (mounted) {
+        setState(() {});
+      }
+    }
 
     final buttonStyle = ButtonStyle(
       padding: MaterialStateProperty.all(EdgeInsets.zero),
@@ -183,18 +190,21 @@ class _PlaylistPageState extends State<PlaylistPage> {
             ],
             title: song.title,
           ),
-          onTap: () {
+          onTap: () async {
             audioManager.pause();
             playlistUIController.setPlaylist(playlist, index: index);
             playlistManager.setPlaylist(playlist, initialIndex: index);
             Modular.to.pushReplacementNamed(
               '/player',
             );
+            audioManager.play();
           },
           icon: song.icon,
         ),
       );
     }
+
+    bool isHorizontal = size.width > size.height;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -264,12 +274,21 @@ class _PlaylistPageState extends State<PlaylistPage> {
                 Padding(
                   padding: EdgeInsets.only(left: x / 2),
                   child: SizedBox(
-                    width: size.width - x / 2,
+                    width: (isHorizontal
+                            ? size.width * (1 - UIConsts.leftBarRatio)
+                            : size.width) -
+                        x / 2,
                     height: 40,
-                    child: TextStyles().getConstrainedTextByWidth(
-                      textStyle: titleStyle,
-                      text: playlist.title,
-                      textWidth: size.width,
+                    child: TextScroll(
+                      playlist.title,
+                      style: titleStyle,
+                      mode: TextScrollMode.endless,
+                      velocity: const Velocity(pixelsPerSecond: Offset(100, 0)),
+                      delayBefore: const Duration(seconds: 5),
+                      pauseBetween: const Duration(seconds: 5),
+                      textAlign: TextAlign.right,
+                      selectable: false,
+                      intervalSpaces: 20,
                     ),
                   ),
                 ),
@@ -311,8 +330,11 @@ class _PlaylistPageState extends State<PlaylistPage> {
                         onPressed: () {
                           Modular.to.popUntil(ModalRoute.withName('/'));
                           audioManager.pause();
+
                           playlistUIController.setPlaylist(playlist);
+                          playlistManager.setPlaylist(playlist);
                           playlistManager.setShuffleModeEnabled(true);
+
                           Modular.to.pushReplacementNamed(
                             '/player',
                           );
@@ -335,7 +357,9 @@ class _PlaylistPageState extends State<PlaylistPage> {
                         onPressed: () {
                           Modular.to.popUntil(ModalRoute.withName('/'));
                           audioManager.pause();
+
                           playlistUIController.setPlaylist(playlist);
+                          playlistManager.setPlaylist(playlist);
 
                           Modular.to.pushReplacementNamed(
                             '/player',
@@ -346,7 +370,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                         child: FaIcon(
                           FontAwesomeIcons.solidCirclePlay,
                           size: iconSize * 1.5,
-                          color: accentColor,
+                          color: contrastColor,
                         ),
                       ),
                     ),
@@ -364,9 +388,11 @@ class _PlaylistPageState extends State<PlaylistPage> {
                     children: songContainers,
                   ),
                 ),
-                SizedBox(
-                  height: x * 2,
-                ),
+                isHorizontal
+                    ? Container()
+                    : SizedBox(
+                        height: x * 2,
+                      ),
               ],
             ),
           ),

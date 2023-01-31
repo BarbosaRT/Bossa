@@ -198,6 +198,7 @@ class _SongAddPageState extends State<SongAddPage> {
         ),
       ),
     );
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -365,8 +366,8 @@ class _SongAddPageState extends State<SongAddPage> {
                             children: [
                               Center(
                                 child: SizedBox(
-                                  width: size.width - x * 2,
-                                  height: size.width - x * 2,
+                                  width: 280 - x * 2,
+                                  height: 280 - x * 2,
                                   child: GestureDetector(
                                     onTap: saveIcon,
                                     child: Container(
@@ -402,6 +403,7 @@ class _SongAddPageState extends State<SongAddPage> {
                                             contentPadding: EdgeInsets.zero,
                                           ),
                                           style: titleStyle,
+                                          textAlign: TextAlign.center,
                                           textAlignVertical:
                                               TextAlignVertical.center,
                                           onChanged: (value) {
@@ -426,6 +428,7 @@ class _SongAddPageState extends State<SongAddPage> {
                                               hintStyle: authorStyle,
                                               border: InputBorder.none),
                                           style: authorStyle,
+                                          textAlign: TextAlign.center,
                                           onChanged: (value) {
                                             setState(() {
                                               songToBeAdded.author = value;

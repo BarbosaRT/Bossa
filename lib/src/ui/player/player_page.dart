@@ -1,7 +1,7 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
-import 'package:bossa/src/color/contrast_checker.dart';
+import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
@@ -40,7 +40,9 @@ class _PlayerPageState extends State<PlayerPage> {
       ImageParser.getImageProviderFromString(image),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -65,11 +67,10 @@ class _PlayerPageState extends State<PlayerPage> {
 
     final settingsController = Modular.get<SettingsController>();
     settingsController.addListener(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          gradient = settingsController.gradientOnPlayer;
-        });
-      });
+      gradient = settingsController.gradient;
+      if (mounted) {
+        setState(() {});
+      }
     });
     playlistUIController.addListener(() async {
       playlist = playlistUIController.playlist;
@@ -117,7 +118,7 @@ class _PlayerPageState extends State<PlayerPage> {
     return replacement;
   }
 
-  Widget playerWidget({bool isHorizontal = true}) {
+  Widget playerWidget({bool isHorizontal = false}) {
     final size = MediaQuery.of(context).size;
     final colorController = Modular.get<ColorController>();
     final accentColor = colorController.currentTheme.accentColor;

@@ -16,6 +16,5 @@ void main() {
       final output = await getApplicationDocumentsDirectory();
       expect(output, isNotNull);
     });
-
   });
 }

@@ -19,7 +19,7 @@ class HttpDownloadService implements DownloadService {
   Future<void> downloadIcon(
       String url, String fileName, String directory) async {
     if (Platform.isAndroid) {
-      bool hasPermission = await _requestWritePermission();
+      bool hasPermission = await requestWritePermission();
       if (!hasPermission) throw Exception('Permission Denied');
     }
     if (!UrlParser.validUrl(url)) {
@@ -52,7 +52,7 @@ class HttpDownloadService implements DownloadService {
   @override
   Future<void> download(String url, String fileName, String directory) async {
     if (Platform.isAndroid) {
-      bool hasPermission = await _requestWritePermission();
+      bool hasPermission = await requestWritePermission();
       if (!hasPermission) throw Exception('Permission Denied');
     }
 
@@ -74,8 +74,7 @@ class HttpDownloadService implements DownloadService {
     youtube.close();
   }
 
-  // Requests storage permission
-  Future<bool> _requestWritePermission() async {
+  Future<bool> requestWritePermission() async {
     await Permission.storage.request();
     return await Permission.storage.request().isGranted;
   }
