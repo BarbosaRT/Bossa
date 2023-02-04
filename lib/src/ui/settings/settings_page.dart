@@ -252,7 +252,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           backgroundColor: Colors.transparent,
                           duration: const Duration(days: 1),
                           content: Container(
-                            height: 100,
+                            height: 50,
                             width: size.width,
                             decoration: BoxDecoration(
                               color: backgroundAccent,

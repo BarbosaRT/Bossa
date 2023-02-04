@@ -191,13 +191,13 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
                   final path = File(song.path);
 
                   if (await icon.exists()) {
-                    song.icon = '';
                     await icon.delete();
                   }
                   if (await path.exists()) {
-                    song.path = '';
                     await path.delete();
                   }
+                  song.icon = '';
+                  song.path = '';
 
                   if (SongParser().isSongFromYoutube(song.url)) {
                     final yt = YoutubeExplode();
@@ -208,6 +208,8 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
                   } else {
                     song.icon = UIConsts.assetImage;
                   }
+
+                  songDataManager.editSong(song);
 
                   if (widget.playlist.icon.isEmpty) {
                     widget.playlist.icon = song.icon;
@@ -228,6 +230,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
                 isOffline = false;
                 canTapOffline = true;
 
+                await playlistDataManager.editPlaylist(widget.playlist);
                 if (mounted) {
                   setState(() {});
                 }
@@ -283,11 +286,10 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
                 ),
               );
 
-              widget.callback?.call();
-
               if (mounted) {
                 setState(() {});
               }
+              widget.callback?.call();
             },
             child: Row(children: [
               FaIcon(
