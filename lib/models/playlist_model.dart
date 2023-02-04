@@ -17,8 +17,7 @@ class PlaylistModel {
     List<SongModel> songs = [];
     if (map['songs'] != null) {
       for (var entry in map['songs']) {
-        SongModel song = entry as SongModel;
-        songs.add(SongModel.fromMap(song.toMap()));
+        songs.add(SongModel.fromMap(entry as Map<dynamic, dynamic>));
       }
     }
 

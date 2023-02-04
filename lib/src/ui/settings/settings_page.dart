@@ -245,6 +245,33 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ),
                       );
+                    } else {
+                      Asuka.showSnackBar(
+                        SnackBar(
+                          padding: EdgeInsets.zero,
+                          backgroundColor: Colors.transparent,
+                          duration: const Duration(days: 1),
+                          content: Container(
+                            height: 100,
+                            width: size.width,
+                            decoration: BoxDecoration(
+                              color: backgroundAccent,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(15),
+                                topRight: Radius.circular(15),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                'Não foi encontrado nenhum update',
+                                style: settingStyle,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
                     }
                   },
                   child: Text(
@@ -272,7 +299,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           padding: EdgeInsets.zero,
                           backgroundColor: Colors.transparent,
                           content: Container(
-                            height: 80,
+                            height: 70,
                             width: size.width,
                             decoration: BoxDecoration(
                               color: backgroundAccent,
