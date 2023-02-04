@@ -105,6 +105,7 @@ class PlaylistSearch {
           id: -1,
           title: playlistData.title,
           icon: icon,
+          url: playlistData.url,
           songs: songs.toList(),
         ),
       );

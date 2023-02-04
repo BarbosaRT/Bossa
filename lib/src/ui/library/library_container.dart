@@ -123,7 +123,7 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
                           text: widget.title,
                           textWidth: isHorizontal
                               ? size.width * (1 - UIConsts.leftBarRatio)
-                              : size.width,
+                              : size.width - UIConsts.spacing * 5.7,
                         ),
                       ),
                       widget.author == null

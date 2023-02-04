@@ -29,7 +29,18 @@ class FilePathImpl extends FilePath {
 
   Future<String> getExternalDirectory() async {
     if (_externalDocumentsDirectory.isEmpty && Platform.isAndroid) {
-      String output = await getExternalDirectory();
+      Directory? directory = Directory('/storage/emulated/0/Download');
+      if (!await directory.exists()) {
+        directory = await getExternalStorageDirectory();
+      }
+      String output = '';
+      if (directory != null) {
+        output = directory.path;
+      } else {
+        directory = Directory('/storage/emulated/0/Bossa');
+        await directory.create();
+        output = directory.path;
+      }
       _externalDocumentsDirectory = parseToExternalDirectory(output);
     }
     return _externalDocumentsDirectory;
