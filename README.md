@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="readme/icon.png" alt="Icon" height="400" width="500">
+  <img src="readme/icon.png" alt="Icon" height="300" width="300">
 </h1>
 <p align="center"><font size="+3">Bossa</font></p>
 <p align="center">A Flutter Music Player</p>
