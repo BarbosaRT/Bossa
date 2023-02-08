@@ -145,6 +145,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.17.2"
+  dio:
+    dependency: "direct main"
+    description:
+      name: dio
+      sha256: "7d328c4d898a61efc3cd93655a0955858e29a0aa647f0f9e02d59b3bb275e2e8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.6"
   eventify:
     dependency: transitive
     description:
@@ -353,7 +361,7 @@ packages:
     source: hosted
     version: "0.1.6"
   just_audio_platform_interface:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: just_audio_platform_interface
       sha256: eff112d5138bea3ba544b6338b1e0537a32b5e1425e4d0dc38f732771cda7c84
@@ -417,7 +425,7 @@ packages:
     source: hosted
     version: "2.0.2"
   mpv_dart:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: mpv_dart
       sha256: a33bd9a68439b496b7a5f36fecd3aa3cf6cbf0176ae15b9b60b12ae96e58f5a4

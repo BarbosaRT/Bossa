@@ -4,7 +4,6 @@ import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
-import 'package:bossa/src/ui/components/detail_container.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/ui/library/filter_widget.dart';
 import 'package:bossa/src/ui/library/library_container.dart';
@@ -15,7 +14,7 @@ import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
-import 'package:bossa/src/ui/song/song_add_page.dart';
+import 'package:bossa/src/ui/song/song_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -103,9 +102,6 @@ class _LibraryPageState extends State<LibraryPage>
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);
 
-    final buttonTextStyle =
-        TextStyles().boldHeadline2.copyWith(color: contrastColor);
-
     final buttonStyle = ButtonStyle(
       padding: MaterialStateProperty.all(EdgeInsets.zero),
       overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -123,63 +119,12 @@ class _LibraryPageState extends State<LibraryPage>
           title: 'Todas as Músicas',
           icon: song.icon,
           songs: songs.toList());
-      final key = GlobalKey<DetailContainerState>();
 
-      DetailContainer detailContainer = DetailContainer(
-        icon: song.icon,
-        key: key,
-        actions: [
-          SizedBox(
-            width: size.width,
-            height: 30,
-            child: GestureDetector(
-              onTap: () {
-                key.currentState?.pop();
-                songDataManager.removeSong(song);
-                loadSongs();
-              },
-              child: Row(children: [
-                FaIcon(
-                  FontAwesomeIcons.trash,
-                  size: iconSize,
-                  color: contrastColor,
-                ),
-                SizedBox(
-                  width: iconSize / 2,
-                ),
-                Text('Remover', style: buttonTextStyle),
-              ]),
-            ),
-          ),
-          SizedBox(
-            width: size.width,
-            height: 30,
-            child: GestureDetector(
-              onTap: () {
-                key.currentState?.pop();
-                Modular.to.push(
-                  MaterialPageRoute(
-                    builder: (context) => SongAddPage(
-                      songToBeEdited: song,
-                    ),
-                  ),
-                );
-              },
-              child: Row(children: [
-                FaIcon(
-                  FontAwesomeIcons.penToSquare,
-                  size: iconSize,
-                  color: contrastColor,
-                ),
-                SizedBox(
-                  width: iconSize / 2,
-                ),
-                Text('Editar', style: buttonTextStyle),
-              ]),
-            ),
-          ),
-        ],
-        title: song.title,
+      Widget detailContainer = SongSnackbar(
+        song: song,
+        callback: () {
+          loadSongs();
+        },
       );
 
       songContainers.add(

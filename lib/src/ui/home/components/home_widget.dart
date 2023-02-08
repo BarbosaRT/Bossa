@@ -1,10 +1,9 @@
 import 'package:asuka/asuka.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
-import 'package:bossa/src/ui/components/detail_container.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
-import 'package:bossa/src/ui/playlist/add_to_playlist_page.dart';
 import 'package:bossa/src/ui/playlist/components/playlist_snackbar.dart';
+import 'package:bossa/src/ui/song/song_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -260,101 +259,17 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget songContainerBuilder(
       SongModel song, PlaylistModel playlistToBePlayed) {
-    final size = MediaQuery.of(context).size;
     final songDataManager = Modular.get<SongDataManager>();
     final playlistManager = Modular.get<JustPlaylistManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
-    final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentTheme.contrastColor;
     final audioManager = playlistManager.player;
-    final buttonStyle =
-        TextStyles().boldHeadline2.copyWith(color: contrastColor);
-
-    final key = GlobalKey<DetailContainerState>();
 
     return ContentContainer(
-      detailContainer: DetailContainer(
-        icon: song.icon,
-        key: key,
-        actions: [
-          SizedBox(
-            width: size.width,
-            height: 30,
-            child: GestureDetector(
-              onTap: () {
-                key.currentState?.pop();
-                songDataManager.removeSong(song);
-                loadSongs();
-              },
-              child: Row(children: [
-                FaIcon(
-                  FontAwesomeIcons.trash,
-                  size: iconSize,
-                  color: contrastColor,
-                ),
-                SizedBox(
-                  width: iconSize / 2,
-                ),
-                Text('Remover', style: buttonStyle),
-              ]),
-            ),
-          ),
-          SizedBox(
-            width: size.width,
-            height: 30,
-            child: GestureDetector(
-              onTap: () {
-                key.currentState?.pop();
-                Modular.to.push(
-                  MaterialPageRoute(
-                    builder: (context) => SongAddPage(
-                      songToBeEdited: song,
-                    ),
-                  ),
-                );
-              },
-              child: Row(children: [
-                FaIcon(
-                  FontAwesomeIcons.penToSquare,
-                  size: iconSize,
-                  color: contrastColor,
-                ),
-                SizedBox(
-                  width: iconSize / 2,
-                ),
-                Text('Editar', style: buttonStyle),
-              ]),
-            ),
-          ),
-          SizedBox(
-            width: size.width,
-            height: 30,
-            child: GestureDetector(
-              onTap: () {
-                key.currentState?.pop();
-                Modular.to.push(
-                  MaterialPageRoute(
-                    builder: (context) => AddToPlaylistPage(
-                      song: song,
-                    ),
-                  ),
-                );
-              },
-              child: Row(children: [
-                FaIcon(
-                  FontAwesomeIcons.circlePlus,
-                  size: iconSize,
-                  color: contrastColor,
-                ),
-                SizedBox(
-                  width: iconSize / 2,
-                ),
-                Text('Adicionar à playlist', style: buttonStyle),
-              ]),
-            ),
-          ),
-        ],
-        title: song.title,
+      detailContainer: SongSnackbar(
+        song: song,
+        callback: () {
+          loadSongs();
+        },
       ),
       onTap: () {
         Modular.to.popUntil(ModalRoute.withName('/'));

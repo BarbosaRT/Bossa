@@ -15,6 +15,11 @@ void main() async {
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+    final which = await Process.run("which", ["mpv"]);
+    if (which.exitCode == 0) {
+      print('canPlayAudio: true');
+    }
   }
+
   runApp(ModularApp(module: AppModule(), child: const AppWidget()));
 }

@@ -199,6 +199,8 @@ class _SongAddPageState extends State<SongAddPage> {
       ),
     );
 
+    bool isHorizontal = size.width > size.height;
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -366,8 +368,14 @@ class _SongAddPageState extends State<SongAddPage> {
                             children: [
                               Center(
                                 child: SizedBox(
-                                  width: 280 - x * 2,
-                                  height: 280 - x * 2,
+                                  width: (isHorizontal
+                                          ? size.height / 2
+                                          : size.width / 2) -
+                                      x * 2,
+                                  height: (isHorizontal
+                                          ? size.height / 2
+                                          : size.width / 2) -
+                                      x * 2,
                                   child: GestureDetector(
                                     onTap: saveIcon,
                                     child: Container(
