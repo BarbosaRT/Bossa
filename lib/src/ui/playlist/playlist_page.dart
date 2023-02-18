@@ -1,6 +1,7 @@
 import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/audio/audio_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
@@ -96,11 +97,11 @@ class _PlaylistPageState extends State<PlaylistPage> {
 
     final titleStyle = TextStyles().boldHeadline.copyWith(color: contrastColor);
     final songDataManager = Modular.get<SongDataManager>();
-    final playlistManager = Modular.get<JustPlaylistManager>();
+    final playlistManager = Modular.get<PlaylistAudioManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
     final settingsController = Modular.get<SettingsController>();
     final homeController = Modular.get<HomeController>();
-    final audioManager = playlistManager.player;
+    final audioManager = Modular.get<AudioManager>();
 
     if (settingsController.gradient != gradient) {
       gradient = settingsController.gradient;

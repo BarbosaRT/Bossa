@@ -1,5 +1,6 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/audio/audio_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
@@ -13,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:palette_generator/palette_generator.dart';
 
 class PlayerPage extends StatefulWidget {
@@ -126,8 +126,9 @@ class _PlayerPageState extends State<PlayerPage> {
     final contrastAccent = colorController.currentTheme.contrastAccent;
     final backgroundAccent = colorController.currentTheme.backgroundAccent;
 
-    final playlistManager = Modular.get<JustPlaylistManager>();
+    final playlistManager = Modular.get<PlaylistAudioManager>();
     final songDataManager = Modular.get<SongDataManager>();
+    final audioManager = Modular.get<AudioManager>();
 
     final titleStyle = GoogleFonts.poppins(
         color: contrastColor, fontSize: 15, fontWeight: FontWeight.bold);
@@ -142,17 +143,13 @@ class _PlayerPageState extends State<PlayerPage> {
       backgroundColor: MaterialStateProperty.all(Colors.transparent),
     );
 
-    Stream<SequenceState?> songsStream =
-        playlistManager.player.sequenceStateStream;
+    Stream<int?> songsStream = playlistManager.indexesStream();
 
-    Stream<bool> playingStream = playlistManager.player.playingStream;
+    Stream<bool> playingStream = audioManager.playingStream();
 
-    Stream<bool> shuffleStream =
-        playlistManager.player.shuffleModeEnabledStream;
+    Stream<bool> shuffleStream = playlistManager.shuffleModeEnabledStream();
 
-    Stream<LoopMode> loopmodeStream = playlistManager.player.loopModeStream;
-
-    AudioPlayer audioManager = playlistManager.player;
+    Stream<PlayMode> playModeStream = playlistManager.playModeStream();
 
     final imageSize =
         size.width > size.height ? size.height * 0.75 : size.width;
@@ -160,16 +157,16 @@ class _PlayerPageState extends State<PlayerPage> {
 
     double width = isHorizontal ? size.width / 2 : size.width;
 
-    return StreamBuilder<SequenceState?>(
+    return StreamBuilder<int?>(
       stream: songsStream,
       builder: (context, snapshot) {
         SongModel currentSong = playlist.songs[0];
-        SequenceState? state = snapshot.data;
+        int? state = snapshot.data;
         if (state != null) {
-          currentSong = playlist.songs[state.currentIndex];
+          currentSong = playlist.songs[state];
 
-          if (state.currentIndex != currentIndex) {
-            currentIndex = state.currentIndex;
+          if (state != currentIndex) {
+            currentIndex = state;
             updatePalette(currentSong.icon);
 
             if (currentSong.id != -1) {
@@ -225,14 +222,14 @@ class _PlayerPageState extends State<PlayerPage> {
               // Slider
               //
               StreamBuilder<Duration?>(
-                stream: audioManager.durationStream,
+                stream: audioManager.getDurationStream(),
                 builder: (context, stream) {
                   double max = stream.data == null
                       ? 2
                       : stream.data!.inSeconds.toDouble();
 
                   return StreamBuilder<Duration>(
-                    stream: audioManager.positionStream,
+                    stream: audioManager.getPositionStream(),
                     builder: (context, snapshot) {
                       double value = snapshot.data == null
                           ? 1
@@ -423,21 +420,21 @@ class _PlayerPageState extends State<PlayerPage> {
                           ),
                         ),
                       ),
-                      StreamBuilder<LoopMode>(
-                        stream: loopmodeStream,
+                      StreamBuilder<PlayMode>(
+                        stream: playModeStream,
                         builder: (context, snapshot) {
-                          LoopMode loopMode = snapshot.data != null
+                          PlayMode loopMode = snapshot.data != null
                               ? snapshot.data!
-                              : LoopMode.all;
+                              : PlayMode.loop;
 
-                          bool isRepeating = loopMode == LoopMode.one;
+                          bool isRepeating = loopMode == PlayMode.repeat;
 
                           return SizedBox(
                             width: 3 * iconSize / 2,
                             child: ElevatedButton(
                               onPressed: () async {
-                                await playlistManager.setLoopMode(
-                                  isRepeating ? LoopMode.all : LoopMode.one,
+                                await playlistManager.setPlayMode(
+                                  isRepeating ? PlayMode.loop : PlayMode.single,
                                 );
                               },
                               style: buttonStyle,

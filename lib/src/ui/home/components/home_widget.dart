@@ -1,4 +1,6 @@
 import 'package:asuka/asuka.dart';
+import 'package:bossa/src/audio/audio_manager.dart';
+import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
@@ -9,7 +11,6 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
-import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
@@ -259,10 +260,9 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget songContainerBuilder(
       SongModel song, PlaylistModel playlistToBePlayed) {
-    final songDataManager = Modular.get<SongDataManager>();
-    final playlistManager = Modular.get<JustPlaylistManager>();
+    final playlistManager = Modular.get<PlaylistAudioManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
-    final audioManager = playlistManager.player;
+    final audioManager = Modular.get<AudioManager>();
 
     return ContentContainer(
       detailContainer: SongSnackbar(

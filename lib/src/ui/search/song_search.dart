@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/audio/audio_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
@@ -39,9 +40,9 @@ class SongSearch {
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentTheme.contrastColor;
 
-    final playlistManager = Modular.get<JustPlaylistManager>();
+    final playlistManager = Modular.get<PlaylistAudioManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
-    final audioManager = playlistManager.player;
+    final audioManager = Modular.get<AudioManager>();
 
     final buttonTextStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
@@ -292,9 +293,9 @@ class SongSearch {
     final contrastColor = colorController.currentTheme.contrastColor;
     final backgroundAccent = colorController.currentTheme.backgroundAccent;
 
-    final playlistManager = Modular.get<JustPlaylistManager>();
+    final playlistManager = Modular.get<PlaylistAudioManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
-    final audioManager = playlistManager.player;
+    final audioManager = Modular.get<AudioManager>();
 
     final buttonTextStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);

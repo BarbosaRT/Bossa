@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:asuka/asuka.dart';
-import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/audio/just_audio_manager.dart';
+import 'package:bossa/src/audio/just_playlist_manager.dart';
+import 'package:bossa/src/audio/vlc_audio_manager.dart';
+import 'package:bossa/src/audio/vlc_playlist_manager.dart';
 import 'package:bossa/src/color/app_colors.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
@@ -22,7 +27,15 @@ class AppModule extends Module {
         Bind((i) => SettingsController()),
         Bind((i) => PlaylistUIController()),
         Bind((i) => HomeController()),
-        Bind((i) => JustPlaylistManager()),
+        Bind(
+          (i) =>
+              Platform.isLinux ? VlcPlaylistManager() : JustPlaylistManager(),
+        ),
+        Bind(
+          (i) => Platform.isLinux
+              ? vlcPlayerManagerInstance
+              : justAudioManagerInstance,
+        ),
         Bind((i) => FilePathImpl()),
         Bind(
           (i) => HttpDownloadService(

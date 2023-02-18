@@ -1,5 +1,6 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/audio/audio_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
@@ -93,10 +94,9 @@ class _LibraryPageState extends State<LibraryPage>
     final backgroundColor = colorController.currentTheme.backgroundColor;
     final backgroundAccent = colorController.currentTheme.backgroundAccent;
 
-    final songDataManager = Modular.get<SongDataManager>();
-    final playlistManager = Modular.get<JustPlaylistManager>();
+    final playlistManager = Modular.get<PlaylistAudioManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
-    final audioManager = playlistManager.player;
+    final audioManager = Modular.get<AudioManager>();
     final homeController = Modular.get<HomeController>();
 
     final headerStyle =
