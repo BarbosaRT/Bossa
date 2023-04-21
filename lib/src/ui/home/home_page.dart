@@ -12,6 +12,7 @@ import 'package:bossa/src/ui/settings/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 
 class HomeController extends ChangeNotifier {
   Pages _currentPage = Pages.home;
@@ -23,7 +24,7 @@ class HomeController extends ChangeNotifier {
   }
 
   PlaylistModel _currentPlaylist =
-      PlaylistModel(id: 0, title: 'Todas as Musicas', icon: 'icon', songs: []);
+      PlaylistModel(id: 0, title: 'all-songs'.i18n(), icon: 'icon', songs: []);
   PlaylistModel get currentPlaylist => _currentPlaylist;
 
   void setPlaylist(PlaylistModel newPlaylist) {
@@ -186,7 +187,7 @@ class _HomePageState extends State<HomePage> {
               color: contrastColor,
               size: iconSize,
             ),
-            'Início',
+            'begin'.i18n(),
           ),
         ),
       ),
@@ -204,7 +205,7 @@ class _HomePageState extends State<HomePage> {
               color: contrastColor,
               size: iconSize,
             ),
-            'Pesquisa',
+            'search'.i18n(),
           ),
         ),
       ),
@@ -221,7 +222,7 @@ class _HomePageState extends State<HomePage> {
               color: contrastColor,
               size: iconSize,
             ),
-            'Sua Biblioteca',
+            'your-library'.i18n(),
           ),
         ),
       ),
@@ -238,7 +239,7 @@ class _HomePageState extends State<HomePage> {
               color: contrastColor,
               size: iconSize,
             ),
-            'Configurações',
+            'config'.i18n(),
           ),
         ),
       ),

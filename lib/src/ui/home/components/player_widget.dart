@@ -26,7 +26,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   double iconSize = UIConsts.iconSize.toDouble();
   bool gradient = true;
   PaletteGenerator? palette;
-  int currentIndex = -1;
+  int currentIndex = -69;
 
   @override
   void initState() {

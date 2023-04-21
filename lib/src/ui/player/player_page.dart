@@ -14,7 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:localization/localization.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'dart:io';
 
 class PlayerPage extends StatefulWidget {
   const PlayerPage({super.key});
@@ -167,6 +169,12 @@ class _PlayerPageState extends State<PlayerPage> {
 
           if (state != currentIndex) {
             currentIndex = state;
+            if (Platform.isLinux && currentSong.path.isEmpty) {
+              // playlistManager.insert(currentIndex, currentSong.url);
+              // Future.delayed(const Duration(seconds: 2)).then((value) {
+              //   playlistManager.removeAt(currentIndex);
+              // });
+            }
             updatePalette(currentSong.icon);
 
             if (currentSong.id != -1) {
@@ -569,7 +577,7 @@ class _PlayerPageState extends State<PlayerPage> {
                       Expanded(
                         child: Center(
                           child: Text(
-                            'Tocando Agora: \n ${playlist.title}',
+                            '${"playing-now".i18n()}: \n ${playlist.title}',
                             style: headerStyle,
                             textAlign: TextAlign.center,
                           ),

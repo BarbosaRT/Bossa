@@ -23,6 +23,7 @@ class VlcPlaylistManager implements PlaylistAudioManager {
   Future<void> add(String path) async {
     final audioSource = vlcPlayerManagerInstance.getMedia(path);
     player.add(audioSource);
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   @override
@@ -83,7 +84,8 @@ class VlcPlaylistManager implements PlaylistAudioManager {
     List<SongModel> songs = playlist.songs.toList();
 
     // Pre-load
-    int length = playlist.songs.length > 2 ? 2 : playlist.songs.length;
+    // TODO: resolver length, não funciona, musica para depois da length
+    int length = playlist.songs.length > 8 ? 8 : playlist.songs.length;
     for (int index = 0; index < length; index++) {
       if (initialIndex + index >= songs.length) {
         break;
@@ -157,8 +159,7 @@ class VlcPlaylistManager implements PlaylistAudioManager {
       // For Highest Bitrate
       var streamInfo = videoManifest.audioOnly.withHighestBitrate();
 
-      youtube.close();
-
+      //youtube.close();
       return Media.network(streamInfo.url);
     }
     return vlcPlayerManagerInstance.getMedia(string);

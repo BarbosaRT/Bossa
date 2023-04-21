@@ -18,6 +18,7 @@ import 'package:bossa/src/url/youtube_url_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class SongSearch {
@@ -51,7 +52,7 @@ class SongSearch {
 
     for (SongModel song in songs) {
       PlaylistModel playlist = PlaylistModel(
-          id: 0, title: 'Todas as Músicas', icon: song.icon, songs: songs);
+          id: 0, title: 'all-songs'.i18n(), icon: song.icon, songs: songs);
       final key = GlobalKey<DetailContainerState>();
       final detailContainer = DetailContainer(
         icon: song.icon,
@@ -74,7 +75,7 @@ class SongSearch {
                 SizedBox(
                   width: UIConsts.iconSize.toDouble() / 2,
                 ),
-                Text('Remover', style: buttonTextStyle),
+                Text('remove'.i18n(), style: buttonTextStyle),
               ]),
             ),
           ),
@@ -101,7 +102,7 @@ class SongSearch {
                 SizedBox(
                   width: UIConsts.iconSize.toDouble() / 2,
                 ),
-                Text('Editar', style: buttonTextStyle),
+                Text('edit'.i18n(), style: buttonTextStyle),
               ]),
             ),
           ),
@@ -225,7 +226,7 @@ class SongSearch {
                 SizedBox(
                   width: UIConsts.iconSize.toDouble() / 2,
                 ),
-                Text('Adicionar Música', style: buttonTextStyle),
+                Text('add-song'.i18n(), style: buttonTextStyle),
               ]),
             ),
           ),
@@ -251,7 +252,7 @@ class SongSearch {
                 SizedBox(
                   width: UIConsts.iconSize.toDouble() / 2,
                 ),
-                Text('Adicionar á uma playlist', style: buttonTextStyle),
+                Text('add-to-playlist'.i18n(), style: buttonTextStyle),
               ]),
             ),
           ),
@@ -305,7 +306,7 @@ class SongSearch {
         backgroundColor: backgroundAccent,
         duration: const Duration(days: 1),
         content: Text(
-          'Carregando a música, por favor aguarde',
+          'loading-song'.i18n(),
           style: buttonTextStyle,
         ),
       ),
@@ -317,7 +318,7 @@ class SongSearch {
 
     song.id = -1;
     PlaylistModel playlist = PlaylistModel(
-        id: 0, title: 'Todas as Músicas', icon: icon, songs: [song]);
+        id: 0, title: 'all-songs'.i18n(), icon: icon, songs: [song]);
 
     audioManager.pause();
     playlistUIController.setPlaylist(playlist);

@@ -17,8 +17,11 @@ import 'package:bossa/src/ui/player/player_page.dart';
 import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:localization/localization.dart';
 
 class AppModule extends Module {
   @override
@@ -114,8 +117,35 @@ class _AppWidgetState extends State<AppWidget> {
   Widget build(BuildContext context) {
     Modular.setObservers([Asuka.asukaHeroController]);
     final colorController = Modular.get<ColorController>();
+    LocalJsonLocalization.delegate.directories = ['assets/i18n'];
+
     return MaterialApp.router(
       builder: Asuka.builder,
+      localizationsDelegates: [
+        // delegate from flutter_localization
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        // delegate from localization package.
+        LocalJsonLocalization.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('pt', 'BR'),
+      ],
+      localeResolutionCallback: (locale, supportedLocales) {
+        if (supportedLocales.contains(locale)) {
+          return locale;
+        }
+
+        // define pt_BR as default when de language code is 'pt'
+        if (locale?.languageCode == 'pt') {
+          return const Locale('pt', 'BR');
+        }
+
+        // default language
+        return const Locale('en', 'US');
+      },
       debugShowCheckedModeBanner: false,
       title: 'Bossa',
       theme: ThemeData(

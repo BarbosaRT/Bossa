@@ -61,4 +61,17 @@ class DataManager {
     );
     return _db!;
   }
+
+  Future<sql.Database> reloadDatabase() async {
+    final databasePath = await getDatabasePath();
+    print(databasePath);
+    _db = await sql.openDatabase(
+      databasePath,
+      version: 1,
+      onCreate: (sql.Database openDatabase, int version) async {
+        await createTables(openDatabase);
+      },
+    );
+    return _db!;
+  }
 }

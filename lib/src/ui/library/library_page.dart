@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -116,7 +117,7 @@ class _LibraryPageState extends State<LibraryPage>
     for (SongModel song in songs) {
       PlaylistModel playlist = PlaylistModel(
           id: 0,
-          title: 'Todas as Músicas',
+          title: 'all-songs'.i18n(),
           icon: song.icon,
           songs: songs.toList());
 
@@ -184,7 +185,7 @@ class _LibraryPageState extends State<LibraryPage>
                 padding: const EdgeInsets.all(8.0),
                 child: ContentContainer(
                     title: playlist.title,
-                    author: '${playlist.songs.length} músicas',
+                    author: '${playlist.songs.length} ${"songs".i18n()}',
                     icon: playlist.icon,
                     imagesSize: size.width / 2 - x * 0.5,
                     textWidth: size.width / 2 - x * 0.5,
@@ -207,7 +208,7 @@ class _LibraryPageState extends State<LibraryPage>
               )
             : LibraryContentContainer(
                 title: playlist.title,
-                author: '${playlist.songs.length} músicas',
+                author: '${playlist.songs.length} ${"songs".i18n()}',
                 detailContainer: PlaylistSnackbar(
                   playlist: playlist,
                   callback: () {
@@ -244,7 +245,7 @@ class _LibraryPageState extends State<LibraryPage>
             padding: EdgeInsets.symmetric(horizontal: x / 2),
             child: Row(
               children: [
-                Text('Sua Biblioteca', style: headerStyle),
+                Text('your-library'.i18n(), style: headerStyle),
                 const Spacer(
                   flex: 1,
                 ),
@@ -330,7 +331,7 @@ class _LibraryPageState extends State<LibraryPage>
                                   ),
                                   child: Center(
                                     child: Text(
-                                      'Músicas',
+                                      'songs'.i18n(),
                                       style: headerStyle.copyWith(
                                         color: (currentTab == 0 && isContrast)
                                             ? backgroundColor

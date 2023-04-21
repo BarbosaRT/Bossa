@@ -9,6 +9,7 @@ import 'package:bossa/src/ui/song/song_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 
 class SongSnackbar extends StatefulWidget {
   final SongModel song;
@@ -70,7 +71,7 @@ class _SongSnackbarState extends State<SongSnackbar> {
               SizedBox(
                 width: iconSize / 2,
               ),
-              Text('Remover', style: buttonStyle),
+              Text('remove'.i18n(), style: buttonStyle),
             ]),
           ),
         ),
@@ -97,7 +98,7 @@ class _SongSnackbarState extends State<SongSnackbar> {
               SizedBox(
                 width: iconSize / 2,
               ),
-              Text('Editar', style: buttonStyle),
+              Text('edit'.i18n(), style: buttonStyle),
             ]),
           ),
         ),
@@ -124,7 +125,7 @@ class _SongSnackbarState extends State<SongSnackbar> {
               SizedBox(
                 width: iconSize / 2,
               ),
-              Text('Adicionar à playlist', style: buttonStyle),
+              Text('add-to-playlist'.i18n(), style: buttonStyle),
             ]),
           ),
         ),

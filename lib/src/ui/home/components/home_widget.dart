@@ -19,6 +19,7 @@ import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/playlist/playlist_add_page.dart';
 import 'package:bossa/src/ui/song/song_add_page.dart';
 import 'package:bossa/src/url/youtube_url_add_page.dart';
+import 'package:localization/localization.dart';
 
 class AddWidget extends StatefulWidget {
   const AddWidget({super.key});
@@ -133,9 +134,9 @@ class _AddWidgetState extends State<AddWidget> {
           ),
         );
       },
-      addText: 'Adicionar música',
-      fromYoutubeText: 'Adicionar música do Youtube',
-      fromFileText: 'Adicionar música de um arquivo',
+      addText: 'add-song'.i18n(),
+      fromYoutubeText: 'add-song-yt'.i18n(),
+      fromFileText: 'add-song-file'.i18n(),
       onYoutubePress: (ctx) {
         Navigator.of(ctx).pop();
         Navigator.of(ctx).pop();
@@ -159,9 +160,9 @@ class _AddWidgetState extends State<AddWidget> {
           ),
         );
       },
-      addText: 'Adicionar playlist',
-      fromYoutubeText: 'Adicionar playlist do Youtube',
-      fromFileText: 'Criar uma nova playlist',
+      addText: 'add-playlist'.i18n(),
+      fromYoutubeText: 'add-playlist-yt'.i18n(),
+      fromFileText: 'create-playlist'.i18n(),
       onYoutubePress: (ctx) {
         Navigator.of(ctx).pop();
         Navigator.of(ctx).pop();
@@ -306,7 +307,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     for (SongModel song in songs) {
       PlaylistModel playlist = PlaylistModel(
           id: 0,
-          title: 'Todas as Músicas',
+          title: 'all-songs'.i18n(),
           icon: song.icon,
           songs: songs.toList());
       songContainers.add(songContainerBuilder(song, playlist));
@@ -344,7 +345,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       songsForPlaylist.insert(0, song);
       PlaylistModel playlist = PlaylistModel(
           id: 0,
-          title: 'Todas as Músicas',
+          title: 'all-songs'.i18n(),
           icon: song.icon,
           songs: songsForPlaylist);
       songsSortedWidgets.add(songContainerBuilder(song, playlist));
@@ -365,7 +366,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   SizedBox(
                     width: x / 2,
                   ),
-                  Text('Bem-vindo', style: headerStyle),
+                  Text('welcome'.i18n(), style: headerStyle),
                 ],
               ),
             ),
@@ -392,7 +393,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Recem Adicionados', style: textStyle),
+                          Text('recent-added'.i18n(), style: textStyle),
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
@@ -436,7 +437,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Músicas mais ouvidas',
+                            'more-listened'.i18n(),
                             style: textStyle,
                             maxLines: 2,
                           ),
