@@ -1,4 +1,5 @@
 import 'package:bossa/src/audio/audio_manager.dart';
+import 'package:bossa/src/audio/just_audio_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -25,7 +26,7 @@ void main() {
       AudioManager audioManager = JustAudioManager();
       audioManager.load(testSongUrl);
       audioManager.play();
-      Duration? position = audioManager.getPosition();
+      Duration? position = await audioManager.getPosition();
       expect(position, isNotNull);
 
       Duration duration = const Duration(seconds: 10);

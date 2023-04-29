@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -263,25 +264,32 @@ class _SearchPageState extends State<SearchPage>
       );
     }
     if (gridEnabled) {
-      songWidget = AlignedGridView.count(
-        crossAxisCount: 2,
-        itemCount: songContainers.length,
-        itemBuilder: (context, index) {
-          return songContainers[index];
-        },
+      songWidget = Padding(
+        padding: EdgeInsets.symmetric(horizontal: UIConsts.spacing * 0.25),
+        child: AlignedGridView.count(
+          crossAxisCount: 2,
+          itemCount: songContainers.length,
+          itemBuilder: (context, index) {
+            return songContainers[index];
+          },
+        ),
       );
 
-      playlistWidget = AlignedGridView.count(
-        crossAxisCount: 2,
-        itemCount: playlistList.length,
-        itemBuilder: (context, index) {
-          return playlistContainers[index];
-        },
+      playlistWidget = Padding(
+        padding: EdgeInsets.symmetric(horizontal: UIConsts.spacing * 0.25),
+        child: AlignedGridView.count(
+          crossAxisCount: 2,
+          itemCount: playlistList.length,
+          itemBuilder: (context, index) {
+            return playlistContainers[index];
+          },
+        ),
       );
     }
 
     bool isContrast = ContrastCheck().contrastCheck(accentColor, contrastColor);
-    double tabHeight = 50.0;
+    double tabHeight = 10.0;
+    double widgetHeight = 45.0;
 
     bool isHorizontal = size.width > size.height;
     double width =
@@ -305,7 +313,8 @@ class _SearchPageState extends State<SearchPage>
                 ),
                 Padding(
                   padding: EdgeInsets.only(left: x / 2),
-                  child: Text(searchLibrary ? 'Buscar na Biblioteca' : 'Buscar',
+                  child: Text(
+                      searchLibrary ? 'search-library'.i18n() : 'search'.i18n(),
                       style: headerStyle),
                 ),
                 SizedBox(
@@ -322,7 +331,7 @@ class _SearchPageState extends State<SearchPage>
                       child: TextField(
                         controller: urlTextController,
                         decoration: InputDecoration(
-                          hintText: 'O que você quer ouvir?',
+                          hintText: 'what-listen'.i18n(),
                           hintStyle: titleStyle,
                           isDense: true,
                           helperMaxLines: 1,
@@ -378,7 +387,9 @@ class _SearchPageState extends State<SearchPage>
                                 preferredSize: Size.fromHeight(tabHeight),
                                 child: Container(
                                   margin: EdgeInsets.only(
-                                      bottom: tabHeight * 0.5 + iconSize),
+                                    bottom: 10,
+                                    right: iconSize * 1.5,
+                                  ),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15),
                                     color: backgroundAccent,
@@ -403,18 +414,19 @@ class _SearchPageState extends State<SearchPage>
                                     ),
                                     tabs: [
                                       Container(
-                                        width: (width - x / 2) / 2,
-                                        height: 50,
+                                        width:
+                                            (width - x) / 2 - iconSize * 0.75,
+                                        height: widgetHeight,
                                         decoration: BoxDecoration(
                                           borderRadius:
-                                              BorderRadius.circular(15),
+                                              BorderRadius.circular(10),
                                           color: _tabController.index == 0
                                               ? accentColor
                                               : backgroundAccent,
                                         ),
                                         child: Center(
                                           child: Text(
-                                            'Musicas',
+                                            'songs'.i18n(),
                                             style: headerStyle.copyWith(
                                               color: (currentTab == 0 &&
                                                       isContrast)
@@ -425,11 +437,12 @@ class _SearchPageState extends State<SearchPage>
                                         ),
                                       ),
                                       Container(
-                                        width: (width - x / 2) / 2,
-                                        height: 50,
+                                        width:
+                                            (width - x) / 2 - iconSize * 0.75,
+                                        height: widgetHeight,
                                         decoration: BoxDecoration(
                                           borderRadius:
-                                              BorderRadius.circular(15),
+                                              BorderRadius.circular(10),
                                           color: _tabController.index == 1
                                               ? accentColor
                                               : backgroundAccent,
@@ -466,8 +479,8 @@ class _SearchPageState extends State<SearchPage>
                       // Filters
                       //
                       Positioned(
-                        top: tabHeight + iconSize * 0.25,
-                        left: UIConsts.spacing,
+                        top: iconSize / 2,
+                        left: UIConsts.spacing + 10,
                         child: FilterWidget(
                           enableDropbutton: searchLibrary,
                           isSong: currentTab == 0,

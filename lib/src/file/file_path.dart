@@ -37,7 +37,7 @@ class FilePathImpl extends FilePath {
       if (directory != null) {
         output = directory.path;
       } else {
-        directory = Directory('/storage/emulated/0/Bossa');
+        directory = Directory('/storage/emulated/0/');
         await directory.create();
         output = directory.path;
       }

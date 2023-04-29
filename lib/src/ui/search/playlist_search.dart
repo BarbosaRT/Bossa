@@ -17,6 +17,7 @@ import 'package:bossa/src/url/youtube_url_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class PlaylistSearch {
@@ -159,7 +160,7 @@ class PlaylistSearch {
                 SizedBox(
                   width: UIConsts.iconSize.toDouble() / 2,
                 ),
-                Text('Adicionar playlist', style: buttonTextStyle),
+                Text('add-playlist'.i18n(), style: buttonTextStyle),
               ]),
             ),
           ),
@@ -172,7 +173,7 @@ class PlaylistSearch {
                 padding: const EdgeInsets.all(8.0),
                 child: ContentContainer(
                   title: playlist.title,
-                  author: '${playlist.songs.length} músicas',
+                  author: '${playlist.songs.length} ${"songs".i18n()}',
                   icon: playlist.icon,
                   imagesSize: size.width / 2 - UIConsts.spacing * 0.5,
                   textWidth: size.width / 2 - UIConsts.spacing * 0.5,
@@ -187,7 +188,7 @@ class PlaylistSearch {
                 padding: EdgeInsets.symmetric(horizontal: UIConsts.spacing / 2),
                 child: LibraryContentContainer(
                   title: playlist.title,
-                  author: '${playlist.songs.length} músicas',
+                  author: '${playlist.songs.length} ${"songs".i18n()}',
                   detailContainer: detailContainer,
                   onTap: () async {
                     await onYoutubeTap(playlist.songs.length, playlist);
@@ -215,7 +216,7 @@ class PlaylistSearch {
         backgroundColor: backgroundAccent,
         duration: const Duration(days: 1),
         content: Text(
-          'Carregando a playlist, por favor aguarde',
+          'loading-playlist'.i18n(),
           style: buttonTextStyle,
         ),
       ),
@@ -242,7 +243,7 @@ class PlaylistSearch {
             }
             final progress = ((downloaded / videoCount) * 100).toInt();
             return Text(
-              'Carregando a playlist, progresso ($downloaded / $videoCount): $progress%',
+              '${"progress-playlist".i18n()} ($downloaded / $videoCount): $progress%',
               style: buttonTextStyle,
             );
           },

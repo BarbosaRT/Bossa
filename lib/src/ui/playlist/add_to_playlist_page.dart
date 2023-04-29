@@ -10,6 +10,7 @@ import 'package:bossa/src/ui/playlist/playlist_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 
 class AddToPlaylistPage extends StatefulWidget {
   final SongModel song;
@@ -54,7 +55,7 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
       videoContainers.add(
         LibraryContentContainer(
           title: playlist.title,
-          author: '${playlist.songs.length} músicas',
+          author: '${playlist.songs.length} ${"songs".i18n()}',
           useDetail: false,
           detailContainer: Container(),
           onTap: () async {
@@ -95,7 +96,7 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
       onPressed: () async {
         PlaylistModel playlist = PlaylistModel(
           id: 0,
-          title: 'Nova Playlist',
+          title: 'new-playlist'.i18n(),
           icon: widget.song.icon,
           songs: [
             widget.song,
@@ -112,7 +113,7 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
         );
       },
       child: Text(
-        'Criar uma nova playlist',
+        'create-playlist'.i18n(),
         style: titleStyle,
       ),
     );
@@ -149,7 +150,7 @@ class _AddToPlaylistPageState extends State<AddToPlaylistPage> {
             ),
           ),
         ),
-        title: Text('Adicionar à playlist', style: headerStyle),
+        title: Text('add-to-playlist'.i18n(), style: headerStyle),
       ),
       body: GestureDetector(
         onTap: () {

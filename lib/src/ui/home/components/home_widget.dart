@@ -1,16 +1,16 @@
 import 'package:asuka/asuka.dart';
+import 'package:bossa/src/audio/audio_manager.dart';
+import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
-import 'package:bossa/src/ui/components/detail_container.dart';
 import 'package:bossa/src/ui/home/home_page.dart';
-import 'package:bossa/src/ui/playlist/add_to_playlist_page.dart';
 import 'package:bossa/src/ui/playlist/components/playlist_snackbar.dart';
+import 'package:bossa/src/ui/song/song_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
-import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
@@ -19,6 +19,7 @@ import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/playlist/playlist_add_page.dart';
 import 'package:bossa/src/ui/song/song_add_page.dart';
 import 'package:bossa/src/url/youtube_url_add_page.dart';
+import 'package:localization/localization.dart';
 
 class AddWidget extends StatefulWidget {
   const AddWidget({super.key});
@@ -133,9 +134,9 @@ class _AddWidgetState extends State<AddWidget> {
           ),
         );
       },
-      addText: 'Adicionar música',
-      fromYoutubeText: 'Adicionar música do Youtube',
-      fromFileText: 'Adicionar música de um arquivo',
+      addText: 'add-song'.i18n(),
+      fromYoutubeText: 'add-song-yt'.i18n(),
+      fromFileText: 'add-song-file'.i18n(),
       onYoutubePress: (ctx) {
         Navigator.of(ctx).pop();
         Navigator.of(ctx).pop();
@@ -159,9 +160,9 @@ class _AddWidgetState extends State<AddWidget> {
           ),
         );
       },
-      addText: 'Adicionar playlist',
-      fromYoutubeText: 'Adicionar playlist do Youtube',
-      fromFileText: 'Criar uma nova playlist',
+      addText: 'add-playlist'.i18n(),
+      fromYoutubeText: 'add-playlist-yt'.i18n(),
+      fromFileText: 'create-playlist'.i18n(),
       onYoutubePress: (ctx) {
         Navigator.of(ctx).pop();
         Navigator.of(ctx).pop();
@@ -260,101 +261,16 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget songContainerBuilder(
       SongModel song, PlaylistModel playlistToBePlayed) {
-    final size = MediaQuery.of(context).size;
-    final songDataManager = Modular.get<SongDataManager>();
-    final playlistManager = Modular.get<JustPlaylistManager>();
+    final playlistManager = Modular.get<PlaylistAudioManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
-    final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentTheme.contrastColor;
-    final audioManager = playlistManager.player;
-    final buttonStyle =
-        TextStyles().boldHeadline2.copyWith(color: contrastColor);
-
-    final key = GlobalKey<DetailContainerState>();
+    final audioManager = Modular.get<AudioManager>();
 
     return ContentContainer(
-      detailContainer: DetailContainer(
-        icon: song.icon,
-        key: key,
-        actions: [
-          SizedBox(
-            width: size.width,
-            height: 30,
-            child: GestureDetector(
-              onTap: () {
-                key.currentState?.pop();
-                songDataManager.removeSong(song);
-                loadSongs();
-              },
-              child: Row(children: [
-                FaIcon(
-                  FontAwesomeIcons.trash,
-                  size: iconSize,
-                  color: contrastColor,
-                ),
-                SizedBox(
-                  width: iconSize / 2,
-                ),
-                Text('Remover', style: buttonStyle),
-              ]),
-            ),
-          ),
-          SizedBox(
-            width: size.width,
-            height: 30,
-            child: GestureDetector(
-              onTap: () {
-                key.currentState?.pop();
-                Modular.to.push(
-                  MaterialPageRoute(
-                    builder: (context) => SongAddPage(
-                      songToBeEdited: song,
-                    ),
-                  ),
-                );
-              },
-              child: Row(children: [
-                FaIcon(
-                  FontAwesomeIcons.penToSquare,
-                  size: iconSize,
-                  color: contrastColor,
-                ),
-                SizedBox(
-                  width: iconSize / 2,
-                ),
-                Text('Editar', style: buttonStyle),
-              ]),
-            ),
-          ),
-          SizedBox(
-            width: size.width,
-            height: 30,
-            child: GestureDetector(
-              onTap: () {
-                key.currentState?.pop();
-                Modular.to.push(
-                  MaterialPageRoute(
-                    builder: (context) => AddToPlaylistPage(
-                      song: song,
-                    ),
-                  ),
-                );
-              },
-              child: Row(children: [
-                FaIcon(
-                  FontAwesomeIcons.circlePlus,
-                  size: iconSize,
-                  color: contrastColor,
-                ),
-                SizedBox(
-                  width: iconSize / 2,
-                ),
-                Text('Adicionar à playlist', style: buttonStyle),
-              ]),
-            ),
-          ),
-        ],
-        title: song.title,
+      detailContainer: SongSnackbar(
+        song: song,
+        callback: () {
+          loadSongs();
+        },
       ),
       onTap: () {
         Modular.to.popUntil(ModalRoute.withName('/'));
@@ -391,7 +307,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     for (SongModel song in songs) {
       PlaylistModel playlist = PlaylistModel(
           id: 0,
-          title: 'Todas as Músicas',
+          title: 'all-songs'.i18n(),
           icon: song.icon,
           songs: songs.toList());
       songContainers.add(songContainerBuilder(song, playlist));
@@ -429,7 +345,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       songsForPlaylist.insert(0, song);
       PlaylistModel playlist = PlaylistModel(
           id: 0,
-          title: 'Todas as Músicas',
+          title: 'all-songs'.i18n(),
           icon: song.icon,
           songs: songsForPlaylist);
       songsSortedWidgets.add(songContainerBuilder(song, playlist));
@@ -450,7 +366,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   SizedBox(
                     width: x / 2,
                   ),
-                  Text('Bem-vindo', style: headerStyle),
+                  Text('welcome'.i18n(), style: headerStyle),
                 ],
               ),
             ),
@@ -477,7 +393,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Recem Adicionados', style: textStyle),
+                          Text('recent-added'.i18n(), style: textStyle),
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
@@ -521,7 +437,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Músicas mais ouvidas',
+                            'more-listened'.i18n(),
                             style: textStyle,
                             maxLines: 2,
                           ),

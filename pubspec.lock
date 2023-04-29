@@ -57,6 +57,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.13"
+  audio_video_progress_bar:
+    dependency: transitive
+    description:
+      name: audio_video_progress_bar
+      sha256: "7be62917604e19e3873e12c8025bbc6dbee5876e1fa4cd7772ea1d0eb0e88d99"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -145,14 +153,32 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.17.2"
-  eventify:
-    dependency: transitive
+  dart_vlc:
+    dependency: "direct main"
     description:
-      name: eventify
-      sha256: b829429f08586cc2001c628e7499e3e3c2493a1d895fd73b00ecb23351aa5a66
+      path: "."
+      ref: master
+      resolved-ref: "41292eda1b357578e3e2b6b3abd927eb690e98e4"
+      url: "https://github.com/alexmercerind/dart_vlc.git"
+    source: git
+    version: "0.4.0"
+  dart_vlc_ffi:
+    dependency: "direct overridden"
+    description:
+      path: ffi
+      ref: master
+      resolved-ref: "41292eda1b357578e3e2b6b3abd927eb690e98e4"
+      url: "https://github.com/alexmercerind/dart_vlc.git"
+    source: git
+    version: "0.2.0"
+  dio:
+    dependency: "direct main"
+    description:
+      name: dio
+      sha256: "7d328c4d898a61efc3cd93655a0955858e29a0aa647f0f9e02d59b3bb275e2e8"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "4.0.6"
   fake_async:
     dependency: transitive
     description:
@@ -214,6 +240,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+  flutter_localizations:
+    dependency: "direct main"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_modular:
     dependency: "direct main"
     description:
@@ -312,6 +343,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.13"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "910f85bce16fb5c6f614e117efa303e85a1731bb0081edf3604a2ae6e9a3cc91"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.17.0"
   js:
     dependency: transitive
     description:
@@ -344,14 +383,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.1-beta.9"
-  just_audio_mpv:
-    dependency: "direct main"
-    description:
-      name: just_audio_mpv
-      sha256: "98ac36712f3fe4fb0cf545f29c250fbd55e52c8445a4b0a4ee0bc9322f192797"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.6"
   just_audio_platform_interface:
     dependency: transitive
     description:
@@ -376,6 +407,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+  localization:
+    dependency: "direct main"
+    description:
+      name: localization
+      sha256: "01d892155364dc456e1141dd8003e43c98d457f2b51fe1b8984766bad2a3fd72"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   matcher:
     dependency: transitive
     description:
@@ -416,14 +455,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
-  mpv_dart:
-    dependency: transitive
-    description:
-      name: mpv_dart
-      sha256: a33bd9a68439b496b7a5f36fecd3aa3cf6cbf0176ae15b9b60b12ae96e58f5a4
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1"
   octo_image:
     dependency: transitive
     description:
