@@ -1,6 +1,7 @@
 import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/audio/audio_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
@@ -17,6 +18,7 @@ import 'package:bossa/src/ui/song/song_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:text_scroll/text_scroll.dart';
 
@@ -45,7 +47,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
   }
 
   PlaylistModel playlist =
-      PlaylistModel(id: 0, title: 'Titulo', icon: 'icon', songs: []);
+      PlaylistModel(id: 0, title: 'title'.i18n(), icon: 'icon', songs: []);
 
   @override
   void initState() {
@@ -96,11 +98,11 @@ class _PlaylistPageState extends State<PlaylistPage> {
 
     final titleStyle = TextStyles().boldHeadline.copyWith(color: contrastColor);
     final songDataManager = Modular.get<SongDataManager>();
-    final playlistManager = Modular.get<JustPlaylistManager>();
+    final playlistManager = Modular.get<PlaylistAudioManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
     final settingsController = Modular.get<SettingsController>();
     final homeController = Modular.get<HomeController>();
-    final audioManager = playlistManager.player;
+    final audioManager = Modular.get<AudioManager>();
 
     if (settingsController.gradient != gradient) {
       gradient = settingsController.gradient;
@@ -156,7 +158,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                     SizedBox(
                       width: iconSize / 2,
                     ),
-                    Text('Remover', style: buttonTextStyle),
+                    Text('remove'.i18n(), style: buttonTextStyle),
                   ]),
                 ),
               ),
@@ -183,7 +185,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                     SizedBox(
                       width: iconSize / 2,
                     ),
-                    Text('Editar', style: buttonTextStyle),
+                    Text('edit'.i18n(), style: buttonTextStyle),
                   ]),
                 ),
               ),

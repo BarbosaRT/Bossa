@@ -1,4 +1,5 @@
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/audio/audio_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
@@ -10,7 +11,6 @@ import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:text_scroll/text_scroll.dart';
 
@@ -26,7 +26,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   double iconSize = UIConsts.iconSize.toDouble();
   bool gradient = true;
   PaletteGenerator? palette;
-  int currentIndex = -1;
+  int currentIndex = -69;
 
   @override
   void initState() {
@@ -61,8 +61,8 @@ class _PlayerWidgetState extends State<PlayerWidget> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final playlistManager = Modular.get<JustPlaylistManager>();
-    final audioManager = playlistManager.player;
+    final playlistManager = Modular.get<PlaylistAudioManager>();
+    final audioManager = Modular.get<AudioManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
 
     final buttonStyle = ButtonStyle(
@@ -79,21 +79,20 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     final backgroundAccent = colorController.currentTheme.backgroundAccent;
     final backgroundColor = colorController.currentTheme.backgroundColor;
 
-    Stream<bool> playingStream = playlistManager.player.playingStream;
-    Stream<SequenceState?> songsStream =
-        playlistManager.player.sequenceStateStream;
+    Stream<bool> playingStream = audioManager.playingStream();
+    Stream<int?> songsStream = playlistManager.indexesStream();
 
     return StreamBuilder<bool>(
       stream: playingStream,
       builder: (context, snapshot) {
         bool playing = snapshot.data != null ? snapshot.data! : false;
         return playlistUIController.hasPlayedOnce
-            ? StreamBuilder<SequenceState?>(
+            ? StreamBuilder<int?>(
                 stream: songsStream,
                 builder: (context, snapshot) {
                   SongModel currentSong =
                       playlistUIController.playlist.songs[0];
-                  SequenceState? state = snapshot.data;
+                  int? state = snapshot.data;
 
                   bool isHorizontal = size.width > size.height;
                   Color gradientColor = backgroundAccent;
@@ -120,10 +119,9 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                       .copyWith(color: finalContrastAccent);
 
                   if (state != null) {
-                    currentSong =
-                        playlistUIController.playlist.songs[state.currentIndex];
-                    if (state.currentIndex != currentIndex) {
-                      currentIndex = state.currentIndex;
+                    currentSong = playlistUIController.playlist.songs[state];
+                    if (state != currentIndex) {
+                      currentIndex = state;
                       updatePalette(currentSong.icon);
                     }
                   }

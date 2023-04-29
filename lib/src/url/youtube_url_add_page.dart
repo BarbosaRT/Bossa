@@ -12,6 +12,7 @@ import 'package:bossa/src/ui/playlist/playlist_add_page.dart';
 import 'package:bossa/src/ui/song/song_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:localization/localization.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class YoutubeUrlAddPage extends StatefulWidget {
@@ -56,14 +57,14 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
 
     final textStyle = TextStyles().boldHeadline2.copyWith(color: contrastColor);
 
-    String content = widget.isSong ? 'música' : 'playlist';
+    String content = widget.isSong ? 'song'.i18n() : 'playlist';
 
     Asuka.showSnackBar(
       SnackBar(
         backgroundColor: snackbarColor,
         duration: const Duration(days: 1),
         content: Text(
-          'Carregando a $content',
+          '${"loading-content".i18n()} $content',
           style: textStyle,
         ),
       ),
@@ -97,7 +98,7 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
                   snapshot.data != null ? snapshot.data!.songs.length : 0;
               final progress = ((downloaded / videoCount) * 100).toInt();
               return Text(
-                'Progresso ($downloaded / $videoCount): $progress%',
+                '${"progress".i18n()} ($downloaded / $videoCount): $progress%',
                 style: textStyle,
               );
             },
@@ -116,7 +117,7 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
       SnackBar(
         backgroundColor: snackbarColor,
         content: Text(
-          'A $content foi carregada com sucesso',
+          '$content ${"sucessful-loading".i18n()}',
           style: textStyle,
         ),
       ),
@@ -168,7 +169,7 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
     TextStyle buttonStyle =
         TextStyles().headline3.copyWith(color: contrastColor);
 
-    String content = widget.isSong ? 'música' : 'playlist';
+    String content = widget.isSong ? 'song'.i18n() : 'playlist';
 
     return Scaffold(
       body: Container(
@@ -192,7 +193,7 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
               SizedBox(
                 width: size.width,
                 child: Text(
-                  'Insira a url da $content',
+                  '${"insert-url".i18n()} $content',
                   style: headerStyle,
                   textAlign: TextAlign.center,
                 ),
@@ -228,7 +229,7 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
                       Modular.to.popUntil(ModalRoute.withName('/'));
                     },
                     child: Text(
-                      'CANCELAR',
+                      'cancel'.i18n(),
                       style: buttonStyle,
                     ),
                   ),
@@ -237,7 +238,7 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
                       addCommand(urlTextController.text);
                     },
                     child: Text(
-                      'ADICIONAR',
+                      'add'.i18n(),
                       style: buttonStyle,
                     ),
                   ),

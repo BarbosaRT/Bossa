@@ -15,6 +15,7 @@ import 'package:bossa/src/ui/playlist/playlist_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class PlaylistSnackbar extends StatefulWidget {
@@ -106,7 +107,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               SizedBox(
                 width: iconSize / 2,
               ),
-              Text('Remover', style: buttonStyle),
+              Text('remove'.i18n(), style: buttonStyle),
             ]),
           ),
         ),
@@ -133,7 +134,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               SizedBox(
                 width: iconSize / 2,
               ),
-              Text('Editar', style: buttonStyle),
+              Text('edit'.i18n(), style: buttonStyle),
             ]),
           ),
         ),
@@ -159,7 +160,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               SizedBox(
                 width: iconSize / 2,
               ),
-              Text('Remover todas as músicas da playlist', style: buttonStyle),
+              Text('remove-all-songs-playlist'.i18n(), style: buttonStyle),
             ]),
           ),
         ),
@@ -179,7 +180,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
                     backgroundColor: backgroundAccent,
                     duration: const Duration(days: 1),
                     content: Text(
-                      'Excluindo os arquivos das músicas, aguarde',
+                      'removing-songs'.i18n(),
                       style: authorStyle,
                     ),
                   ),
@@ -221,7 +222,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
                   SnackBar(
                     backgroundColor: accentColor,
                     content: Text(
-                      'Arquivos removidos com sucesso',
+                      'success-remove'.i18n(),
                       style: authorStyle,
                     ),
                   ),
@@ -254,7 +255,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
                           ((downloaded / widget.playlist.songs.length) * 100)
                               .toInt();
                       return Text(
-                        'Baixando as músicas, progresso ($downloaded / ${widget.playlist.songs.length}):  $progress%',
+                        '${"progress-playlist".i18n()} ($downloaded / ${widget.playlist.songs.length}):  $progress%',
                         style: authorStyle,
                       );
                     },
@@ -280,7 +281,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
                 SnackBar(
                   backgroundColor: accentColor,
                   content: Text(
-                    'Músicas baixadas com sucesso',
+                    'sucessful-download'.i18n(),
                     style: authorStyle,
                   ),
                 ),
@@ -302,7 +303,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               SizedBox(
                 width: iconSize / 2,
               ),
-              Text('Disponivel Offline', style: buttonStyle),
+              Text('avaliable-offline'.i18n(), style: buttonStyle),
             ]),
           ),
         ),

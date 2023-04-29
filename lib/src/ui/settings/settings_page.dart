@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:asuka/asuka.dart';
+import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/app_colors.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/data_manager.dart';
@@ -11,6 +12,7 @@ import 'package:bossa/src/url/download_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:localization/localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -49,6 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<bool> saveDatabase() async {
+    await FilePicker.platform.clearTemporaryFiles();
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.any,
     );
@@ -58,6 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
       if (file.path!.endsWith('.db')) {
         String databasePath = await dataManagerInstance.getDatabasePath();
         await File(file.path!).copy(databasePath);
+        dataManagerInstance.reloadDatabase();
         return true;
       }
     }
@@ -101,7 +105,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 SizedBox(
                   width: x / 2,
                 ),
-                Text('Configurações', style: headerStyle),
+                Text('config'.i18n(), style: headerStyle),
               ],
             ),
             Row(
@@ -109,7 +113,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 SizedBox(
                   width: x / 2,
                 ),
-                Text('Usar gradiente', style: settingStyle),
+                Text('use-gradient'.i18n(), style: settingStyle),
                 const Spacer(),
                 Switch(
                   value: gradient,
@@ -136,7 +140,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 SizedBox(
                   width: x / 2,
                 ),
-                Text('Cor principal', style: settingStyle),
+                Text('main-color'.i18n(), style: settingStyle),
                 const Spacer(),
                 for (Color color in AccentColors().listOfColors)
                   Radio<Color>(
@@ -165,18 +169,18 @@ class _SettingsPageState extends State<SettingsPage> {
                 SizedBox(
                   width: x / 2,
                 ),
-                Text('Mudar tema', style: settingStyle),
+                Text('change-theme'.i18n(), style: settingStyle),
                 const Spacer(),
                 DropdownButton<AppColors>(
                   dropdownColor: backgroundColor,
                   items: [
                     DropdownMenuItem<DarkTheme>(
                       value: DarkTheme(),
-                      child: Text('Tema Escuro', style: settingStyle),
+                      child: Text('dark-theme'.i18n(), style: settingStyle),
                     ),
                     DropdownMenuItem<LightTheme>(
                       value: LightTheme(),
-                      child: Text('Tema Claro', style: settingStyle),
+                      child: Text('light-theme'.i18n(), style: settingStyle),
                     ),
                   ],
                   onChanged: (v) async {
@@ -201,7 +205,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 SizedBox(
                   width: x / 2,
                 ),
-                Text('Verificar Updates', style: settingStyle),
+                Text('verify-update'.i18n(), style: settingStyle),
                 const Spacer(),
                 ElevatedButton(
                   onPressed: () async {
@@ -234,7 +238,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 },
                                 style: buttonStyle,
                                 child: Text(
-                                  'Update encontrado, aperte para ir à pagina de downloads',
+                                  'update-found'.i18n(),
                                   style: settingStyle.copyWith(
                                     color: Colors.blue,
                                   ),
@@ -264,7 +268,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
-                                'Não foi encontrado nenhum update',
+                                'update-not-found'.i18n(),
                                 style: settingStyle,
                                 textAlign: TextAlign.center,
                               ),
@@ -275,7 +279,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     }
                   },
                   child: Text(
-                    'Verificar',
+                    'verify'.i18n(),
                     style: settingStyle,
                   ),
                 ),
@@ -311,7 +315,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             child: Padding(
                               padding: const EdgeInsets.all(15.0),
                               child: Text(
-                                'Backup carregado com sucesso',
+                                'backup-loaded'.i18n(),
                                 style: settingStyle,
                                 textAlign: TextAlign.center,
                               ),
@@ -337,7 +341,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             child: Padding(
                               padding: const EdgeInsets.all(15.0),
                               child: Text(
-                                'Houve um erro, tente novamente',
+                                'error'.i18n(),
                                 style: settingStyle,
                                 textAlign: TextAlign.center,
                               ),
@@ -348,7 +352,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     }
                   },
                   child: Text(
-                    'Importar',
+                    'import'.i18n(),
                     style: settingStyle,
                   ),
                 ),
@@ -368,7 +372,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           await FilePathImpl().getExternalDirectory();
                     } else if (!Platform.isIOS) {
                       String? outputFile = await FilePicker.platform.saveFile(
-                        dialogTitle: 'Selecione uma pasta:',
+                        dialogTitle: '${"select-dir".i18n()}:',
                         fileName: dataManagerInstance.databaseName,
                       );
 
@@ -396,7 +400,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(15.0),
                             child: Text(
-                              'Backup salvo em: $externalDirectory/${dataManagerInstance.databaseName}',
+                              '${"backup-saved".i18n()}: $externalDirectory/${dataManagerInstance.databaseName}',
                               style: settingStyle,
                               textAlign: TextAlign.center,
                             ),
@@ -406,7 +410,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     );
                   },
                   child: Text(
-                    'Exportar',
+                    'export'.i18n(),
                     style: settingStyle,
                   ),
                 ),

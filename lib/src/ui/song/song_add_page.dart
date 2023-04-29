@@ -12,6 +12,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class SongAddPage extends StatefulWidget {
@@ -131,7 +132,7 @@ class _SongAddPageState extends State<SongAddPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Disponivel offline',
+              'avaliable-offline'.i18n(),
               style: snackbarStyle,
             ),
             Switch(
@@ -142,13 +143,14 @@ class _SongAddPageState extends State<SongAddPage> {
                   final path = File(songToBeAdded.path);
 
                   if (await icon.exists()) {
-                    songToBeAdded.icon = '';
                     await icon.delete();
                   }
                   if (await path.exists()) {
-                    songToBeAdded.path = '';
                     await path.delete();
                   }
+
+                  songToBeAdded.icon = '';
+                  songToBeAdded.path = '';
 
                   if (SongParser().isSongFromYoutube(songToBeAdded.url)) {
                     final yt = YoutubeExplode();
@@ -170,7 +172,7 @@ class _SongAddPageState extends State<SongAddPage> {
                     backgroundColor: backgroundAccent,
                     duration: const Duration(days: 1),
                     content: Text(
-                      'Baixando a música, por favor aguarde',
+                      'downloading-song'.i18n(),
                       style: snackbarStyle,
                     ),
                   ),
@@ -184,7 +186,7 @@ class _SongAddPageState extends State<SongAddPage> {
                   SnackBar(
                     backgroundColor: accentColor,
                     content: Text(
-                      'Música baixada com sucesso',
+                      'successful-download'.i18n(),
                       style: snackbarStyle,
                     ),
                   ),
@@ -198,6 +200,8 @@ class _SongAddPageState extends State<SongAddPage> {
         ),
       ),
     );
+
+    bool isHorizontal = size.width > size.height;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -232,7 +236,7 @@ class _SongAddPageState extends State<SongAddPage> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  'Você têm mudanças não salvas, você deseja realmente sair?',
+                                  'changes-msg'.i18n(),
                                   style: snackbarStyle,
                                   textAlign: TextAlign.center,
                                 ),
@@ -260,7 +264,7 @@ class _SongAddPageState extends State<SongAddPage> {
                                             ),
                                             padding: const EdgeInsets.all(8),
                                             child: Text(
-                                              'Sim',
+                                              'yes'.i18n(),
                                               style: snackbarStyle,
                                             ),
                                           ),
@@ -285,7 +289,7 @@ class _SongAddPageState extends State<SongAddPage> {
                                             ),
                                             padding: const EdgeInsets.all(8),
                                             child: Text(
-                                              'Não',
+                                              'no'.i18n(),
                                               style: snackbarStyle,
                                             ),
                                           ),
@@ -366,8 +370,14 @@ class _SongAddPageState extends State<SongAddPage> {
                             children: [
                               Center(
                                 child: SizedBox(
-                                  width: 280 - x * 2,
-                                  height: 280 - x * 2,
+                                  width: (isHorizontal
+                                          ? size.height / 2
+                                          : size.width / 2) -
+                                      x * 2,
+                                  height: (isHorizontal
+                                          ? size.height / 2
+                                          : size.width / 2) -
+                                      x * 2,
                                   child: GestureDetector(
                                     onTap: saveIcon,
                                     child: Container(
@@ -395,7 +405,7 @@ class _SongAddPageState extends State<SongAddPage> {
                                         child: TextField(
                                           controller: titleTextController,
                                           decoration: InputDecoration(
-                                            hintText: 'Titulo',
+                                            hintText: 'title'.i18n(),
                                             hintStyle: titleStyle,
                                             border: InputBorder.none,
                                             isDense: true,
@@ -424,7 +434,7 @@ class _SongAddPageState extends State<SongAddPage> {
                                         child: TextField(
                                           controller: authorTextController,
                                           decoration: InputDecoration(
-                                              hintText: 'Autor',
+                                              hintText: 'author'.i18n(),
                                               hintStyle: authorStyle,
                                               border: InputBorder.none),
                                           style: authorStyle,

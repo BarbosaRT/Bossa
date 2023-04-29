@@ -1,6 +1,6 @@
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
-import 'package:bossa/src/audio/playlist_audio_manager.dart';
+import 'package:bossa/src/audio/just_playlist_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:just_audio/just_audio.dart';
 

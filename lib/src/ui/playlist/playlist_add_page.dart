@@ -12,6 +12,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localization/localization.dart';
 
 class PlaylistSongContainer extends StatefulWidget {
   final SongModel song;
@@ -144,14 +145,14 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
 
   final PlaylistModel defaultPlaylist = PlaylistModel(
     id: 0,
-    title: 'Titulo',
+    title: 'title'.i18n(),
     icon: defaultIcon,
     songs: [],
   );
 
   PlaylistModel playlistToBeAdded = PlaylistModel(
     id: 0,
-    title: 'Titulo',
+    title: 'title'.i18n(),
     icon: defaultIcon,
     songs: [],
   );
@@ -276,7 +277,7 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                           children: [
                             Expanded(
                               child: Text(
-                                'Você têm mudanças não salvas, você deseja realmente sair?',
+                                'changes-msg'.i18n(),
                                 style: snackbarStyle,
                                 textAlign: TextAlign.center,
                               ),
@@ -304,7 +305,7 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                                           ),
                                           padding: const EdgeInsets.all(8),
                                           child: Text(
-                                            'Sim',
+                                            'yes'.i18n(),
                                             style: snackbarStyle,
                                           ),
                                         ),
@@ -329,7 +330,7 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                                           ),
                                           padding: const EdgeInsets.all(8),
                                           child: Text(
-                                            'Não',
+                                            'no'.i18n(),
                                             style: snackbarStyle,
                                           ),
                                         ),
@@ -423,7 +424,7 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                         child: TextField(
                           controller: titleTextController,
                           decoration: InputDecoration(
-                            hintText: 'Titulo',
+                            hintText: 'title'.i18n(),
                             hintStyle: titleStyle,
                             border: InputBorder.none,
                             isDense: true,
@@ -528,7 +529,7 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                             child: SizedBox(
                               width: size.width,
                               child: Text(
-                                'Músicas para adicionar',
+                                'songs-to-add'.i18n(),
                                 style: titleStyle,
                                 textAlign: TextAlign.center,
                               ),
