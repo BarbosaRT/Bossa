@@ -12,16 +12,16 @@
 - [git](https://git-scm.com)
 
 ## On Ubuntu/Debian:
-
+```
 sudo apt-get install vlc
 sudo apt-get install libvlc-dev
-
+```
 ## On Fedora:
-
+```
 sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 sudo dnf install vlc
 sudo dnf install vlc-devel
-
+```
 # Clone and Execute
 Clone this repository:
 ```
