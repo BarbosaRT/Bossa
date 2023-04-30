@@ -131,26 +131,15 @@ class _FilterWidgetState extends State<FilterWidget> {
 
     bool isHorizontal = size.width > size.height;
 
+    double width =
+        isHorizontal ? size.width * (1 - UIConsts.leftBarRatio) : size.width;
+
     List<Widget> widgets = [
       widget.enableDropbutton
-          ? DropdownButton(
-              value: widget.isSong ? _songFilter : _playlistFilter,
-              dropdownColor: backgroundAccent,
-              items: widget.isSong ? songItems : playlistItems,
-              onChanged: (v) {
-                if (v == null) {
-                  return;
-                }
-                if (widget.isSong) {
-                  _songFilter = v as SongFilter;
-                  widget.filterCallback(_songFilter);
-                  return;
-                }
-                _playlistFilter = v as PlaylistFilter;
-                widget.filterCallback(_playlistFilter);
-              },
-            )
-          : const Spacer(),
+          ? const SizedBox()
+          : SizedBox(
+              width: width - iconSize * 4 + 5,
+            ),
       GestureDetector(
         onTap: () {
           gridEnabled = !gridEnabled;
@@ -172,15 +161,41 @@ class _FilterWidgetState extends State<FilterWidget> {
             ),
           ),
         ),
-      )
+      ),
+      widget.enableDropbutton
+          ? Center(
+              child: DropdownButton(
+                value: widget.isSong ? _songFilter : _playlistFilter,
+                dropdownColor: backgroundAccent,
+                items: widget.isSong ? songItems : playlistItems,
+                onChanged: (v) {
+                  if (v == null) {
+                    return;
+                  }
+                  if (widget.isSong) {
+                    _songFilter = v as SongFilter;
+                    widget.filterCallback(_songFilter);
+                    return;
+                  }
+                  _playlistFilter = v as PlaylistFilter;
+                  widget.filterCallback(_playlistFilter);
+                },
+              ),
+            )
+          : const Spacer(),
     ];
 
-    double width =
-        isHorizontal ? size.width * (1 - UIConsts.leftBarRatio) : size.width;
     return SizedBox(
       width: width - UIConsts.spacing * 1.5,
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, children: widgets),
+      child: widget.enableDropbutton
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: widgets,
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: widgets,
+            ),
     );
   }
 }
