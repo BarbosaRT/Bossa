@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:sqflite/sqflite.dart';
@@ -16,9 +15,6 @@ void main() async {
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
-  }
-  if (Platform.isLinux) {
-    DartVLC.initialize();
   }
 
   runApp(ModularApp(module: AppModule(), child: const AppWidget()));

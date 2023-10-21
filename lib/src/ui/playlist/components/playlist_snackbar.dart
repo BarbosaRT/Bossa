@@ -281,7 +281,7 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
                 SnackBar(
                   backgroundColor: accentColor,
                   content: Text(
-                    'sucessful-download'.i18n(),
+                    'successful-download'.i18n(),
                     style: authorStyle,
                   ),
                 ),

@@ -3,8 +3,10 @@ import 'package:bossa/src/file/file_path.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 
 DataManager dataManagerInstance = DataManager(filePath: FilePathImpl());
-DataManager testDataManagerInstance =
-    DataManager(filePath: FilePathImpl(), databasePath: '/test.db');
+DataManager testDataManagerInstance = DataManager(
+    filePath: FilePathImpl(),
+    databasePath: '/test.db',
+    databaseName: 'test.db');
 
 class DataManager {
   FilePath filePath;
@@ -12,9 +14,12 @@ class DataManager {
   Timer closeDatabaseTimer = Timer(_closeDatabaseDelay, () {});
   sql.Database? _db;
   String databasePath = '';
-  String get databaseName => 'database.db';
+  String databaseName = 'database.db';
 
-  DataManager({required this.filePath, this.databasePath = '/database.db'});
+  DataManager(
+      {required this.filePath,
+      this.databasePath = '/database.db',
+      this.databaseName = 'database.db'});
 
   Future<String> getDatabasePath() async {
     final workingDirectory = await filePath.getDocumentsDirectory();
@@ -64,7 +69,6 @@ class DataManager {
 
   Future<sql.Database> reloadDatabase() async {
     final databasePath = await getDatabasePath();
-    print(databasePath);
     _db = await sql.openDatabase(
       databasePath,
       version: 1,

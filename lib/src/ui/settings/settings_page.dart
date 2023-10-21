@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:asuka/asuka.dart';
-import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/app_colors.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/data_manager.dart';
