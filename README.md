@@ -7,8 +7,8 @@
 # 
 
 # Requirements: 
-- flutter >= 3.7
-- dart >= 2.17  
+- flutter >= 3.25
+- dart >= 3.6 
 - [git](https://git-scm.com)
 
 ## On Ubuntu/Debian:
