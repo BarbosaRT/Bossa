@@ -95,6 +95,7 @@ class _AppWidgetState extends State<AppWidget> {
     settingsController.setGradientOnPlayer(gradientOnPlayer);
 
     int accentColor =
+        // ignore: deprecated_member_use
         prefs.getInt('accentColor') ?? colorController.currentAccent.value;
     colorController.changeAccentColor(Color(accentColor));
 
@@ -143,8 +144,7 @@ class _AppWidgetState extends State<AppWidget> {
       title: 'Bossa',
       theme: ThemeData(
         scrollbarTheme: ScrollbarThemeData(
-            trackVisibility:
-                MaterialStateProperty.resolveWith((states) => true)),
+            trackVisibility: WidgetStateProperty.resolveWith((states) => true)),
         primarySwatch: colorController.currentCustomColor,
       ),
       routeInformationParser: Modular.routeInformationParser,

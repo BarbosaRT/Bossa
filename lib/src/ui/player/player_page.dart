@@ -138,11 +138,11 @@ class _PlayerPageState extends State<PlayerPage> {
         color: contrastAccent, fontSize: 10, fontWeight: FontWeight.normal);
 
     final buttonStyle = ButtonStyle(
-      padding: MaterialStateProperty.all(EdgeInsets.zero),
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
-      foregroundColor: MaterialStateProperty.all(Colors.transparent),
-      shadowColor: MaterialStateProperty.all(Colors.transparent),
-      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+      overlayColor: WidgetStateProperty.all(Colors.transparent),
+      foregroundColor: WidgetStateProperty.all(Colors.transparent),
+      shadowColor: WidgetStateProperty.all(Colors.transparent),
+      backgroundColor: WidgetStateProperty.all(Colors.transparent),
     );
 
     Stream<int?> songsStream = playlistManager.indexesStream();
@@ -511,11 +511,11 @@ class _PlayerPageState extends State<PlayerPage> {
     final backgroundColor = colorController.currentTheme.backgroundColor;
 
     final buttonStyle = ButtonStyle(
-      padding: MaterialStateProperty.all(EdgeInsets.zero),
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
-      foregroundColor: MaterialStateProperty.all(Colors.transparent),
-      shadowColor: MaterialStateProperty.all(Colors.transparent),
-      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+      overlayColor: WidgetStateProperty.all(Colors.transparent),
+      foregroundColor: WidgetStateProperty.all(Colors.transparent),
+      shadowColor: WidgetStateProperty.all(Colors.transparent),
+      backgroundColor: WidgetStateProperty.all(Colors.transparent),
     );
     Color gradientColor = backgroundColor;
     if (palette != null) {

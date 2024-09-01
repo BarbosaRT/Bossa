@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:bossa/src/main_widget.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -16,5 +17,6 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
+  JustAudioMediaKit.ensureInitialized();
   runApp(ModularApp(module: AppModule(), child: const AppWidget()));
 }

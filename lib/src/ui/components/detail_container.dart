@@ -10,11 +10,11 @@ class DetailContainer extends StatefulWidget {
   final String title;
   final List<Widget> actions;
   const DetailContainer({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
     required this.actions,
-  }) : super(key: key);
+  });
 
   @override
   State<DetailContainer> createState() => DetailContainerState();

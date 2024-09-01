@@ -158,11 +158,11 @@ class _HomePageState extends State<HomePage> {
     final backgroundColor = colorController.currentTheme.backgroundColor;
 
     final buttonStyle = ButtonStyle(
-      padding: MaterialStateProperty.all(EdgeInsets.zero),
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
-      foregroundColor: MaterialStateProperty.all(Colors.transparent),
-      shadowColor: MaterialStateProperty.all(Colors.transparent),
-      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+      overlayColor: WidgetStateProperty.all(Colors.transparent),
+      foregroundColor: WidgetStateProperty.all(Colors.transparent),
+      shadowColor: WidgetStateProperty.all(Colors.transparent),
+      backgroundColor: WidgetStateProperty.all(Colors.transparent),
     );
 
     Widget widgetPage = AnimatedOpacity(
@@ -276,13 +276,14 @@ class _HomePageState extends State<HomePage> {
                   ? Container(
                       width: size.width * UIConsts.leftBarRatio,
                       decoration: BoxDecoration(
-                        color:
-                            gradient ? null : contrastColor.withOpacity(0.05),
+                        color: gradient
+                            ? null
+                            : contrastColor.withValues(alpha: .05),
                         gradient: gradient
                             ? LinearGradient(
                                 colors: [
-                                  accentColor.withOpacity(0.2),
-                                  accentColor.withOpacity(0)
+                                  accentColor.withValues(alpha: 0.2),
+                                  accentColor.withValues(alpha: 0)
                                 ],
                               )
                             : null,

@@ -66,11 +66,11 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     final playlistUIController = Modular.get<PlaylistUIController>();
 
     final buttonStyle = ButtonStyle(
-      padding: MaterialStateProperty.all(EdgeInsets.zero),
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
-      foregroundColor: MaterialStateProperty.all(Colors.transparent),
-      shadowColor: MaterialStateProperty.all(Colors.transparent),
-      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+      overlayColor: WidgetStateProperty.all(Colors.transparent),
+      foregroundColor: WidgetStateProperty.all(Colors.transparent),
+      shadowColor: WidgetStateProperty.all(Colors.transparent),
+      backgroundColor: WidgetStateProperty.all(Colors.transparent),
     );
 
     final colorController = Modular.get<ColorController>();
@@ -181,7 +181,10 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           stops: const [0.75, 1],
-                                          colors: [color.withOpacity(0), color],
+                                          colors: [
+                                            color.withValues(alpha: 0),
+                                            color
+                                          ],
                                         ),
                                       ),
                                     )

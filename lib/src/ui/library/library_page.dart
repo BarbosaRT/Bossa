@@ -104,11 +104,11 @@ class _LibraryPageState extends State<LibraryPage>
         TextStyles().boldHeadline.copyWith(color: contrastColor);
 
     final buttonStyle = ButtonStyle(
-      padding: MaterialStateProperty.all(EdgeInsets.zero),
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
-      foregroundColor: MaterialStateProperty.all(Colors.transparent),
-      shadowColor: MaterialStateProperty.all(Colors.transparent),
-      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+      overlayColor: WidgetStateProperty.all(Colors.transparent),
+      foregroundColor: WidgetStateProperty.all(Colors.transparent),
+      shadowColor: WidgetStateProperty.all(Colors.transparent),
+      backgroundColor: WidgetStateProperty.all(Colors.transparent),
     );
 
     const tabHeight = 50.0;
