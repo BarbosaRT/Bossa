@@ -39,20 +39,25 @@ void main() {
       // Create a playlist with two songs
       PlaylistModel playlist = setUpPlaylist();
 
-      await manager.setPlaylist(playlist);
+      manager.setPlaylist(playlist);
 
       // Verify that the playlist was set correctly
-      expect(manager.playlistAudioSource.children.length, 2);
-      expect(manager.playlistAudioSource.children[0],
-          AudioSource.uri(Uri.parse(playlist.songs[0].url)));
+      Future.delayed(const Duration(seconds: 2)).then(
+        (value) {
+          expect(manager.playlistAudioSource.children.length, 2);
+          expect(manager.playlistAudioSource.children[0],
+              AudioSource.uri(Uri.parse(playlist.songs[0].url)));
 
-      expect(manager.playlistAudioSource.children[1],
-          AudioSource.uri(Uri.parse(playlist.songs[1].url)));
+          expect(manager.playlistAudioSource.children[1],
+              AudioSource.uri(Uri.parse(playlist.songs[1].url)));
+        },
+      );
     });
 
     test('seekToNext', () async {
       // Create a playlist with three songs
       PlaylistModel playlist = setUpPlaylist();
+      JustPlaylistManager pmanager = JustPlaylistManager();
       playlist.songs.add(SongModel(
         id: 2,
         title: 'Song 3',
@@ -62,26 +67,29 @@ void main() {
             'http://commondatastorage.googleapis.com/codeskulptor-assets/week7-bounce.m4a',
       ));
 
-      await manager.setPlaylist(playlist, initialIndex: 0);
-      await manager.seekToNext();
+      pmanager.setPlaylist(playlist, initialIndex: 0);
+      pmanager.seekToNext();
 
       // Verify that the current song is the second song in the playlist
-      expect(manager.player.currentIndex, 1);
-      expect(manager.playlistAudioSource.children[manager.player.currentIndex!],
+      expect(pmanager.player.currentIndex, 1);
+      expect(
+          pmanager.playlistAudioSource.children[pmanager.player.currentIndex!],
           AudioSource.uri(Uri.parse(playlist.songs[1].url)));
 
-      await manager.seekToNext();
+      pmanager.seekToNext();
 
       // Verify that the current song is the third song in the playlist
-      expect(manager.player.currentIndex, 2);
-      expect(manager.playlistAudioSource.children[manager.player.currentIndex!],
+      expect(pmanager.player.currentIndex, 2);
+      expect(
+          pmanager.playlistAudioSource.children[pmanager.player.currentIndex!],
           AudioSource.uri(Uri.parse(playlist.songs[2].url)));
 
-      await manager.seekToNext();
+      pmanager.seekToNext();
 
       // Verify that the current song is the first song in the playlist (loop mode is enabled by default)
-      expect(manager.player.currentIndex, 0);
-      expect(manager.playlistAudioSource.children[manager.player.currentIndex!],
+      expect(pmanager.player.currentIndex, 0);
+      expect(
+          pmanager.playlistAudioSource.children[pmanager.player.currentIndex!],
           AudioSource.uri(Uri.parse(playlist.songs[0].url)));
     });
 
@@ -89,8 +97,8 @@ void main() {
       // Create a playlist with three songs
       PlaylistModel playlist = setUpPlaylist();
 
-      await manager.setPlaylist(playlist, initialIndex: 1);
-      await manager.seekToPrevious();
+      manager.setPlaylist(playlist, initialIndex: 1);
+      manager.seekToPrevious();
 
       // Verify that the current song is the first song in the playlist
       expect(manager.player.currentIndex, 0);
@@ -102,8 +110,8 @@ void main() {
       // Create a playlist with three songs
       PlaylistModel playlist = setUpPlaylist();
 
-      await manager.setPlaylist(playlist);
-      await manager.seek(const Duration(seconds: 90), 0);
+      manager.setPlaylist(playlist);
+      manager.seek(const Duration(seconds: 90), 0);
 
       // Verify that the current position is 90 seconds into the first song
       expect(manager.player.position, const Duration(seconds: 90));

@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:asuka/asuka.dart';
 import 'package:bossa/src/audio/just_audio_manager.dart';
 import 'package:bossa/src/audio/just_playlist_manager.dart';
-import 'package:bossa/src/audio/vlc_audio_manager.dart';
-import 'package:bossa/src/audio/vlc_playlist_manager.dart';
 import 'package:bossa/src/color/app_colors.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
@@ -31,13 +27,10 @@ class AppModule extends Module {
         Bind((i) => PlaylistUIController()),
         Bind((i) => HomeController()),
         Bind(
-          (i) =>
-              Platform.isLinux ? VlcPlaylistManager() : JustPlaylistManager(),
+          (i) => JustPlaylistManager(),
         ),
         Bind(
-          (i) => Platform.isLinux
-              ? vlcPlayerManagerInstance
-              : justAudioManagerInstance,
+          (i) => justAudioManagerInstance,
         ),
         Bind((i) => FilePathImpl()),
         Bind(
@@ -102,6 +95,7 @@ class _AppWidgetState extends State<AppWidget> {
     settingsController.setGradientOnPlayer(gradientOnPlayer);
 
     int accentColor =
+        // ignore: deprecated_member_use
         prefs.getInt('accentColor') ?? colorController.currentAccent.value;
     colorController.changeAccentColor(Color(accentColor));
 
@@ -150,8 +144,7 @@ class _AppWidgetState extends State<AppWidget> {
       title: 'Bossa',
       theme: ThemeData(
         scrollbarTheme: ScrollbarThemeData(
-            trackVisibility:
-                MaterialStateProperty.resolveWith((states) => true)),
+            trackVisibility: WidgetStateProperty.resolveWith((states) => true)),
         primarySwatch: colorController.currentCustomColor,
       ),
       routeInformationParser: Modular.routeInformationParser,

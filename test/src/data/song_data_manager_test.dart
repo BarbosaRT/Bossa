@@ -5,7 +5,6 @@ import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/url/download_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bossa/models/song_model.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {

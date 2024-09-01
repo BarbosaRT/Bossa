@@ -19,7 +19,7 @@ void main() {
         'id': id,
         'title': title,
         'icon': icon,
-        'songs': [song],
+        'songs': [song.toMap()],
       };
       final PlaylistModel playlist = PlaylistModel.fromMap(map);
       expect(playlist.id, id);

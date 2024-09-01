@@ -480,7 +480,7 @@ class _SearchPageState extends State<SearchPage>
                       //
                       Positioned(
                         top: iconSize / 2,
-                        left: UIConsts.spacing + 10,
+                        right: 5,
                         child: FilterWidget(
                           enableDropbutton: searchLibrary,
                           isSong: currentTab == 0,

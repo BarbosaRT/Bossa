@@ -8,12 +8,12 @@ class JustAudioManager implements AudioManager {
   var player = AudioPlayer();
 
   JustAudioManager() {
-    AndroidLoudnessEnhancer loudnessEnhancer = AndroidLoudnessEnhancer();
-    loudnessEnhancer.setEnabled(true);
-    loudnessEnhancer.setTargetGain(40);
-    AudioPipeline audioPipeline =
-        AudioPipeline(androidAudioEffects: [loudnessEnhancer]);
-    player = AudioPlayer(audioPipeline: audioPipeline);
+    //AndroidLoudnessEnhancer loudnessEnhancer = AndroidLoudnessEnhancer();
+    //loudnessEnhancer.setEnabled(true);
+    //loudnessEnhancer.setTargetGain(40);
+    // AudioPipeline audioPipeline =
+    //     AudioPipeline(androidAudioEffects: [loudnessEnhancer]);
+    //player = AudioPlayer(audioPipeline: audioPipeline);
     player.setSkipSilenceEnabled(true);
   }
 

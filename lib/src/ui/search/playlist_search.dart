@@ -86,7 +86,7 @@ class PlaylistSearch {
         await yt.search.searchRaw(searchQuery, filter: TypeFilters.playlist);
 
     for (var playlistContent in searchResponse.content.toList()) {
-      var playlistData = await yt.playlists.get(playlistContent.playlistId);
+      var playlistData = await yt.playlists.get(playlistContent.id);
 
       final videoStream = yt.playlists.getVideos(playlistData.id).take(1);
 

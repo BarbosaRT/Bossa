@@ -3,7 +3,8 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  dart_vlc
+  media_kit_libs_windows_audio
+  permission_handler_windows
   url_launcher_windows
 )
 

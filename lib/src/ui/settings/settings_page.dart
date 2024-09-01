@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:asuka/asuka.dart';
-import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/app_colors.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/data_manager.dart';
@@ -84,11 +83,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
     final settingStyle = TextStyles().headline2.copyWith(color: contrastColor);
     final buttonStyle = ButtonStyle(
-      padding: MaterialStateProperty.all(EdgeInsets.zero),
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
-      foregroundColor: MaterialStateProperty.all(Colors.transparent),
-      shadowColor: MaterialStateProperty.all(Colors.transparent),
-      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+      overlayColor: WidgetStateProperty.all(Colors.transparent),
+      foregroundColor: WidgetStateProperty.all(Colors.transparent),
+      shadowColor: WidgetStateProperty.all(Colors.transparent),
+      backgroundColor: WidgetStateProperty.all(Colors.transparent),
     );
 
     return SafeArea(
@@ -144,7 +143,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const Spacer(),
                 for (Color color in AccentColors().listOfColors)
                   Radio<Color>(
-                    fillColor: MaterialStateProperty.all(color),
+                    fillColor: WidgetStateProperty.all(color),
                     value: color,
                     groupValue: colorController.currentAccent,
                     onChanged: (newColor) async {
@@ -152,6 +151,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         return;
                       }
                       final prefs = await SharedPreferences.getInstance();
+                      // ignore: deprecated_member_use
                       prefs.setInt('accentColor', newColor.value);
                       colorController.changeAccentColor(newColor);
                     },

@@ -104,11 +104,11 @@ class _LibraryPageState extends State<LibraryPage>
         TextStyles().boldHeadline.copyWith(color: contrastColor);
 
     final buttonStyle = ButtonStyle(
-      padding: MaterialStateProperty.all(EdgeInsets.zero),
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
-      foregroundColor: MaterialStateProperty.all(Colors.transparent),
-      shadowColor: MaterialStateProperty.all(Colors.transparent),
-      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+      padding: WidgetStateProperty.all(EdgeInsets.zero),
+      overlayColor: WidgetStateProperty.all(Colors.transparent),
+      foregroundColor: WidgetStateProperty.all(Colors.transparent),
+      shadowColor: WidgetStateProperty.all(Colors.transparent),
+      backgroundColor: WidgetStateProperty.all(Colors.transparent),
     );
 
     const tabHeight = 50.0;
@@ -291,7 +291,9 @@ class _LibraryPageState extends State<LibraryPage>
                           preferredSize: const Size.fromHeight(tabHeight),
                           child: Container(
                             margin: EdgeInsets.only(
-                                bottom: tabHeight * 0.5 + iconSize),
+                              bottom: tabHeight * 0.5 + iconSize,
+                              right: iconSize * 2,
+                            ),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15),
                               color: backgroundAccent,
@@ -321,7 +323,7 @@ class _LibraryPageState extends State<LibraryPage>
                               ),
                               tabs: [
                                 Container(
-                                  width: (width - x / 2) / 2,
+                                  width: (width - x) / 2 - iconSize,
                                   height: tabHeight,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15),
@@ -341,7 +343,7 @@ class _LibraryPageState extends State<LibraryPage>
                                   ),
                                 ),
                                 Container(
-                                  width: (width - x / 2) / 2,
+                                  width: (width - x) / 2 - iconSize,
                                   height: tabHeight,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(15),
@@ -406,8 +408,8 @@ class _LibraryPageState extends State<LibraryPage>
                 // Filters
                 //
                 Positioned(
-                  top: tabHeight + iconSize * 0.25,
-                  left: UIConsts.spacing,
+                  top: iconSize / 2,
+                  left: UIConsts.spacing + 5,
                   child: FilterWidget(
                     isSong: currentTab == 0,
                     filterCallback: (v) {

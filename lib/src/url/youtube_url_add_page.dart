@@ -117,7 +117,7 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
       SnackBar(
         backgroundColor: snackbarColor,
         content: Text(
-          '$content ${"sucessful-loading".i18n()}',
+          '$content ${"successful-loading".i18n()}',
           style: textStyle,
         ),
       ),
