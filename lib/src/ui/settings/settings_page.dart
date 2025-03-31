@@ -208,6 +208,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 Text('verify-update'.i18n(), style: settingStyle),
                 const Spacer(),
                 ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStateProperty.all<Color>(backgroundAccent)),
                   onPressed: () async {
                     bool hasUpdate = await settingsController.hasUpdate();
                     if (hasUpdate) {
@@ -296,6 +299,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 Text('Backups', style: settingStyle),
                 const Spacer(),
                 ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStateProperty.all<Color>(backgroundAccent)),
                   onPressed: () async {
                     if (await saveDatabase()) {
                       Asuka.showSnackBar(
@@ -360,6 +366,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   width: x / 4,
                 ),
                 ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStateProperty.all<Color>(backgroundAccent)),
                   onPressed: () async {
                     final databasePath =
                         await dataManagerInstance.getDatabasePath();
