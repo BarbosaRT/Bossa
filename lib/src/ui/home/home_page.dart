@@ -276,14 +276,12 @@ class _HomePageState extends State<HomePage> {
                   ? Container(
                       width: size.width * UIConsts.leftBarRatio,
                       decoration: BoxDecoration(
-                        color: gradient
-                            ? null
-                            : contrastColor.withValues(alpha: .05),
+                        color: gradient ? null : contrastColor.withOpacity(.05),
                         gradient: gradient
                             ? LinearGradient(
                                 colors: [
-                                  accentColor.withValues(alpha: 0.2),
-                                  accentColor.withValues(alpha: 0)
+                                  accentColor.withOpacity(0.2),
+                                  accentColor.withOpacity(0)
                                 ],
                               )
                             : null,
