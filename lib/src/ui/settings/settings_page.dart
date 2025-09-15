@@ -208,6 +208,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   onPressed: () async {
                     bool hasUpdate = await settingsController.hasUpdate();
+                    if (!mounted) return;
+
                     if (hasUpdate) {
                       ThemeAwareSnackbar.show(
                         context: context,
@@ -264,7 +266,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     foregroundColor: contrastColor,
                   ),
                   onPressed: () async {
-                    if (await saveDatabase()) {
+                    bool success = await saveDatabase();
+                    if (!mounted) return;
+
+                    if (success) {
                       ThemeAwareSnackbar.showWithContainer(
                         context: context,
                         message: 'backup-loaded'.i18n(),
@@ -316,6 +321,9 @@ class _SettingsPageState extends State<SettingsPage> {
                     await Directory(externalDirectory).create();
                     File(databasePath).copy(
                         '$externalDirectory/${dataManagerInstance.databaseName}');
+
+                    if (!mounted) return;
+
                     ThemeAwareSnackbar.showWithContainer(
                       context: context,
                       message:

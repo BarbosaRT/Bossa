@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/src/ui/components/theme_aware_snackbar.dart';
 import 'package:bossa/models/song_model.dart';
@@ -8,6 +6,7 @@ import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
 import 'package:bossa/src/data/youtube_parser.dart';
+import 'package:bossa/src/services/song_download_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/detail_container.dart';
@@ -45,14 +44,29 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
   Stream<List<SongModel>> downloadPlaylistSongs() async* {
     List<SongModel> output = [];
     final songDataManager = Modular.get<SongDataManager>();
-    for (SongModel song in widget.playlist.songs) {
-      song = await SongParser().parseSongBeforeSave(
-        song,
-        saveOffline: true,
-      );
-      songDataManager.editSong(song);
-      output.add(song);
-      yield output;
+    final downloadManager = SongDownloadManager();
+
+    for (int i = 0; i < widget.playlist.songs.length; i++) {
+      SongModel song = widget.playlist.songs[i];
+
+      try {
+        // Download with robust system
+        song = await downloadManager.downloadSong(
+          song,
+          downloadOffline: true,
+          onProgress: (progress) {
+            // Progress tracking handled by download state manager
+          },
+        );
+
+        songDataManager.editSong(song);
+        output.add(song);
+        yield output;
+      } catch (e) {
+        // If download fails, add original song
+        output.add(song);
+        yield output;
+      }
     }
   }
 
@@ -173,24 +187,24 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               }
               key.currentState?.pop();
               canTapOffline = false;
+
+              // Store context before async operations
+              final scaffoldContext = context;
+
               if (isOffline) {
                 ThemeAwareSnackbar.show(
-                  context: context,
+                  context: scaffoldContext,
                   message: 'removing-songs'.i18n(),
                   duration: const Duration(days: 1),
                 );
 
                 widget.playlist.icon = '';
-                for (SongModel song in widget.playlist.songs) {
-                  final icon = File(song.icon);
-                  final path = File(song.path);
+                final downloadManager = SongDownloadManager();
 
-                  if (await icon.exists()) {
-                    await icon.delete();
-                  }
-                  if (await path.exists()) {
-                    await path.delete();
-                  }
+                for (SongModel song in widget.playlist.songs) {
+                  // Use robust delete method
+                  await downloadManager.deleteSongFiles(song);
+
                   song.icon = '';
                   song.path = '';
 
@@ -211,15 +225,20 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
                   }
                 }
 
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                ThemeAwareSnackbar.showCustom(
-                  context: context,
-                  backgroundColor: accentColor,
-                  content: Text(
-                    'success-remove'.i18n(),
-                    style: authorStyle,
-                  ),
-                );
+                // Use a post-frame callback to avoid BuildContext async gap
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ThemeAwareSnackbar.showCustom(
+                      context: context,
+                      backgroundColor: accentColor,
+                      content: Text(
+                        'success-remove'.i18n(),
+                        style: authorStyle,
+                      ),
+                    );
+                  }
+                });
 
                 isOffline = false;
                 canTapOffline = true;
@@ -235,8 +254,9 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               Stream<List<SongModel>> donwloadStream =
                   downloadPlaylistSongs().asBroadcastStream();
 
+              // Show progress snackbar immediately (before async operations)
               ThemeAwareSnackbar.showCustom(
-                context: context,
+                context: scaffoldContext,
                 duration: const Duration(days: 1),
                 content: StreamBuilder<List<SongModel>>(
                   stream: donwloadStream,
@@ -267,15 +287,20 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               isOffline = true;
               canTapOffline = true;
 
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              ThemeAwareSnackbar.showCustom(
-                context: context,
-                backgroundColor: accentColor,
-                content: Text(
-                  'successful-download'.i18n(),
-                  style: authorStyle,
-                ),
-              );
+              // Use a post-frame callback to avoid BuildContext async gap
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ThemeAwareSnackbar.showCustom(
+                    context: context,
+                    backgroundColor: accentColor,
+                    content: Text(
+                      'successful-download'.i18n(),
+                      style: authorStyle,
+                    ),
+                  );
+                }
+              });
 
               if (mounted) {
                 setState(() {});

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
@@ -7,7 +6,9 @@ import 'package:bossa/src/data/youtube_parser.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/theme_aware_snackbar.dart';
+import 'package:bossa/src/ui/components/download_progress_widget.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
+import 'package:bossa/src/services/song_download_manager.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -34,6 +35,8 @@ class _SongAddPageState extends State<SongAddPage> {
 
   bool editing = false;
   bool saveOffline = false;
+  bool isDownloading = false;
+  String? currentDownloadId;
 
   final SongModel defaultSong = SongModel(
       id: 0,
@@ -137,54 +140,76 @@ class _SongAddPageState extends State<SongAddPage> {
             ),
             Switch(
               value: songToBeAdded.path.isNotEmpty,
-              onChanged: (value) async {
-                if (!value) {
-                  final icon = File(songToBeAdded.icon);
-                  final path = File(songToBeAdded.path);
+              onChanged: isDownloading
+                  ? null
+                  : (value) async {
+                      if (!value) {
+                        // Delete offline files
+                        final downloadManager = SongDownloadManager();
+                        await downloadManager.deleteSongFiles(songToBeAdded);
 
-                  if (await icon.exists()) {
-                    await icon.delete();
-                  }
-                  if (await path.exists()) {
-                    await path.delete();
-                  }
+                        songToBeAdded.icon = '';
+                        songToBeAdded.path = '';
 
-                  songToBeAdded.icon = '';
-                  songToBeAdded.path = '';
+                        if (SongParser().isSongFromYoutube(songToBeAdded.url)) {
+                          final yt = YoutubeExplode();
+                          final video = await yt.videos.get(SongParser()
+                              .parseYoutubeSongUrl(songToBeAdded.url));
+                          songToBeAdded.icon = YoutubeParser()
+                              .getYoutubeThumbnail(video.thumbnails);
+                        } else {
+                          songToBeAdded.icon = UIConsts.assetImage;
+                        }
+                        if (mounted) {
+                          setState(() {});
+                        }
+                        return;
+                      }
 
-                  if (SongParser().isSongFromYoutube(songToBeAdded.url)) {
-                    final yt = YoutubeExplode();
-                    final video = await yt.videos.get(
-                        SongParser().parseYoutubeSongUrl(songToBeAdded.url));
-                    songToBeAdded.icon =
-                        YoutubeParser().getYoutubeThumbnail(video.thumbnails);
-                  } else {
-                    songToBeAdded.icon = UIConsts.assetImage;
-                  }
-                  if (mounted) {
-                    setState(() {});
-                  }
-                  return;
-                }
+                      // Start download with progress tracking
+                      setState(() {
+                        isDownloading = true;
+                        currentDownloadId =
+                            songToBeAdded.url.hashCode.toString();
+                      });
 
-                ThemeAwareSnackbar.show(
-                  context: context,
-                  message: 'downloading-song'.i18n(),
-                  duration: const Duration(days: 1),
-                );
-                songToBeAdded = await SongParser().parseSongBeforeSave(
-                  songToBeAdded,
-                  saveOffline: true,
-                );
-                ThemeAwareSnackbar.hide(context);
-                ThemeAwareSnackbar.show(
-                  context: context,
-                  message: 'successful-download'.i18n(),
-                );
-                if (mounted) {
-                  setState(() {});
-                }
-              },
+                      try {
+                        songToBeAdded = await SongParser().parseSongBeforeSave(
+                          songToBeAdded,
+                          saveOffline: true,
+                          onProgress: (progress) {
+                            // Progress is handled by DownloadProgressWidget
+                          },
+                        );
+
+                        // Use a post-frame callback to avoid BuildContext async gap
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            ThemeAwareSnackbar.show(
+                              context: context,
+                              message: 'successful-download'.i18n(),
+                            );
+                          }
+                        });
+                      } catch (e) {
+                        // Use a post-frame callback to avoid BuildContext async gap
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            ThemeAwareSnackbar.show(
+                              context: context,
+                              message: 'download-failed'.i18n(),
+                            );
+                          }
+                        });
+                      } finally {
+                        if (mounted) {
+                          setState(() {
+                            isDownloading = false;
+                            currentDownloadId = null;
+                          });
+                        }
+                      }
+                    },
             )
           ],
         ),
@@ -284,6 +309,8 @@ class _SongAddPageState extends State<SongAddPage> {
                 onTap: () async {
                   songToBeAdded =
                       await SongParser().parseSongBeforeSave(songToBeAdded);
+                  if (!mounted) return;
+
                   editing
                       ? songDataManager.editSong(songToBeAdded)
                       : songDataManager.addSong(songToBeAdded);
@@ -417,6 +444,20 @@ class _SongAddPageState extends State<SongAddPage> {
                               songToBeAdded.url.isNotEmpty
                                   ? offlineWidget
                                   : Container(),
+                              // Download progress widget
+                              if (currentDownloadId != null)
+                                DownloadProgressWidget(
+                                  downloadId: currentDownloadId!,
+                                  title: songToBeAdded.title.isNotEmpty
+                                      ? songToBeAdded.title
+                                      : 'downloading-song'.i18n(),
+                                  onCancel: () {
+                                    setState(() {
+                                      isDownloading = false;
+                                      currentDownloadId = null;
+                                    });
+                                  },
+                                ),
                             ],
                           ),
                         ),
