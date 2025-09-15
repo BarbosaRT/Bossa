@@ -5,7 +5,7 @@ import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
-import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/ui/home/home_controller.dart';
 import 'package:bossa/src/ui/library/filter_widget.dart';
 import 'package:bossa/src/ui/library/library_container.dart';
 import 'package:bossa/src/ui/playlist/components/playlist_snackbar.dart';

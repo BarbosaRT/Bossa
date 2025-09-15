@@ -5,7 +5,7 @@ import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
-import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/ui/home/home_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/library/filter_widget.dart';

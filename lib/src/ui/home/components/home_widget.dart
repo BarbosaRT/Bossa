@@ -1,9 +1,8 @@
-import 'package:asuka/asuka.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
-import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/ui/home/home_controller.dart';
 import 'package:bossa/src/ui/playlist/components/playlist_snackbar.dart';
 import 'package:bossa/src/ui/song/song_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +59,8 @@ class _AddWidgetState extends State<AddWidget> {
 
     return ElevatedButton(
       onPressed: () {
-        Asuka.showModalBottomSheet(
+        showModalBottomSheet(
+          context: context,
           backgroundColor: backgroundColor,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
@@ -181,7 +181,8 @@ class _AddWidgetState extends State<AddWidget> {
       child: ElevatedButton(
         style: buttonStyle,
         onPressed: () {
-          Asuka.showModalBottomSheet(
+          showModalBottomSheet(
+            context: context,
             backgroundColor: backgroundColor,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(

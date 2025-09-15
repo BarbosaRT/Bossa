@@ -1,4 +1,3 @@
-import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
@@ -8,7 +7,7 @@ import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/detail_container.dart';
-import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/ui/home/home_controller.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:bossa/src/ui/library/library_container.dart';
 import 'package:bossa/src/ui/playlist/components/playlist_snackbar.dart';
@@ -193,13 +192,26 @@ class _PlaylistPageState extends State<PlaylistPage> {
             title: song.title,
           ),
           onTap: () async {
-            audioManager.pause();
-            playlistUIController.setPlaylist(playlist, index: index);
-            playlistManager.setPlaylist(playlist, initialIndex: index);
-            Modular.to.pushReplacementNamed(
-              '/player',
-            );
-            audioManager.play();
+            try {
+              audioManager.pause();
+              playlistUIController.setPlaylist(playlist, index: index);
+              await playlistManager.setPlaylist(playlist, initialIndex: index);
+              Modular.to.pushReplacementNamed(
+                '/player',
+              );
+              audioManager.play();
+            } catch (e) {
+              print('Error playing song: $e');
+              // Show user-friendly error message
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      'Cannot play song: ${e.toString().replaceAll('Exception: ', '')}'),
+                  backgroundColor: Colors.red,
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
           },
           icon: song.icon,
         ),
@@ -306,7 +318,8 @@ class _PlaylistPageState extends State<PlaylistPage> {
                       child: ElevatedButton(
                         style: buttonStyle,
                         onPressed: () {
-                          Asuka.showModalBottomSheet(
+                          showModalBottomSheet(
+                            context: context,
                             backgroundColor: backgroundColor,
                             shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.only(
@@ -329,18 +342,30 @@ class _PlaylistPageState extends State<PlaylistPage> {
                     SizedBox(
                       width: iconSize * 1.5,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Modular.to.popUntil(ModalRoute.withName('/'));
-                          audioManager.pause();
+                        onPressed: () async {
+                          try {
+                            Modular.to.popUntil(ModalRoute.withName('/'));
+                            audioManager.pause();
 
-                          playlistUIController.setPlaylist(playlist);
-                          playlistManager.setPlaylist(playlist);
-                          playlistManager.setShuffleModeEnabled(true);
+                            playlistUIController.setPlaylist(playlist);
+                            await playlistManager.setPlaylist(playlist);
+                            playlistManager.setShuffleModeEnabled(true);
 
-                          Modular.to.pushReplacementNamed(
-                            '/player',
-                          );
-                          audioManager.play();
+                            Modular.to.pushReplacementNamed(
+                              '/player',
+                            );
+                            audioManager.play();
+                          } catch (e) {
+                            print('Error playing shuffled playlist: $e');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'Cannot play playlist: ${e.toString().replaceAll('Exception: ', '')}'),
+                                backgroundColor: Colors.red,
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          }
                         },
                         style: buttonStyle,
                         child: FaIcon(
@@ -356,17 +381,29 @@ class _PlaylistPageState extends State<PlaylistPage> {
                     SizedBox(
                       width: 3 * iconSize / 2,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Modular.to.popUntil(ModalRoute.withName('/'));
-                          audioManager.pause();
+                        onPressed: () async {
+                          try {
+                            Modular.to.popUntil(ModalRoute.withName('/'));
+                            audioManager.pause();
 
-                          playlistUIController.setPlaylist(playlist);
-                          playlistManager.setPlaylist(playlist);
+                            playlistUIController.setPlaylist(playlist);
+                            await playlistManager.setPlaylist(playlist);
 
-                          Modular.to.pushReplacementNamed(
-                            '/player',
-                          );
-                          audioManager.play();
+                            Modular.to.pushReplacementNamed(
+                              '/player',
+                            );
+                            audioManager.play();
+                          } catch (e) {
+                            print('Error playing playlist: $e');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'Cannot play playlist: ${e.toString().replaceAll('Exception: ', '')}'),
+                                backgroundColor: Colors.red,
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          }
                         },
                         style: buttonStyle,
                         child: FaIcon(

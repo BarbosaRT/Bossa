@@ -1,4 +1,3 @@
-import 'package:asuka/asuka.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
@@ -76,7 +75,8 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
                 if (widget.useDetail == false) {
                   return;
                 }
-                Asuka.showModalBottomSheet(
+                showModalBottomSheet(
+                  context: context,
                   backgroundColor: backgroundColor,
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(
@@ -142,7 +142,8 @@ class _LibraryContentContainerState extends State<LibraryContentContainer> {
             //
             GestureDetector(
               onTap: () {
-                Asuka.showModalBottomSheet(
+                showModalBottomSheet(
+                  context: context,
                   backgroundColor: backgroundColor,
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(

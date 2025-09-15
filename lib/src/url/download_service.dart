@@ -9,6 +9,8 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 abstract class DownloadService {
   Future<void> download(String url, String path, String directory);
+  Future<void> downloadIcon(String url, String fileName, String directory);
+  Future<bool> requestWritePermission();
 }
 
 class HttpDownloadService implements DownloadService {
@@ -16,6 +18,7 @@ class HttpDownloadService implements DownloadService {
 
   HttpDownloadService({required this.filePath});
 
+  @override
   Future<void> downloadIcon(
       String url, String fileName, String directory) async {
     if (Platform.isAndroid) {
@@ -74,6 +77,7 @@ class HttpDownloadService implements DownloadService {
     youtube.close();
   }
 
+  @override
   Future<bool> requestWritePermission() async {
     await Permission.storage.request();
     return await Permission.storage.request().isGranted;

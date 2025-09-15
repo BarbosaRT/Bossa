@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:asuka/asuka.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
@@ -7,6 +6,7 @@ import 'package:bossa/src/data/song_parser.dart';
 import 'package:bossa/src/data/youtube_parser.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
+import 'package:bossa/src/ui/components/theme_aware_snackbar.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -167,29 +167,19 @@ class _SongAddPageState extends State<SongAddPage> {
                   return;
                 }
 
-                Asuka.showSnackBar(
-                  SnackBar(
-                    backgroundColor: backgroundAccent,
-                    duration: const Duration(days: 1),
-                    content: Text(
-                      'downloading-song'.i18n(),
-                      style: snackbarStyle,
-                    ),
-                  ),
+                ThemeAwareSnackbar.show(
+                  context: context,
+                  message: 'downloading-song'.i18n(),
+                  duration: const Duration(days: 1),
                 );
                 songToBeAdded = await SongParser().parseSongBeforeSave(
                   songToBeAdded,
                   saveOffline: true,
                 );
-                Asuka.hideCurrentSnackBar();
-                Asuka.showSnackBar(
-                  SnackBar(
-                    backgroundColor: accentColor,
-                    content: Text(
-                      'successful-download'.i18n(),
-                      style: snackbarStyle,
-                    ),
-                  ),
+                ThemeAwareSnackbar.hide(context);
+                ThemeAwareSnackbar.show(
+                  context: context,
+                  message: 'successful-download'.i18n(),
                 );
                 if (mounted) {
                   setState(() {});
@@ -214,96 +204,65 @@ class _SongAddPageState extends State<SongAddPage> {
             child: GestureDetector(
               onTap: () {
                 if (widget.songToBeEdited != songToBeAdded) {
-                  Asuka.hideCurrentSnackBar();
-                  Asuka.showSnackBar(
-                    SnackBar(
-                      padding: EdgeInsets.zero,
-                      backgroundColor: Colors.transparent,
-                      duration: const Duration(days: 1),
-                      content: Container(
-                        height: 100,
-                        width: size.width,
-                        decoration: BoxDecoration(
-                          color: backgroundAccent,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(15),
-                            topRight: Radius.circular(15),
-                          ),
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        backgroundColor: backgroundAccent,
+                        title: Text(
+                          'changes-msg'.i18n(),
+                          style: snackbarStyle,
+                          textAlign: TextAlign.center,
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
+                        actions: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Expanded(
-                                child: Text(
-                                  'changes-msg'.i18n(),
-                                  style: snackbarStyle,
-                                  textAlign: TextAlign.center,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    Modular.to.popAndPushNamed('/');
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: accentColor,
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text(
+                                      'yes'.i18n(),
+                                      style: snackbarStyle,
+                                    ),
+                                  ),
                                 ),
                               ),
+                              const SizedBox(width: 10),
                               Expanded(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          Asuka.hideCurrentSnackBar();
-                                          Modular.to.popAndPushNamed('/');
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20),
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                              color: accentColor,
-                                              borderRadius:
-                                                  BorderRadius.circular(15),
-                                            ),
-                                            padding: const EdgeInsets.all(8),
-                                            child: Text(
-                                              'yes'.i18n(),
-                                              style: snackbarStyle,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: accentColor,
+                                      borderRadius: BorderRadius.circular(15),
                                     ),
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          Asuka.hideCurrentSnackBar();
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                          ),
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                              color: accentColor,
-                                              borderRadius:
-                                                  BorderRadius.circular(15),
-                                            ),
-                                            padding: const EdgeInsets.all(8),
-                                            child: Text(
-                                              'no'.i18n(),
-                                              style: snackbarStyle,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text(
+                                      'no'.i18n(),
+                                      style: snackbarStyle,
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    ),
+                        ],
+                      );
+                    },
                   );
                 } else {
                   Modular.to.popAndPushNamed('/');

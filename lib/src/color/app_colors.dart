@@ -13,15 +13,11 @@ class AppColors {
   bool operator ==(covariant AppColors other) {
     if (identical(this, other)) return true;
 
-    return false;
+    return runtimeType == other.runtimeType;
   }
 
   @override
-  int get hashCode =>
-      backgroundColor.hashCode ^
-      backgroundAccent.hashCode ^
-      contrastAccent.hashCode ^
-      contrastColor.hashCode;
+  int get hashCode => runtimeType.hashCode;
 }
 
 class DarkTheme extends AppColors {}

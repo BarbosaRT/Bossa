@@ -7,16 +7,25 @@ import 'package:bossa/src/main_widget.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
   );
+
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
 
+  // Configure media_kit to avoid XCB issues
   JustAudioMediaKit.ensureInitialized();
+
+  JustAudioMediaKit.title = 'Bossa';
+  JustAudioMediaKit.protocolWhitelist = ['file', 'http', 'https'];
+  JustAudioMediaKit.bufferSize = 128 * 1024 * 1024;
+
   runApp(ModularApp(module: AppModule(), child: const AppWidget()));
 }

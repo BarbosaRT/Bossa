@@ -1,4 +1,3 @@
-import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
@@ -59,7 +58,7 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
 
     String content = widget.isSong ? 'song'.i18n() : 'playlist';
 
-    Asuka.showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: snackbarColor,
         duration: const Duration(days: 1),
@@ -86,8 +85,8 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
       Stream<PlaylistModel> playlistStream =
           parser.convertYoutubePlaylist(value).asBroadcastStream();
 
-      Asuka.hideCurrentSnackBar();
-      Asuka.showSnackBar(
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: snackbarColor,
           duration: const Duration(days: 1),
@@ -112,8 +111,8 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
       await playlistDataManager.addPlaylist(finalPlaylist!);
       finalPlaylist = await playlistDataManager.loadLastAddedPlaylist();
     }
-    Asuka.hideCurrentSnackBar();
-    Asuka.showSnackBar(
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: snackbarColor,
         content: Text(

@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
+import 'package:bossa/src/ui/components/theme_aware_snackbar.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
@@ -62,7 +62,6 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
 
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentTheme.contrastColor;
-    final backgroundAccent = colorController.currentTheme.backgroundAccent;
     final accentColor = colorController.currentTheme.accentColor;
 
     final playlistDataManager = Modular.get<PlaylistDataManager>();
@@ -175,15 +174,10 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               key.currentState?.pop();
               canTapOffline = false;
               if (isOffline) {
-                Asuka.showSnackBar(
-                  SnackBar(
-                    backgroundColor: backgroundAccent,
-                    duration: const Duration(days: 1),
-                    content: Text(
-                      'removing-songs'.i18n(),
-                      style: authorStyle,
-                    ),
-                  ),
+                ThemeAwareSnackbar.show(
+                  context: context,
+                  message: 'removing-songs'.i18n(),
+                  duration: const Duration(days: 1),
                 );
 
                 widget.playlist.icon = '';
@@ -217,14 +211,13 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
                   }
                 }
 
-                Asuka.hideCurrentSnackBar();
-                Asuka.showSnackBar(
-                  SnackBar(
-                    backgroundColor: accentColor,
-                    content: Text(
-                      'success-remove'.i18n(),
-                      style: authorStyle,
-                    ),
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                ThemeAwareSnackbar.showCustom(
+                  context: context,
+                  backgroundColor: accentColor,
+                  content: Text(
+                    'success-remove'.i18n(),
+                    style: authorStyle,
                   ),
                 );
 
@@ -242,24 +235,22 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               Stream<List<SongModel>> donwloadStream =
                   downloadPlaylistSongs().asBroadcastStream();
 
-              Asuka.showSnackBar(
-                SnackBar(
-                  backgroundColor: backgroundAccent,
-                  duration: const Duration(days: 1),
-                  content: StreamBuilder<List<SongModel>>(
-                    stream: donwloadStream,
-                    builder: (context, snapshot) {
-                      final downloaded =
-                          snapshot.data == null ? 0 : snapshot.data!.length;
-                      final progress =
-                          ((downloaded / widget.playlist.songs.length) * 100)
-                              .toInt();
-                      return Text(
-                        '${"progress-playlist".i18n()} ($downloaded / ${widget.playlist.songs.length}):  $progress%',
-                        style: authorStyle,
-                      );
-                    },
-                  ),
+              ThemeAwareSnackbar.showCustom(
+                context: context,
+                duration: const Duration(days: 1),
+                content: StreamBuilder<List<SongModel>>(
+                  stream: donwloadStream,
+                  builder: (context, snapshot) {
+                    final downloaded =
+                        snapshot.data == null ? 0 : snapshot.data!.length;
+                    final progress =
+                        ((downloaded / widget.playlist.songs.length) * 100)
+                            .toInt();
+                    return Text(
+                      '${"progress-playlist".i18n()} ($downloaded / ${widget.playlist.songs.length}):  $progress%',
+                      style: authorStyle,
+                    );
+                  },
                 ),
               );
 
@@ -276,14 +267,13 @@ class _PlaylistSnackbarState extends State<PlaylistSnackbar> {
               isOffline = true;
               canTapOffline = true;
 
-              Asuka.hideCurrentSnackBar();
-              Asuka.showSnackBar(
-                SnackBar(
-                  backgroundColor: accentColor,
-                  content: Text(
-                    'successful-download'.i18n(),
-                    style: authorStyle,
-                  ),
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              ThemeAwareSnackbar.showCustom(
+                context: context,
+                backgroundColor: accentColor,
+                content: Text(
+                  'successful-download'.i18n(),
+                  style: authorStyle,
                 ),
               );
 

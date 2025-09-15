@@ -48,6 +48,17 @@ class _PlayerPageState extends State<PlayerPage> {
     });
   }
 
+  void _updatePlaylistFromController(PlaylistUIController controller) {
+    final newPlaylist = controller.playlist;
+
+    if (newPlaylist.songs.isNotEmpty &&
+        newPlaylist.songs.length != playlist.songs.length) {
+      playlist = newPlaylist;
+      updatePalette(playlist.songs[0].icon);
+      setState(() {});
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -60,12 +71,20 @@ class _PlayerPageState extends State<PlayerPage> {
     });
 
     final playlistUIController = Modular.get<PlaylistUIController>();
-    playlist =
-        PlaylistModel.fromMap(playlistUIController.currentPlaylist.toMap());
 
-    if (playlist.songs.isNotEmpty) {
-      updatePalette(playlist.songs[0].icon);
-    }
+    // Use a post-frame callback to ensure UI controller state is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _updatePlaylistFromController(playlistUIController);
+      }
+    });
+
+    // Also add a small delay as backup in case the post-frame callback is too early
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        _updatePlaylistFromController(playlistUIController);
+      }
+    });
 
     final settingsController = Modular.get<SettingsController>();
     settingsController.addListener(() {
@@ -74,14 +93,9 @@ class _PlayerPageState extends State<PlayerPage> {
         setState(() {});
       }
     });
-    playlistUIController.addListener(() async {
-      playlist = playlistUIController.playlist;
-      if (playlist.songs.isNotEmpty) {
-        updatePalette(playlist.songs[0].icon);
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {});
-      });
+
+    playlistUIController.addListener(() {
+      _updatePlaylistFromController(playlistUIController);
     });
   }
 
@@ -162,9 +176,54 @@ class _PlayerPageState extends State<PlayerPage> {
     return StreamBuilder<int?>(
       stream: songsStream,
       builder: (context, snapshot) {
+        if (playlist.songs.isEmpty) {
+          if (snapshot.hasData && snapshot.data != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final playlistUIController = Modular.get<PlaylistUIController>();
+              _updatePlaylistFromController(playlistUIController);
+            });
+
+            Future.delayed(const Duration(milliseconds: 50), () {
+              if (mounted && playlist.songs.isEmpty) {
+                final playlistUIController =
+                    Modular.get<PlaylistUIController>();
+                _updatePlaylistFromController(playlistUIController);
+              }
+            });
+          }
+
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FaIcon(
+                  FontAwesomeIcons.music,
+                  size: 64,
+                  color: contrastAccent,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  snapshot.hasData
+                      ? 'Loading playlist...'
+                      : 'No songs in playlist',
+                  style: TextStyle(color: contrastColor, fontSize: 18),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  snapshot.hasData
+                      ? 'Please wait'
+                      : 'Add some songs to start playing',
+                  style: TextStyle(color: contrastAccent, fontSize: 14),
+                ),
+              ],
+            ),
+          );
+        }
+
         SongModel currentSong = playlist.songs[0];
         int? state = snapshot.data;
-        if (state != null) {
+
+        if (state != null && state < playlist.songs.length) {
           currentSong = playlist.songs[state];
 
           if (state != currentIndex) {
@@ -182,6 +241,10 @@ class _PlayerPageState extends State<PlayerPage> {
               songDataManager.editSong(currentSong);
             }
           }
+        } else if (state != null) {
+          // Handle case where index is out of bounds
+          print(
+              'Warning: Audio manager index $state is out of bounds for playlist with ${playlist.songs.length} songs');
         }
 
         final widgets = [

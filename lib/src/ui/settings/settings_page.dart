@@ -1,11 +1,11 @@
 import 'dart:io';
-import 'package:asuka/asuka.dart';
 import 'package:bossa/src/color/app_colors.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/data_manager.dart';
 import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
+import 'package:bossa/src/ui/components/theme_aware_snackbar.dart';
 import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:bossa/src/url/download_service.dart';
 import 'package:file_picker/file_picker.dart';
@@ -71,7 +71,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final settingsController = Modular.get<SettingsController>();
-    final downloadService = Modular.get<HttpDownloadService>();
+    final downloadService = Modular.get<DownloadService>();
 
     final colorController = Modular.get<ColorController>();
     final backgroundColor = colorController.currentTheme.backgroundColor;
@@ -82,13 +82,6 @@ class _SettingsPageState extends State<SettingsPage> {
         TextStyles().boldHeadline.copyWith(color: contrastColor);
 
     final settingStyle = TextStyles().headline2.copyWith(color: contrastColor);
-    final buttonStyle = ButtonStyle(
-      padding: WidgetStateProperty.all(EdgeInsets.zero),
-      overlayColor: WidgetStateProperty.all(Colors.transparent),
-      foregroundColor: WidgetStateProperty.all(Colors.transparent),
-      shadowColor: WidgetStateProperty.all(Colors.transparent),
-      backgroundColor: WidgetStateProperty.all(Colors.transparent),
-    );
 
     return SafeArea(
       child: SizedBox(
@@ -173,12 +166,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 const Spacer(),
                 DropdownButton<AppColors>(
                   dropdownColor: backgroundColor,
+                  value: colorController.currentTheme,
                   items: [
-                    DropdownMenuItem<DarkTheme>(
+                    DropdownMenuItem<AppColors>(
                       value: DarkTheme(),
                       child: Text('dark-theme'.i18n(), style: settingStyle),
                     ),
-                    DropdownMenuItem<LightTheme>(
+                    DropdownMenuItem<AppColors>(
                       value: LightTheme(),
                       child: Text('light-theme'.i18n(), style: settingStyle),
                     ),
@@ -208,73 +202,36 @@ class _SettingsPageState extends State<SettingsPage> {
                 Text('verify-update'.i18n(), style: settingStyle),
                 const Spacer(),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: backgroundAccent,
+                    foregroundColor: contrastColor,
+                  ),
                   onPressed: () async {
                     bool hasUpdate = await settingsController.hasUpdate();
                     if (hasUpdate) {
-                      Asuka.showSnackBar(
-                        SnackBar(
-                          padding: EdgeInsets.zero,
-                          backgroundColor: Colors.transparent,
-                          duration: const Duration(days: 1),
-                          content: Container(
-                            height: 100,
-                            width: size.width,
-                            decoration: BoxDecoration(
-                              color: backgroundAccent,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15),
+                      ThemeAwareSnackbar.show(
+                        context: context,
+                        message: 'update-found'.i18n(),
+                        duration: const Duration(days: 1),
+                        action: SnackBarAction(
+                          label: 'Download',
+                          textColor: colorController.currentAccent,
+                          onPressed: () async {
+                            await launchUrl(
+                              Uri.parse(
+                                'https://github.com/BarbosaRT/Bossa/releases',
                               ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  await launchUrl(
-                                    Uri.parse(
-                                      'https://github.com/BarbosaRT/Bossa/releases',
-                                    ),
-                                  );
-                                },
-                                style: buttonStyle,
-                                child: Text(
-                                  'update-found'.i18n(),
-                                  style: settingStyle.copyWith(
-                                    color: Colors.blue,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
                       );
                     } else {
-                      Asuka.showSnackBar(
-                        SnackBar(
-                          padding: EdgeInsets.zero,
-                          backgroundColor: Colors.transparent,
-                          duration: const Duration(days: 1),
-                          content: Container(
-                            height: 50,
-                            width: size.width,
-                            decoration: BoxDecoration(
-                              color: backgroundAccent,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                'update-not-found'.i18n(),
-                                style: settingStyle,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
+                      ThemeAwareSnackbar.showWithContainer(
+                        context: context,
+                        message: 'update-not-found'.i18n(),
+                        width: size.width,
+                        height: 50,
+                        duration: const Duration(days: 1),
                       );
                     }
                   },
@@ -288,6 +245,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ],
             ),
+            SizedBox(
+              height: x / 2,
+            ),
+            //
+            // Backups
+            //
             Row(
               children: [
                 SizedBox(
@@ -296,58 +259,24 @@ class _SettingsPageState extends State<SettingsPage> {
                 Text('Backups', style: settingStyle),
                 const Spacer(),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: backgroundAccent,
+                    foregroundColor: contrastColor,
+                  ),
                   onPressed: () async {
                     if (await saveDatabase()) {
-                      Asuka.showSnackBar(
-                        SnackBar(
-                          padding: EdgeInsets.zero,
-                          backgroundColor: Colors.transparent,
-                          content: Container(
-                            height: 70,
-                            width: size.width,
-                            decoration: BoxDecoration(
-                              color: backgroundAccent,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: Text(
-                                'backup-loaded'.i18n(),
-                                style: settingStyle,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
+                      ThemeAwareSnackbar.showWithContainer(
+                        context: context,
+                        message: 'backup-loaded'.i18n(),
+                        width: size.width,
+                        height: 70,
                       );
                     } else {
-                      Asuka.showSnackBar(
-                        SnackBar(
-                          padding: EdgeInsets.zero,
-                          backgroundColor: Colors.transparent,
-                          content: Container(
-                            height: 50,
-                            width: size.width,
-                            decoration: BoxDecoration(
-                              color: backgroundAccent,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(15),
-                                topRight: Radius.circular(15),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: Text(
-                                'error'.i18n(),
-                                style: settingStyle,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
+                      ThemeAwareSnackbar.showWithContainer(
+                        context: context,
+                        message: 'error'.i18n(),
+                        width: size.width,
+                        height: 50,
                       );
                     }
                   },
@@ -360,6 +289,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   width: x / 4,
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: backgroundAccent,
+                    foregroundColor: contrastColor,
+                  ),
                   onPressed: () async {
                     final databasePath =
                         await dataManagerInstance.getDatabasePath();
@@ -383,30 +316,12 @@ class _SettingsPageState extends State<SettingsPage> {
                     await Directory(externalDirectory).create();
                     File(databasePath).copy(
                         '$externalDirectory/${dataManagerInstance.databaseName}');
-                    Asuka.showSnackBar(
-                      SnackBar(
-                        padding: EdgeInsets.zero,
-                        backgroundColor: Colors.transparent,
-                        content: Container(
-                          height: 80,
-                          width: size.width,
-                          decoration: BoxDecoration(
-                            color: backgroundAccent,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(15.0),
-                            child: Text(
-                              '${"backup-saved".i18n()}: $externalDirectory/${dataManagerInstance.databaseName}',
-                              style: settingStyle,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
+                    ThemeAwareSnackbar.showWithContainer(
+                      context: context,
+                      message:
+                          '${"backup-saved".i18n()}: $externalDirectory/${dataManagerInstance.databaseName}',
+                      width: size.width,
+                      height: 80,
                     );
                   },
                   child: Text(
