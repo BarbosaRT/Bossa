@@ -1,4 +1,4 @@
-package com.bossa
+package com.example.bossa
 
 import io.flutter.embedding.android.FlutterActivity
 

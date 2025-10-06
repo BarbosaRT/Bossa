@@ -192,10 +192,11 @@ class _PlaylistPageState extends State<PlaylistPage> {
             title: song.title,
           ),
           onTap: () async {
+            //TODO: Mudar isso, tá demorando muito
             try {
               audioManager.pause();
               playlistUIController.setPlaylist(playlist, index: index);
-              await playlistManager.setPlaylist(playlist, initialIndex: index);
+              playlistManager.setPlaylist(playlist, initialIndex: index);
               Modular.to.pushReplacementNamed(
                 '/player',
               );
