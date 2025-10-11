@@ -3,7 +3,7 @@ import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
-import 'package:bossa/src/data/youtube_parser.dart';
+import 'package:bossa/src/data/youtube/youtube_parser_interface.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/playlist/add_to_playlist_page.dart';
@@ -12,7 +12,6 @@ import 'package:bossa/src/ui/song/song_add_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:localization/localization.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class YoutubeUrlAddPage extends StatefulWidget {
   final String? url;
@@ -47,12 +46,12 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
 
   void addCommand(String value) async {
     final colorController = Modular.get<ColorController>();
+    final youtubeParser = Modular.get<YoutubeParserInterface>();
     final snackbarColor = colorController.currentTheme.backgroundAccent;
     final contrastColor = colorController.currentTheme.contrastColor;
 
     final songDataManager = Modular.get<SongDataManager>();
     final playlistDataManager = Modular.get<PlaylistDataManager>();
-    final parser = YoutubeParser(songDataManager: songDataManager);
 
     final textStyle = TextStyles().boldHeadline2.copyWith(color: contrastColor);
 
@@ -71,19 +70,19 @@ class _YoutubeUrlAddPageState extends State<YoutubeUrlAddPage> {
     SongModel? song;
     PlaylistModel? finalPlaylist;
     if (widget.isSong) {
-      song = await parser.convertYoutubeSong(value);
+      song = await youtubeParser.convertYoutubeSong(value);
       songDataManager.addSong(song);
     } else {
-      var yt = YoutubeExplode();
-
-      var playlist =
-          await yt.playlists.get(YoutubeParser().parseYoutubePlaylist(value));
-
-      final videoCount = playlist.videoCount == null ? 0 : playlist.videoCount!;
-      yt.close();
-
+      // Get the total video count from the playlist stream
+      final playlistNonBroadcastStream =
+          youtubeParser.convertYoutubePlaylist(value);
+      List<SongModel> songs = [];
+      await for (var playlist in playlistNonBroadcastStream) {
+        songs = playlist.songs;
+      }
+      final videoCount = songs.length;
       Stream<PlaylistModel> playlistStream =
-          parser.convertYoutubePlaylist(value).asBroadcastStream();
+          youtubeParser.convertYoutubePlaylist(value).asBroadcastStream();
 
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(

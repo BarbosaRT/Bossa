@@ -68,6 +68,9 @@ dependencies:
   flutter_localizations: 
     sdk: flutter
   hugeicons: ^1.0.2
+  invidious: ^0.1.2
+  piped_client: ^0.1.2
+  shadcn_flutter: ^0.0.42
 
 dependency_overrides:
   # dart_vlc_ffi:
@@ -102,4 +105,6 @@ flutter:
   assets: 
     - assets/images/disc.png
     - assets/i18n/
+    - assets/i18n/en_US.json
+    - assets/i18n/pt_BR.json
 

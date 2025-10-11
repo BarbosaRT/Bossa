@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:bossa/models/song_model.dart';
+import 'package:bossa/src/data/youtube/youtube_parser_interface.dart';
 import 'package:bossa/src/file/file_path.dart';
 import 'package:bossa/src/url/download_service.dart';
 import 'package:bossa/src/services/song_download_manager.dart';
 import 'package:bossa/src/services/download_state_manager.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 class SongParser {
   String apiUrl =
@@ -24,14 +26,11 @@ class SongParser {
   }
 
   String parseYoutubeSongUrl(String input) {
-    String output = input.toString();
-
     if (isSongFromYoutube(input)) {
-      for (String url in youtubeUrls) {
-        output = output.replaceAll(url, '');
-      }
+      final youtubeParser = Modular.get<YoutubeParserInterface>();
+      return youtubeParser.parseYoutubeSongUrl(input);
     }
-    return output.substring(0, 11);
+    return input;
   }
 
   Future<SongModel> parseSongBeforeSave(SongModel song,

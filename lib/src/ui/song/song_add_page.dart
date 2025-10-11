@@ -2,7 +2,7 @@ import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
-import 'package:bossa/src/data/youtube_parser.dart';
+import 'package:bossa/src/data/youtube/youtube_parser_interface.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/theme_aware_snackbar.dart';
@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localization/localization.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class SongAddPage extends StatefulWidget {
   final SongModel? songToBeEdited;
@@ -149,14 +148,10 @@ class _SongAddPageState extends State<SongAddPage> {
                         await downloadManager.deleteSongFiles(songToBeAdded);
 
                         songToBeAdded.icon = '';
-                        songToBeAdded.path = '';
-
                         if (SongParser().isSongFromYoutube(songToBeAdded.url)) {
-                          final yt = YoutubeExplode();
-                          final video = await yt.videos.get(SongParser()
-                              .parseYoutubeSongUrl(songToBeAdded.url));
-                          songToBeAdded.icon = YoutubeParser()
-                              .getYoutubeThumbnail(video.thumbnails);
+                          final youtubeParser = Modular.get<YoutubeParserInterface>();
+                          final song = await youtubeParser.convertYoutubeSong(songToBeAdded.url);
+                          songToBeAdded.icon = song.icon;
                         } else {
                           songToBeAdded.icon = UIConsts.assetImage;
                         }
