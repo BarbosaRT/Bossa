@@ -514,8 +514,7 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                                           begin: Alignment.topCenter,
                                           end: Alignment.bottomCenter,
                                           colors: [
-                                            backgroundColor.withValues(
-                                                alpha: 0),
+                                            backgroundColor.withOpacity(0),
                                             backgroundColor,
                                           ],
                                         ),

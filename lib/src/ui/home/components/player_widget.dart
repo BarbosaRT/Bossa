@@ -181,10 +181,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           stops: const [0.75, 1],
-                                          colors: [
-                                            color.withValues(alpha: 0),
-                                            color
-                                          ],
+                                          colors: [color.withOpacity(0), color],
                                         ),
                                       ),
                                     )
