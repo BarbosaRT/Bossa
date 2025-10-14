@@ -3,8 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  irondash_engine_context
   media_kit_libs_windows_audio
   permission_handler_windows
+  super_native_extensions
   url_launcher_windows
 )
 

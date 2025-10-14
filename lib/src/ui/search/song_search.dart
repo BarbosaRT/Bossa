@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
@@ -11,6 +10,7 @@ import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
 import 'package:bossa/src/ui/components/detail_container.dart';
+import 'package:bossa/src/ui/components/theme_aware_snackbar.dart';
 import 'package:bossa/src/ui/library/library_container.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/ui/song/song_add_page.dart';
@@ -270,7 +270,7 @@ class SongSearch {
                   textWidth: size.width / 2 - UIConsts.spacing * 1.75,
                   detailContainer: detailContainer,
                   onTap: () async {
-                    await onYoutubeTap(song.url, song.icon);
+                    await onYoutubeTap(context, song.url, song.icon);
                   }),
             )
           : Padding(
@@ -280,7 +280,7 @@ class SongSearch {
                 author: song.author,
                 detailContainer: detailContainer,
                 onTap: () async {
-                  await onYoutubeTap(song.url, song.icon);
+                  await onYoutubeTap(context, song.url, song.icon);
                 },
                 icon: song.icon,
               ),
@@ -289,32 +289,21 @@ class SongSearch {
     return songContainers;
   }
 
-  Future<void> onYoutubeTap(String url, String icon) async {
-    final colorController = Modular.get<ColorController>();
-    final contrastColor = colorController.currentTheme.contrastColor;
-    final backgroundAccent = colorController.currentTheme.backgroundAccent;
-
+  Future<void> onYoutubeTap(
+      BuildContext context, String url, String icon) async {
     final playlistManager = Modular.get<PlaylistAudioManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
     final audioManager = Modular.get<AudioManager>();
 
-    final buttonTextStyle =
-        TextStyles().boldHeadline2.copyWith(color: contrastColor);
-
-    Asuka.showSnackBar(
-      SnackBar(
-        backgroundColor: backgroundAccent,
-        duration: const Duration(days: 1),
-        content: Text(
-          'loading-song'.i18n(),
-          style: buttonTextStyle,
-        ),
-      ),
+    ThemeAwareSnackbar.show(
+      context: context,
+      message: 'loading-song'.i18n(),
+      duration: const Duration(days: 1),
     );
 
     SongModel song = await YoutubeParser().convertYoutubeSong(url);
 
-    Asuka.hideCurrentSnackBar();
+    ThemeAwareSnackbar.hide(context);
 
     song.id = -1;
     PlaylistModel playlist = PlaylistModel(

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
+import 'package:bossa/src/ui/components/theme_aware_snackbar.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
@@ -10,7 +10,7 @@ import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
 import 'package:bossa/src/ui/components/detail_container.dart';
-import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/ui/home/home_controller.dart';
 import 'package:bossa/src/ui/library/library_container.dart';
 import 'package:bossa/src/ui/playlist/components/playlist_snackbar.dart';
 import 'package:bossa/src/url/youtube_url_add_page.dart';
@@ -180,7 +180,7 @@ class PlaylistSearch {
                   detailContainer: detailContainer,
                   onTap: () async {
                     await PlaylistSearch()
-                        .onYoutubeTap(playlist.songs.length, playlist);
+                        .onYoutubeTap(context, playlist.songs.length, playlist);
                   },
                 ),
               )
@@ -191,7 +191,8 @@ class PlaylistSearch {
                   author: '${playlist.songs.length} ${"songs".i18n()}',
                   detailContainer: detailContainer,
                   onTap: () async {
-                    await onYoutubeTap(playlist.songs.length, playlist);
+                    await onYoutubeTap(
+                        context, playlist.songs.length, playlist);
                   },
                   icon: playlist.icon,
                 ),
@@ -202,26 +203,20 @@ class PlaylistSearch {
     return output;
   }
 
-  Future<void> onYoutubeTap(int videoCount, PlaylistModel playlist) async {
+  Future<void> onYoutubeTap(
+      BuildContext context, int videoCount, PlaylistModel playlist) async {
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentTheme.contrastColor;
-    final backgroundAccent = colorController.currentTheme.backgroundAccent;
-
     final homeController = Modular.get<HomeController>();
 
     final buttonTextStyle =
         TextStyles().boldHeadline2.copyWith(color: contrastColor);
-    Asuka.showSnackBar(
-      SnackBar(
-        backgroundColor: backgroundAccent,
-        duration: const Duration(days: 1),
-        content: Text(
-          'loading-playlist'.i18n(),
-          style: buttonTextStyle,
-        ),
-      ),
+    ThemeAwareSnackbar.show(
+      context: context,
+      message: 'loading-playlist'.i18n(),
+      duration: const Duration(days: 1),
     );
-    Asuka.hideCurrentSnackBar();
+    ThemeAwareSnackbar.hide(context);
 
     videoCount = videoCount > 10 ? 10 : videoCount;
     List<SongModel> finalSongs = [];
@@ -229,25 +224,22 @@ class PlaylistSearch {
             YoutubeParser().parseYoutubePlaylist(playlist.url!), videoCount)
         .asBroadcastStream();
 
-    Asuka.showSnackBar(
-      SnackBar(
-        backgroundColor: backgroundAccent,
-        duration: const Duration(days: 1),
-        content: StreamBuilder<List<SongModel>>(
-          stream: songStream,
-          builder: (context, snapshot) {
-            final downloaded =
-                snapshot.data == null ? 0 : snapshot.data!.length;
-            if (snapshot.data != null) {
-              finalSongs = snapshot.data!;
-            }
-            final progress = ((downloaded / videoCount) * 100).toInt();
-            return Text(
-              '${"progress-playlist".i18n()} ($downloaded / $videoCount): $progress%',
-              style: buttonTextStyle,
-            );
-          },
-        ),
+    ThemeAwareSnackbar.showCustom(
+      context: context,
+      duration: const Duration(days: 1),
+      content: StreamBuilder<List<SongModel>>(
+        stream: songStream,
+        builder: (context, snapshot) {
+          final downloaded = snapshot.data == null ? 0 : snapshot.data!.length;
+          if (snapshot.data != null) {
+            finalSongs = snapshot.data!;
+          }
+          final progress = ((downloaded / videoCount) * 100).toInt();
+          return Text(
+            '${"progress-playlist".i18n()} ($downloaded / $videoCount): $progress%',
+            style: buttonTextStyle,
+          );
+        },
       ),
     );
 
@@ -258,7 +250,7 @@ class PlaylistSearch {
         title: playlist.title,
         icon: finalSongs[0].icon,
         songs: finalSongs);
-    Asuka.hideCurrentSnackBar();
+    ThemeAwareSnackbar.hide(context);
     homeController.setPlaylist(finalPlaylist);
     homeController.setCurrentPage(Pages.playlist);
     Modular.to.pushReplacementNamed(

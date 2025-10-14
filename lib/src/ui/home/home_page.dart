@@ -1,9 +1,9 @@
-import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
 import 'package:bossa/src/ui/home/components/player_widget.dart';
+import 'package:bossa/src/ui/home/home_controller.dart';
 import 'package:bossa/src/ui/library/library_page.dart';
 import 'package:bossa/src/ui/playlist/playlist_page.dart';
 import 'package:bossa/src/ui/search/search_page.dart';
@@ -13,43 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localization/localization.dart';
-
-class HomeController extends ChangeNotifier {
-  Pages _currentPage = Pages.home;
-  Pages get currentPage => _currentPage;
-
-  void setCurrentPage(Pages newPage) {
-    _currentPage = newPage;
-    notifyListeners();
-  }
-
-  PlaylistModel _currentPlaylist =
-      PlaylistModel(id: 0, title: 'all-songs'.i18n(), icon: 'icon', songs: []);
-  PlaylistModel get currentPlaylist => _currentPlaylist;
-
-  void setPlaylist(PlaylistModel newPlaylist) {
-    _currentPlaylist = newPlaylist;
-    notifyListeners();
-  }
-
-  bool _searchLibrary = false;
-  bool get searchLibrary => _searchLibrary;
-
-  void setSearchLibrary(bool value) {
-    _searchLibrary = value;
-    notifyListeners();
-  }
-
-  String _lastSearchedTopic = '';
-  String get lastSearchedTopic => _lastSearchedTopic;
-
-  void setlastSearchedTopic(String value) {
-    _lastSearchedTopic = value;
-    notifyListeners();
-  }
-}
-
-enum Pages { home, search, library, settings, playlist }
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

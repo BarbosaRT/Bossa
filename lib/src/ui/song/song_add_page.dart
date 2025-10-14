@@ -1,19 +1,19 @@
-import 'dart:io';
-import 'package:asuka/asuka.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
-import 'package:bossa/src/data/youtube_parser.dart';
+import 'package:bossa/src/data/youtube/youtube_parser_interface.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
+import 'package:bossa/src/ui/components/theme_aware_snackbar.dart';
+import 'package:bossa/src/ui/components/download_progress_widget.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
+import 'package:bossa/src/services/song_download_manager.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localization/localization.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class SongAddPage extends StatefulWidget {
   final SongModel? songToBeEdited;
@@ -34,6 +34,8 @@ class _SongAddPageState extends State<SongAddPage> {
 
   bool editing = false;
   bool saveOffline = false;
+  bool isDownloading = false;
+  String? currentDownloadId;
 
   final SongModel defaultSong = SongModel(
       id: 0,
@@ -137,64 +139,72 @@ class _SongAddPageState extends State<SongAddPage> {
             ),
             Switch(
               value: songToBeAdded.path.isNotEmpty,
-              onChanged: (value) async {
-                if (!value) {
-                  final icon = File(songToBeAdded.icon);
-                  final path = File(songToBeAdded.path);
+              onChanged: isDownloading
+                  ? null
+                  : (value) async {
+                      if (!value) {
+                        // Delete offline files
+                        final downloadManager = SongDownloadManager();
+                        await downloadManager.deleteSongFiles(songToBeAdded);
 
-                  if (await icon.exists()) {
-                    await icon.delete();
-                  }
-                  if (await path.exists()) {
-                    await path.delete();
-                  }
+                        songToBeAdded.icon = '';
+                        if (SongParser().isSongFromYoutube(songToBeAdded.url)) {
+                          final youtubeParser = Modular.get<YoutubeParserInterface>();
+                          final song = await youtubeParser.convertYoutubeSong(songToBeAdded.url);
+                          songToBeAdded.icon = song.icon;
+                        } else {
+                          songToBeAdded.icon = UIConsts.assetImage;
+                        }
+                        if (mounted) {
+                          setState(() {});
+                        }
+                        return;
+                      }
 
-                  songToBeAdded.icon = '';
-                  songToBeAdded.path = '';
+                      // Start download with progress tracking
+                      setState(() {
+                        isDownloading = true;
+                        currentDownloadId =
+                            songToBeAdded.url.hashCode.toString();
+                      });
 
-                  if (SongParser().isSongFromYoutube(songToBeAdded.url)) {
-                    final yt = YoutubeExplode();
-                    final video = await yt.videos.get(
-                        SongParser().parseYoutubeSongUrl(songToBeAdded.url));
-                    songToBeAdded.icon =
-                        YoutubeParser().getYoutubeThumbnail(video.thumbnails);
-                  } else {
-                    songToBeAdded.icon = UIConsts.assetImage;
-                  }
-                  if (mounted) {
-                    setState(() {});
-                  }
-                  return;
-                }
+                      try {
+                        songToBeAdded = await SongParser().parseSongBeforeSave(
+                          songToBeAdded,
+                          saveOffline: true,
+                          onProgress: (progress) {
+                            // Progress is handled by DownloadProgressWidget
+                          },
+                        );
 
-                Asuka.showSnackBar(
-                  SnackBar(
-                    backgroundColor: backgroundAccent,
-                    duration: const Duration(days: 1),
-                    content: Text(
-                      'downloading-song'.i18n(),
-                      style: snackbarStyle,
-                    ),
-                  ),
-                );
-                songToBeAdded = await SongParser().parseSongBeforeSave(
-                  songToBeAdded,
-                  saveOffline: true,
-                );
-                Asuka.hideCurrentSnackBar();
-                Asuka.showSnackBar(
-                  SnackBar(
-                    backgroundColor: accentColor,
-                    content: Text(
-                      'successful-download'.i18n(),
-                      style: snackbarStyle,
-                    ),
-                  ),
-                );
-                if (mounted) {
-                  setState(() {});
-                }
-              },
+                        // Use a post-frame callback to avoid BuildContext async gap
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            ThemeAwareSnackbar.show(
+                              context: context,
+                              message: 'successful-download'.i18n(),
+                            );
+                          }
+                        });
+                      } catch (e) {
+                        // Use a post-frame callback to avoid BuildContext async gap
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            ThemeAwareSnackbar.show(
+                              context: context,
+                              message: 'download-failed'.i18n(),
+                            );
+                          }
+                        });
+                      } finally {
+                        if (mounted) {
+                          setState(() {
+                            isDownloading = false;
+                            currentDownloadId = null;
+                          });
+                        }
+                      }
+                    },
             )
           ],
         ),
@@ -214,96 +224,65 @@ class _SongAddPageState extends State<SongAddPage> {
             child: GestureDetector(
               onTap: () {
                 if (widget.songToBeEdited != songToBeAdded) {
-                  Asuka.hideCurrentSnackBar();
-                  Asuka.showSnackBar(
-                    SnackBar(
-                      padding: EdgeInsets.zero,
-                      backgroundColor: Colors.transparent,
-                      duration: const Duration(days: 1),
-                      content: Container(
-                        height: 100,
-                        width: size.width,
-                        decoration: BoxDecoration(
-                          color: backgroundAccent,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(15),
-                            topRight: Radius.circular(15),
-                          ),
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        backgroundColor: backgroundAccent,
+                        title: Text(
+                          'changes-msg'.i18n(),
+                          style: snackbarStyle,
+                          textAlign: TextAlign.center,
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
+                        actions: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               Expanded(
-                                child: Text(
-                                  'changes-msg'.i18n(),
-                                  style: snackbarStyle,
-                                  textAlign: TextAlign.center,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    Modular.to.popAndPushNamed('/');
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: accentColor,
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text(
+                                      'yes'.i18n(),
+                                      style: snackbarStyle,
+                                    ),
+                                  ),
                                 ),
                               ),
+                              const SizedBox(width: 10),
                               Expanded(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          Asuka.hideCurrentSnackBar();
-                                          Modular.to.popAndPushNamed('/');
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20),
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                              color: accentColor,
-                                              borderRadius:
-                                                  BorderRadius.circular(15),
-                                            ),
-                                            padding: const EdgeInsets.all(8),
-                                            child: Text(
-                                              'yes'.i18n(),
-                                              style: snackbarStyle,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: accentColor,
+                                      borderRadius: BorderRadius.circular(15),
                                     ),
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          Asuka.hideCurrentSnackBar();
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                          ),
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                              color: accentColor,
-                                              borderRadius:
-                                                  BorderRadius.circular(15),
-                                            ),
-                                            padding: const EdgeInsets.all(8),
-                                            child: Text(
-                                              'no'.i18n(),
-                                              style: snackbarStyle,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text(
+                                      'no'.i18n(),
+                                      style: snackbarStyle,
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    ),
+                        ],
+                      );
+                    },
                   );
                 } else {
                   Modular.to.popAndPushNamed('/');
@@ -325,6 +304,8 @@ class _SongAddPageState extends State<SongAddPage> {
                 onTap: () async {
                   songToBeAdded =
                       await SongParser().parseSongBeforeSave(songToBeAdded);
+                  if (!mounted) return;
+
                   editing
                       ? songDataManager.editSong(songToBeAdded)
                       : songDataManager.addSong(songToBeAdded);
@@ -458,6 +439,20 @@ class _SongAddPageState extends State<SongAddPage> {
                               songToBeAdded.url.isNotEmpty
                                   ? offlineWidget
                                   : Container(),
+                              // Download progress widget
+                              if (currentDownloadId != null)
+                                DownloadProgressWidget(
+                                  downloadId: currentDownloadId!,
+                                  title: songToBeAdded.title.isNotEmpty
+                                      ? songToBeAdded.title
+                                      : 'downloading-song'.i18n(),
+                                  onCancel: () {
+                                    setState(() {
+                                      isDownloading = false;
+                                      currentDownloadId = null;
+                                    });
+                                  },
+                                ),
                             ],
                           ),
                         ),

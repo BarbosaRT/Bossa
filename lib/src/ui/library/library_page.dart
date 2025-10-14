@@ -5,7 +5,7 @@ import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
-import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/ui/home/home_controller.dart';
 import 'package:bossa/src/ui/library/filter_widget.dart';
 import 'package:bossa/src/ui/library/library_container.dart';
 import 'package:bossa/src/ui/playlist/components/playlist_snackbar.dart';
@@ -40,7 +40,7 @@ class _LibraryPageState extends State<LibraryPage>
 
   late TabController _tabController;
   int currentTab = 0;
-  final ScrollController _scrollController = ScrollController();
+  //final ScrollController _scrollController = ScrollController();
 
   List<PlaylistModel> playlists = [];
   List<SongModel> songs = [];
@@ -111,7 +111,7 @@ class _LibraryPageState extends State<LibraryPage>
       backgroundColor: WidgetStateProperty.all(Colors.transparent),
     );
 
-    const tabHeight = 50.0;
+    //const tabHeight = 50.0;
 
     List<Widget> songContainers = [];
     for (SongModel song in songs) {
@@ -232,8 +232,8 @@ class _LibraryPageState extends State<LibraryPage>
 
     bool isContrast = ContrastCheck().contrastCheck(accentColor, contrastColor);
     bool isHorizontal = size.width > size.height;
-    double width =
-        isHorizontal ? size.width * (1 - UIConsts.leftBarRatio) : size.width;
+    //double width =
+    //    isHorizontal ? size.width * (1 - UIConsts.leftBarRatio) : size.width;
 
     return SafeArea(
       child: Column(
@@ -277,131 +277,86 @@ class _LibraryPageState extends State<LibraryPage>
             width: isHorizontal
                 ? size.width * (1 - UIConsts.leftBarRatio)
                 : size.width,
-            child: Stack(
+            child: Column(
               children: [
-                NestedScrollView(
-                  headerSliverBuilder: (BuildContext context, bool isScroll) {
-                    return [
-                      SliverAppBar(
-                        automaticallyImplyLeading: false,
-                        pinned: true,
-                        elevation: 0,
-                        backgroundColor: backgroundColor,
-                        bottom: PreferredSize(
-                          preferredSize: const Size.fromHeight(tabHeight),
-                          child: Container(
-                            margin: EdgeInsets.only(
-                              bottom: tabHeight * 0.5 + iconSize,
-                              right: iconSize * 2,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: backgroundAccent,
-                            ),
-                            child: TabBar(
-                              dividerColor: Colors.transparent,
-                              onTap: (value) {
-                                if (mounted) {
-                                  setState(() {
-                                    currentTab = _tabController.index;
-                                  });
-                                }
-                              },
-                              padding: EdgeInsets.zero,
-                              indicatorPadding: EdgeInsets.zero,
-                              indicatorSize: TabBarIndicatorSize.label,
-                              labelPadding: EdgeInsets.zero,
-                              controller: _tabController,
-                              isScrollable: true,
-                              indicator: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.transparent,
-                                  ),
-                                ],
-                              ),
-                              tabs: [
-                                Container(
-                                  width: (width - x) / 2 - iconSize,
-                                  height: tabHeight,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    color: currentTab == 0
-                                        ? accentColor
-                                        : backgroundAccent,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'songs'.i18n(),
-                                      style: headerStyle.copyWith(
-                                        color: (currentTab == 0 && isContrast)
-                                            ? backgroundColor
-                                            : contrastColor,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: (width - x) / 2 - iconSize,
-                                  height: tabHeight,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    color: currentTab == 1
-                                        ? accentColor
-                                        : backgroundAccent,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Playlist',
-                                      style: headerStyle.copyWith(
-                                        color: (currentTab == 1 && isContrast)
-                                            ? backgroundColor
-                                            : contrastColor,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ];
-                  },
-                  controller: _scrollController,
-                  body: TabBarView(
-                    controller: _tabController,
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: x / 2, vertical: 8),
+                  child: Row(
                     children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: x / 2),
-                        child: gridEnabled
-                            ? AlignedGridView.count(
-                                crossAxisCount: 2,
-                                itemCount: songContainers.length,
-                                itemBuilder: (context, index) {
-                                  return songContainers[index];
-                                },
-                              )
-                            : ListView(
-                                children: songContainers,
-                              ),
+                      FilterChip(
+                        label: Text('songs'.i18n()),
+                        selected: currentTab == 0,
+                        selectedColor: accentColor,
+                        checkmarkColor:
+                            isContrast ? backgroundColor : contrastColor,
+                        backgroundColor: backgroundAccent,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() {
+                              currentTab = 0;
+                            });
+                          }
+                        },
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: x / 2),
-                        child: gridEnabled
-                            ? AlignedGridView.count(
-                                crossAxisCount: 2,
-                                itemCount: playlistContainers.length,
-                                itemBuilder: (context, index) {
-                                  return playlistContainers[index];
-                                },
-                              )
-                            : ListView(
-                                children: playlistContainers,
-                              ),
+                      const SizedBox(width: 8),
+                      FilterChip(
+                        label: Text('Playlist'.i18n()),
+                        selected: currentTab == 1,
+                        selectedColor: accentColor,
+                        checkmarkColor:
+                            isContrast ? backgroundColor : contrastColor,
+                        backgroundColor: backgroundAccent,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() {
+                              currentTab = 1;
+                            });
+                          }
+                        },
                       ),
                     ],
+                  ),
+                ),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(1.0, 0.0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      );
+                    },
+                    child: Container(
+                      key: ValueKey<int>(currentTab),
+                      padding: EdgeInsets.symmetric(horizontal: x / 2),
+                      child: currentTab == 0
+                          ? (gridEnabled
+                              ? AlignedGridView.count(
+                                  crossAxisCount: 2,
+                                  itemCount: songContainers.length,
+                                  itemBuilder: (context, index) {
+                                    return songContainers[index];
+                                  },
+                                )
+                              : ListView(
+                                  children: songContainers,
+                                ))
+                          : (gridEnabled
+                              ? AlignedGridView.count(
+                                  crossAxisCount: 2,
+                                  itemCount: playlistContainers.length,
+                                  itemBuilder: (context, index) {
+                                    return playlistContainers[index];
+                                  },
+                                )
+                              : ListView(
+                                  children: playlistContainers,
+                                )),
+                    ),
                   ),
                 ),
                 //

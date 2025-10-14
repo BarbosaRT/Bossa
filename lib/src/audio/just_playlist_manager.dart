@@ -4,10 +4,11 @@ import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/just_audio_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
+import 'package:bossa/src/data/youtube/piped_youtube_parser.dart';
+import 'package:bossa/src/data/youtube/youtube_parser_interface.dart';
 import 'package:bossa/src/url/url_parser.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class JustPlaylistManager implements PlaylistAudioManager {
   final player = justAudioManagerInstance.player;
@@ -16,6 +17,8 @@ class JustPlaylistManager implements PlaylistAudioManager {
     shuffleOrder: DefaultShuffleOrder(),
     children: [],
   );
+
+  final YoutubeParserInterface _youtubeParser = PipedYoutubeParser();
 
   @override
   Stream<int?> indexesStream() {
@@ -152,19 +155,10 @@ class JustPlaylistManager implements PlaylistAudioManager {
   Future<AudioSource> getAudioSourceFromString(String string,
       {MediaItem? tag}) async {
     if (SongParser().isSongFromYoutube(string)) {
-      var youtube = YoutubeExplode();
-      String parsedUrl = SongParser().parseYoutubeSongUrl(string);
-      var videoManifest =
-          await youtube.videos.streamsClient.getManifest(parsedUrl);
-      // var streamInf = videoManifest.audioOnly.sortByBitrate();
-      // var streamInfo = streamInf[streamInf.length - 1];
-      // For Highest Bitrate
-      var streamInfo = videoManifest.audioOnly.withHighestBitrate();
-
-      youtube.close();
-
+      final videoId = _youtubeParser.parseYoutubeSongUrl(string);
+      final audioUrl = await _youtubeParser.getHighestQualityAudioUrl(videoId);
       return LockCachingAudioSource(
-        streamInfo.url,
+        Uri.parse(audioUrl),
         tag: tag,
       );
     }

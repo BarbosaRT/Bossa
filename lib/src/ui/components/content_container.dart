@@ -1,4 +1,3 @@
-import 'package:asuka/asuka.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
@@ -55,7 +54,8 @@ class _ContentContainerState extends State<ContentContainer> {
     return GestureDetector(
       onTap: widget.onTap,
       onLongPress: () {
-        Asuka.showModalBottomSheet(
+        showModalBottomSheet(
+          context: context,
           backgroundColor: Colors.transparent,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(

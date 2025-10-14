@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:asuka/asuka.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/color/color_controller.dart';
@@ -255,8 +254,8 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
           child: GestureDetector(
             onTap: () {
               if (widget.playlistToBeEdited != playlistToBeAdded) {
-                Asuka.hideCurrentSnackBar();
-                Asuka.showSnackBar(
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     padding: EdgeInsets.zero,
                     backgroundColor: Colors.transparent,
@@ -290,7 +289,8 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
-                                        Asuka.hideCurrentSnackBar();
+                                        ScaffoldMessenger.of(context)
+                                            .hideCurrentSnackBar();
                                         Modular.to.popAndPushNamed('/');
                                       },
                                       child: Padding(
@@ -315,7 +315,8 @@ class _PlaylistAddPageState extends State<PlaylistAddPage> {
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
-                                        Asuka.hideCurrentSnackBar();
+                                        ScaffoldMessenger.of(context)
+                                            .hideCurrentSnackBar();
                                       },
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(

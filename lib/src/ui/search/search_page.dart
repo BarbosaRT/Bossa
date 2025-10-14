@@ -5,7 +5,7 @@ import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/data/playlist_data_manager.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
-import 'package:bossa/src/ui/home/home_page.dart';
+import 'package:bossa/src/ui/home/home_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/ui/library/filter_widget.dart';
@@ -68,9 +68,13 @@ class _SearchPageState extends State<SearchPage>
       if (_tabController.index != currentTab && mounted) {
         setState(() {
           currentTab = _tabController.index;
+          isSearchingSong = currentTab == 0;
         });
       }
     });
+
+    // Initialize currentTab based on isSearchingSong
+    currentTab = isSearchingSong ? 0 : 1;
 
     final homeController = Modular.get<HomeController>();
 
@@ -373,137 +377,106 @@ class _SearchPageState extends State<SearchPage>
                   width: isHorizontal
                       ? size.width * (1 - UIConsts.leftBarRatio)
                       : size.width,
-                  child: Stack(
+                  child: Column(
                     children: [
-                      NestedScrollView(
-                        headerSliverBuilder:
-                            (BuildContext context, bool isScroll) {
-                          return [
-                            SliverAppBar(
-                              automaticallyImplyLeading: false,
-                              pinned: true,
-                              backgroundColor: backgroundColor,
-                              bottom: PreferredSize(
-                                preferredSize: Size.fromHeight(tabHeight),
-                                child: Container(
-                                  margin: EdgeInsets.only(
-                                    bottom: 10,
-                                    right: iconSize * 1.5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    color: backgroundAccent,
-                                  ),
-                                  child: TabBar(
-                                    onTap: (value) {
-                                      isSearchingSong = value == 0;
-                                    },
-                                    padding: EdgeInsets.zero,
-                                    indicatorPadding: EdgeInsets.zero,
-                                    indicatorSize: TabBarIndicatorSize.label,
-                                    labelPadding: EdgeInsets.zero,
-                                    controller: _tabController,
-                                    isScrollable: true,
-                                    indicator: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(15),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Colors.transparent,
-                                        ),
-                                      ],
-                                    ),
-                                    tabs: [
-                                      Container(
-                                        width:
-                                            (width - x) / 2 - iconSize * 0.75,
-                                        height: widgetHeight,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          color: _tabController.index == 0
-                                              ? accentColor
-                                              : backgroundAccent,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            'songs'.i18n(),
-                                            style: headerStyle.copyWith(
-                                              color: (currentTab == 0 &&
-                                                      isContrast)
-                                                  ? backgroundColor
-                                                  : contrastColor,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width:
-                                            (width - x) / 2 - iconSize * 0.75,
-                                        height: widgetHeight,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          color: _tabController.index == 1
-                                              ? accentColor
-                                              : backgroundAccent,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            'Playlist',
-                                            style: headerStyle.copyWith(
-                                              color: (currentTab == 1 &&
-                                                      isContrast)
-                                                  ? backgroundColor
-                                                  : contrastColor,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ];
-                        },
-                        controller: _scrollController,
-                        body: TabBarView(
-                          controller: _tabController,
+                      Container(
+                        margin: EdgeInsets.symmetric(
+                            horizontal: x / 2, vertical: 8),
+                        child: Row(
                           children: [
-                            songWidget,
-                            playlistWidget,
+                            FilterChip(
+                              label: Text('songs'.i18n()),
+                              selected: currentTab == 0,
+                              selectedColor: accentColor,
+                              checkmarkColor:
+                                  isContrast ? backgroundColor : contrastColor,
+                              backgroundColor: backgroundAccent,
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setState(() {
+                                    currentTab = 0;
+                                    isSearchingSong = true;
+                                  });
+                                }
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                            FilterChip(
+                              label: Text('Playlist'.i18n()),
+                              selected: currentTab == 1,
+                              selectedColor: accentColor,
+                              checkmarkColor:
+                                  isContrast ? backgroundColor : contrastColor,
+                              backgroundColor: backgroundAccent,
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setState(() {
+                                    currentTab = 1;
+                                    isSearchingSong = false;
+                                  });
+                                }
+                              },
+                            ),
                           ],
                         ),
                       ),
-                      //
-                      // Filters
-                      //
-                      Positioned(
-                        top: iconSize / 2,
-                        right: 5,
-                        child: FilterWidget(
-                          enableDropbutton: searchLibrary,
-                          isSong: currentTab == 0,
-                          filterCallback: (v) async {
-                            if (currentTab == 0) {
-                              _songFilter = v as SongFilter;
-                            } else {
-                              _playlistFilter = v as PlaylistFilter;
-                            }
-                            searchCommand(lastSearchQuery);
-                          },
-                          gridCallback: (v) async {
-                            gridEnabled = v;
-                            loadSongs();
-                            loadPlaylists();
-                          },
+                      Expanded(
+                        child: Container(
+                          child: Stack(
+                            children: [
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                transitionBuilder: (Widget child,
+                                    Animation<double> animation) {
+                                  return SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(1.0, 0.0),
+                                      end: Offset.zero,
+                                    ).animate(animation),
+                                    child: child,
+                                  );
+                                },
+                                child: Container(
+                                  key: ValueKey<int>(currentTab),
+                                  child: currentTab == 0
+                                      ? songWidget
+                                      : playlistWidget,
+                                ),
+                              ),
+                              //
+                              // Filters
+                              //
+                              Positioned(
+                                top: iconSize / 2,
+                                right: 5,
+                                child: FilterWidget(
+                                  enableDropbutton: searchLibrary,
+                                  isSong: currentTab == 0,
+                                  filterCallback: (v) async {
+                                    if (currentTab == 0) {
+                                      _songFilter = v as SongFilter;
+                                    } else {
+                                      _playlistFilter = v as PlaylistFilter;
+                                    }
+                                    searchCommand(lastSearchQuery);
+                                  },
+                                  gridCallback: (v) async {
+                                    gridEnabled = v;
+                                    loadSongs();
+                                    loadPlaylists();
+                                  },
+                                ),
+                              ),
+
+                              SizedBox(
+                                height: x / 2,
+                              ),
+                            ],
+                          ),
                         ),
-                      )
+                      ),
                     ],
                   ),
-                ),
-                SizedBox(
-                  height: x / 2,
                 ),
               ],
             ),
