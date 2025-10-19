@@ -1,13 +1,39 @@
 import 'package:bossa/src/url/http_requester.dart';
 import 'package:flutter/widgets.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsController extends ChangeNotifier {
   bool _gradient = true;
+  String _selectedLanguageCode = 'en'; // Default to English
+  String _selectedCountryCode = 'US'; // Default to US
   bool get gradient => _gradient;
+
+  String get selectedLanguageCode => _selectedLanguageCode;
+  String get selectedCountryCode => _selectedCountryCode;
+  String get selectedLocale => '${_selectedLanguageCode}_$_selectedCountryCode';
 
   void setGradientOnPlayer(bool newValue) {
     _gradient = newValue;
+    notifyListeners();
+  }
+
+  Future<void> setSelectedLanguage(
+      String languageCode, String countryCode) async {
+    _selectedLanguageCode = languageCode;
+    _selectedCountryCode = countryCode;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selectedLanguageCode', languageCode);
+    await prefs.setString('selectedCountryCode', countryCode);
+
+    notifyListeners();
+  }
+
+  Future<void> loadLanguageSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    _selectedLanguageCode = prefs.getString('selectedLanguageCode') ?? 'en';
+    _selectedCountryCode = prefs.getString('selectedCountryCode') ?? 'US';
     notifyListeners();
   }
 

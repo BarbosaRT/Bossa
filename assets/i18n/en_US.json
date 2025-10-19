@@ -60,5 +60,7 @@
     "cancel": "CANCEL",
     "add": "ADD",
     "light-theme": "Light Theme",
-    "dark-theme": "Dark Theme"
+    "dark-theme": "Dark Theme",
+    "app-language": "App Language",
+    "language-change-restart": "Language changed"
 }

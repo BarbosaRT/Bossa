@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'package:bossa/src/color/app_colors.dart';
 import 'package:bossa/src/color/color_controller.dart';
@@ -25,6 +27,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   static double x = UIConsts.spacing;
   bool gradient = false;
+  String selectedLocale = 'en_US'; // Default
 
   @override
   void initState() {
@@ -38,11 +41,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
     final settingsController = Modular.get<SettingsController>();
     gradient = settingsController.gradient;
+    selectedLocale = settingsController.selectedLocale;
     settingsController.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {
             gradient = settingsController.gradient;
+            selectedLocale = settingsController.selectedLocale;
           });
         }
       });
@@ -184,6 +189,59 @@ class _SettingsPageState extends State<SettingsPage> {
                     final prefs = await SharedPreferences.getInstance();
                     prefs.setInt('currentTheme', Themes().indexOf(v));
                     colorController.changeTheme(v);
+                  },
+                ),
+                SizedBox(
+                  width: x / 2,
+                ),
+              ],
+            ),
+            //
+            // Language Selection
+            //
+            Row(
+              children: [
+                SizedBox(
+                  width: x / 2,
+                ),
+                Text('app-language'.i18n(), style: settingStyle),
+                const Spacer(),
+                DropdownButton<String>(
+                  dropdownColor: backgroundColor,
+                  value: selectedLocale,
+                  items: [
+                    DropdownMenuItem<String>(
+                      value: 'en_US',
+                      child: Text('English', style: settingStyle),
+                    ),
+                    DropdownMenuItem<String>(
+                      value: 'pt_BR',
+                      child: Text('Português', style: settingStyle),
+                    ),
+                  ],
+                  onChanged: (String? newValue) async {
+                    if (newValue == null) {
+                      return;
+                    }
+                    //final prefs = await SharedPreferences.getInstance();
+                    final settingsController =
+                        Modular.get<SettingsController>();
+
+                    // Extract language and country codes from the locale string
+                    List<String> localeParts = newValue.split('_');
+                    if (localeParts.length == 2) {
+                      await settingsController.setSelectedLanguage(
+                          localeParts[0], localeParts[1]);
+
+                      // Show snackbar to inform user about restart requirement
+                      ThemeAwareSnackbar.showWithContainer(
+                        context: context,
+                        message: 'language-change-restart'.i18n(),
+                        width: size.width,
+                        height: 50,
+                        duration: const Duration(seconds: 3),
+                      );
+                    }
                   },
                 ),
                 SizedBox(
