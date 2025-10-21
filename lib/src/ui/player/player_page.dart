@@ -10,6 +10,7 @@ import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
 import 'package:bossa/src/ui/settings/settings_controller.dart';
+import 'package:bossa/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -104,41 +105,6 @@ class _PlayerPageState extends State<PlayerPage> {
     playlistUIController.addListener(() {
       _updatePlaylistFromController(playlistUIController);
     });
-  }
-
-  String durationFormatter(Duration duration, {int length = 4}) {
-    length = length < 4 ? 4 : length;
-
-    String durationString = duration.toString().split('.')[0];
-    String replacement = zerosBeforeDuration(duration);
-    String replacedString = durationString.replaceFirst(replacement, '');
-
-    if (length > replacedString.length) {
-      replacement = '';
-      durationString = duration.toString().split('.')[0];
-      int diference = durationString.length - length;
-      for (var number in durationString.split('')) {
-        if (number != '0' && number != ':' || diference == 0) {
-          break;
-        }
-        replacement += number;
-        diference -= 1;
-      }
-    }
-
-    return durationString.replaceFirst(replacement, '');
-  }
-
-  String zerosBeforeDuration(Duration duration) {
-    String d = duration.toString().split('.')[0];
-    String replacement = '';
-    for (var number in d.split('')) {
-      if (number != '0' && number != ':') {
-        break;
-      }
-      replacement += number;
-    }
-    return replacement;
   }
 
   Widget playerWidget({bool isHorizontal = false}) {
@@ -585,8 +551,7 @@ class _PlayerPageState extends State<PlayerPage> {
           )
         ];
         return isHorizontal
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            ? Column(
                 children: widgets,
               )
             : Column(

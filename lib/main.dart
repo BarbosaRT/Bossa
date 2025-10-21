@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
@@ -28,4 +29,13 @@ void main() async {
   JustAudioMediaKit.bufferSize = 128 * 1024 * 1024;
 
   runApp(ModularApp(module: AppModule(), child: const AppWidget()));
+
+  doWhenWindowReady(() {
+    const initialSize = Size(800, 600);
+    appWindow.minSize = initialSize;
+    appWindow.size = initialSize;
+    appWindow.alignment = Alignment.center;
+    appWindow.title = "Bossa";
+    appWindow.show();
+  });
 }

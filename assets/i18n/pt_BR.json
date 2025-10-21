@@ -62,5 +62,7 @@
     "add": "ADICIONAR",
     "light-theme": "Tema Claro",
     "dark-theme": "Tema Escuro",
+    "app-language": "Idioma do Aplicativo",
+    "language-change-restart": "Idioma alterado"
     "coffee-theme": "Tema Café"
 }

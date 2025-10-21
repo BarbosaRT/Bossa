@@ -16,9 +16,10 @@ import 'package:bossa/src/ui/home/home_page.dart';
 import 'package:bossa/src/ui/player/player_page.dart';
 import 'package:bossa/src/ui/settings/settings_controller.dart';
 import 'package:bossa/src/url/download_service.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ThemeData;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:localization/localization.dart';
@@ -90,9 +91,15 @@ class _AppWidgetState extends State<AppWidget> {
   void initState() {
     super.initState();
     final colorController = Modular.get<ColorController>();
+    final settingsController = Modular.get<SettingsController>();
     colorController.changeAccentColor(AccentColors.blueAccent);
     init();
     colorController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    settingsController.addListener(() {
       if (mounted) {
         setState(() {});
       }
@@ -104,6 +111,9 @@ class _AppWidgetState extends State<AppWidget> {
     final settingsController = Modular.get<SettingsController>();
 
     final prefs = await SharedPreferences.getInstance();
+
+    // Load language settings
+    await settingsController.loadLanguageSettings();
 
     bool gradientOnPlayer = prefs.getBool('gradientOnPlayer') ?? true;
     settingsController.setGradientOnPlayer(gradientOnPlayer);
@@ -123,49 +133,64 @@ class _AppWidgetState extends State<AppWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final colorController = Modular.get<ColorController>();
+    //final colorController = Modular.get<ColorController>();
+    final settingsController = Modular.get<SettingsController>();
     LocalJsonLocalization.delegate.directories = ['assets/i18n'];
 
-    return MaterialApp.router(
-      localizationsDelegates: [
-        // delegate from flutter_localization
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        // delegate from localization package.
-        LocalJsonLocalization.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en', 'US'),
-        Locale('pt', 'BR'),
-      ],
-      localeResolutionCallback: (locale, supportedLocales) {
-        if (supportedLocales.contains(locale)) {
-          return locale;
-        }
+    // Get the selected locale from settings
+    Locale? selectedLocale;
+    if (settingsController.selectedLanguageCode.isNotEmpty &&
+        settingsController.selectedCountryCode.isNotEmpty) {
+      selectedLocale = Locale(settingsController.selectedLanguageCode,
+          settingsController.selectedCountryCode);
+    }
 
-        // define pt_BR as default when de language code is 'pt'
-        if (locale?.languageCode == 'pt') {
-          return const Locale('pt', 'BR');
-        }
-
-        // default language
-        return const Locale('en', 'US');
-      },
-      debugShowCheckedModeBanner: false,
-      title: 'Bossa',
-      theme: ThemeData(
-        scrollbarTheme: ScrollbarThemeData(
-            trackVisibility: WidgetStateProperty.resolveWith((states) => true)),
-        primarySwatch: colorController.currentCustomColor,
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colorController.currentTheme.backgroundAccent,
-            foregroundColor: colorController.currentTheme.contrastColor,
-          ),
-        ),
+    return ShadcnAnimatedTheme(
+      data: ThemeData(
+        colorScheme: ColorSchemes.darkDefaultColor,
       ),
-      routerConfig: Modular.routerConfig,
+      duration: Duration(milliseconds: 300),
+      child: MaterialApp.router(
+        locale: selectedLocale, // Use the selected locale
+        localizationsDelegates: [
+          // delegate from flutter_localization
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          // delegate from localization package.
+          LocalJsonLocalization.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en', 'US'),
+          Locale('pt', 'BR'),
+        ],
+        localeResolutionCallback: (locale, supportedLocales) {
+          if (supportedLocales.contains(locale)) {
+            return locale;
+          }
+
+          // Check if we have a user-selected locale
+          if (settingsController.selectedLanguageCode.isNotEmpty &&
+              settingsController.selectedCountryCode.isNotEmpty) {
+            Locale userLocale = Locale(settingsController.selectedLanguageCode,
+                settingsController.selectedCountryCode);
+            if (supportedLocales.contains(userLocale)) {
+              return userLocale;
+            }
+          }
+
+          // define pt_BR as default when de language code is 'pt'
+          if (locale?.languageCode == 'pt') {
+            return const Locale('pt', 'BR');
+          }
+
+          // default language
+          return const Locale('en', 'US');
+        },
+        debugShowCheckedModeBanner: false,
+        title: 'Bossa',
+        routerConfig: Modular.routerConfig,
+      ),
     );
   }
 }

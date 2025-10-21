@@ -71,6 +71,7 @@ dependencies:
   invidious: ^0.1.2
   piped_client: ^0.1.2
   shadcn_flutter: ^0.0.42
+  bitsdojo_window: ^0.1.6
 
 dependency_overrides:
   # dart_vlc_ffi:

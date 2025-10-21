@@ -1,8 +1,10 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/home/components/home_widget.dart';
 import 'package:bossa/src/ui/home/components/player_widget.dart';
+import 'package:bossa/src/ui/home/components/window_buttons.dart';
 import 'package:bossa/src/ui/home/home_controller.dart';
 import 'package:bossa/src/ui/library/library_page.dart';
 import 'package:bossa/src/ui/playlist/playlist_page.dart';
@@ -208,122 +210,155 @@ class _HomePageState extends State<HomePage> {
       ),
     ];
 
+    final double leftBarWidth = 200;
+    final double topPadding = 31;
+
     return Scaffold(
       backgroundColor: backgroundColor,
       body: SafeArea(
-        child: SizedBox(
-          width: size.width,
-          height: size.height,
-          child: Stack(
-            children: [
-              isHorizontal
-                  ? SizedBox(
-                      height: size.height,
-                      width: size.width,
-                      child: Row(
+        child: Stack(
+          children: [
+            WindowTitleBarBox(
+              child: WindowButtons(),
+            ),
+            //
+            // Widget Page
+            //
+            isHorizontal
+                ? SizedBox(
+                    height: size.height,
+                    width: size.width,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: leftBarWidth,
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              top: topPadding,
+                              bottom: 100,
+                              left: UIConsts.spacing,
+                              right: UIConsts.spacing / 2,
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: contrastColor.withValues(alpha: .05),
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: SizedBox(
+                                child: widgetPage,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : widgetPage,
+            //
+            // Left Pane
+            //
+            isHorizontal
+                ? Padding(
+                    padding: EdgeInsets.only(
+                      top: topPadding,
+                      bottom: 100,
+                      left: UIConsts.spacing / 2,
+                    ),
+                    child: Container(
+                      width: leftBarWidth,
+                      decoration: BoxDecoration(
+                          color: gradient
+                              ? null
+                              : contrastColor.withValues(alpha: .05),
+                          gradient: gradient
+                              ? LinearGradient(
+                                  colors: [
+                                    accentColor.withValues(alpha: 0.2),
+                                    accentColor.withValues(alpha: 0)
+                                  ],
+                                )
+                              : null,
+                          borderRadius: BorderRadius.circular(20)),
+                    ),
+                  )
+                : Container(),
+            //
+            // Buttons
+            //
+            isHorizontal
+                ? SizedBox(
+                    width: leftBarWidth,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: UIConsts.spacing,
+                        top: topPadding,
+                      ),
+                      child: ListView(
                         children: [
                           SizedBox(
-                            width: size.width * UIConsts.leftBarRatio,
+                            height: x / 2,
                           ),
+                          for (var button in buttons)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 5,
+                              ),
+                              child: button,
+                            )
+                        ],
+                      ),
+                    ),
+                  )
+                : Positioned(
+                    bottom: 0,
+                    child: Container(
+                      width: size.width,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            backgroundColor.withAlpha(0),
+                            backgroundColor,
+                          ],
+                        ),
+                      ),
+                      child: Column(
+                        children: [
                           SizedBox(
-                            height: size.height,
-                            width: size.width * (1 - UIConsts.leftBarRatio),
-                            child: widgetPage,
+                            height: x,
+                          ),
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: x / 2,
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: buttons,
+                                ),
+                              ),
+                              SizedBox(
+                                width: x / 2,
+                              )
+                            ],
                           ),
                         ],
                       ),
-                    )
-                  : widgetPage,
-
-              isHorizontal
-                  ? Container(
-                      width: size.width * UIConsts.leftBarRatio,
-                      decoration: BoxDecoration(
-                        color: gradient ? null : contrastColor.withOpacity(.05),
-                        gradient: gradient
-                            ? LinearGradient(
-                                colors: [
-                                  accentColor.withOpacity(0.2),
-                                  accentColor.withOpacity(0)
-                                ],
-                              )
-                            : null,
-                      ))
-                  : Container(),
-              //
-              // Bottom App Bar
-              //
-              isHorizontal
-                  ? SizedBox(
-                      width: size.width * UIConsts.leftBarRatio,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: ListView(
-                          children: [
-                            SizedBox(
-                              height: x / 2,
-                            ),
-                            for (var button in buttons)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 5,
-                                ),
-                                child: button,
-                              )
-                          ],
-                        ),
-                      ),
-                    )
-                  : Positioned(
-                      bottom: 0,
-                      child: Container(
-                        width: size.width,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              backgroundColor.withAlpha(0),
-                              backgroundColor,
-                            ],
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: x,
-                            ),
-                            Row(
-                              children: [
-                                SizedBox(
-                                  width: x / 2,
-                                ),
-                                Expanded(
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: buttons,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: x / 2,
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
-              //
-              // Player Part
-              //
-              Positioned(
-                bottom: isHorizontal ? 0 : x + iconSize / 2,
-                left: isHorizontal ? 0 : x / 4,
-                child: const PlayerWidget(),
-              ),
-            ],
-          ),
+                  ),
+            //
+            // Player Part
+            //
+            Positioned(
+              bottom: isHorizontal ? 0 : x + iconSize / 2,
+              left: isHorizontal ? 0 : x / 4,
+              child: const PlayerWidget(),
+            ),
+          ],
         ),
       ),
     );

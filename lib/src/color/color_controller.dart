@@ -20,16 +20,16 @@ class ColorController extends ChangeNotifier {
   void changeAccentColor(Color newColor) {
     _currentAccent = newColor;
     Map<int, Color> color = {
-      50: _currentAccent.withOpacity(.1),
-      100: _currentAccent.withOpacity(.2),
-      200: _currentAccent.withOpacity(.3),
-      300: _currentAccent.withOpacity(.4),
-      400: _currentAccent.withOpacity(.5),
-      500: _currentAccent.withOpacity(.6),
-      600: _currentAccent.withOpacity(.7),
-      700: _currentAccent.withOpacity(.8),
-      800: _currentAccent.withOpacity(.9),
-      900: _currentAccent.withOpacity(1),
+      50: _currentAccent.withValues(alpha: .1),
+      100: _currentAccent..withValues(alpha: .2),
+      200: _currentAccent..withValues(alpha: .3),
+      300: _currentAccent..withValues(alpha: .4),
+      400: _currentAccent..withValues(alpha: .5),
+      500: _currentAccent..withValues(alpha: .6),
+      600: _currentAccent..withValues(alpha: .7),
+      700: _currentAccent..withValues(alpha: .8),
+      800: _currentAccent..withValues(alpha: .9),
+      900: _currentAccent..withValues(alpha: 1),
     };
     // ignore: deprecated_member_use
     _currentCustomColor = MaterialColor(_currentAccent.value, color);

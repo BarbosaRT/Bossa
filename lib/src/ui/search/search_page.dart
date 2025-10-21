@@ -49,7 +49,6 @@ class _SearchPageState extends State<SearchPage>
 
   late TabController _tabController;
   int currentTab = 0;
-  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -292,12 +291,8 @@ class _SearchPageState extends State<SearchPage>
     }
 
     bool isContrast = ContrastCheck().contrastCheck(accentColor, contrastColor);
-    double tabHeight = 10.0;
-    double widgetHeight = 45.0;
 
     bool isHorizontal = size.width > size.height;
-    double width =
-        isHorizontal ? size.width * (1 - UIConsts.leftBarRatio) : size.width;
     return GestureDetector(
       onTap: () {
         FocusScopeNode currentFocus = FocusScope.of(context);

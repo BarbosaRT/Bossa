@@ -2,7 +2,6 @@ import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
-import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
 import 'package:bossa/src/ui/components/content_container.dart';
 import 'package:bossa/src/ui/home/home_controller.dart';
@@ -21,6 +20,8 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localization/localization.dart';
+//import 'package:bossa/src/color/contrast_check.dart';
+//import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -44,7 +45,7 @@ class _LibraryPageState extends State<LibraryPage>
 
   List<PlaylistModel> playlists = [];
   List<SongModel> songs = [];
-
+  int index = 0;
   @override
   void initState() {
     super.initState();
@@ -91,9 +92,9 @@ class _LibraryPageState extends State<LibraryPage>
 
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentTheme.contrastColor;
-    final accentColor = colorController.currentTheme.accentColor;
-    final backgroundColor = colorController.currentTheme.backgroundColor;
-    final backgroundAccent = colorController.currentTheme.backgroundAccent;
+    // final accentColor = colorController.currentTheme.accentColor;
+    // final backgroundColor = colorController.currentTheme.backgroundColor;
+    // final backgroundAccent = colorController.currentTheme.backgroundAccent;
 
     final playlistManager = Modular.get<PlaylistAudioManager>();
     final playlistUIController = Modular.get<PlaylistUIController>();
@@ -102,6 +103,7 @@ class _LibraryPageState extends State<LibraryPage>
 
     final headerStyle =
         TextStyles().boldHeadline.copyWith(color: contrastColor);
+    final textStyle = TextStyles().boldHeadline2.copyWith(color: contrastColor);
 
     final buttonStyle = ButtonStyle(
       padding: WidgetStateProperty.all(EdgeInsets.zero),
@@ -230,13 +232,38 @@ class _LibraryPageState extends State<LibraryPage>
       );
     }
 
-    bool isContrast = ContrastCheck().contrastCheck(accentColor, contrastColor);
+    List<Widget> albumContainers = [];
+    for (PlaylistModel playlist in playlists) {
+      albumContainers.add(
+        ContentContainer(
+          detailContainer: PlaylistSnackbar(
+            playlist: playlist,
+            callback: () {
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
+          onTap: () {
+            homeController.setPlaylist(playlist);
+            if (mounted) {
+              setState(() {
+                homeController.setCurrentPage(Pages.playlist);
+              });
+            }
+          },
+          icon: playlist.icon,
+        ),
+      );
+    }
+
+    //bool isContrast = ContrastCheck().contrastCheck(accentColor, contrastColor);
     bool isHorizontal = size.width > size.height;
     //double width =
     //    isHorizontal ? size.width * (1 - UIConsts.leftBarRatio) : size.width;
 
     return SafeArea(
-      child: Column(
+      child: ListView(
         children: [
           SizedBox(
             height: x / 2,
@@ -272,6 +299,33 @@ class _LibraryPageState extends State<LibraryPage>
               ],
             ),
           ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: x / 2),
+            child: SizedBox(
+              height: 160,
+              width: size.width,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text('Playlists', style: textStyle),
+                  ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (var playlist in albumContainers) playlist,
+                        SizedBox(
+                          width: x / 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           SizedBox(
             height: size.height - (isHorizontal ? 100 : 180),
             width: isHorizontal
@@ -283,37 +337,59 @@ class _LibraryPageState extends State<LibraryPage>
                   margin: EdgeInsets.symmetric(horizontal: x / 2, vertical: 8),
                   child: Row(
                     children: [
-                      FilterChip(
-                        label: Text('songs'.i18n()),
-                        selected: currentTab == 0,
-                        selectedColor: accentColor,
-                        checkmarkColor:
-                            isContrast ? backgroundColor : contrastColor,
-                        backgroundColor: backgroundAccent,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() {
-                              currentTab = 0;
-                            });
+                      // FilterChip(
+                      //   label: Text('songs'.i18n()),
+                      //   selected: currentTab == 0,
+                      //   selectedColor: accentColor,
+                      //   checkmarkColor:
+                      //       isContrast ? backgroundColor : contrastColor,
+                      //   backgroundColor: backgroundAccent,
+                      //   onSelected: (selected) {
+                      //     if (selected) {
+                      //       setState(() {
+                      //         currentTab = 0;
+                      //       });
+                      //     }
+                      //   },
+                      // ),
+                      // const SizedBox(width: 8),
+                      // FilterChip(
+                      //   label: Text('Playlist'.i18n()),
+                      //   selected: currentTab == 1,
+                      //   selectedColor: accentColor,
+                      //   checkmarkColor:
+                      //       isContrast ? backgroundColor : contrastColor,
+                      //   backgroundColor: backgroundAccent,
+                      //   onSelected: (selected) {
+                      //     if (selected) {
+                      //       setState(() {
+                      //         currentTab = 1;
+                      //       });
+                      //     }
+                      //   },
+                      // ),
+
+                      //
+                      // Filters
+                      //
+                      FilterWidget(
+                        isSong: currentTab == 0,
+                        filterCallback: (v) {
+                          if (currentTab == 0) {
+                            _songFilter = v as SongFilter;
+                            loadSongs();
+                            return;
+                          }
+                          _playlistFilter = v as PlaylistFilter;
+                          loadPlaylists();
+                        },
+                        gridCallback: (v) {
+                          gridEnabled = v;
+                          if (mounted) {
+                            setState(() {});
                           }
                         },
-                      ),
-                      const SizedBox(width: 8),
-                      FilterChip(
-                        label: Text('Playlist'.i18n()),
-                        selected: currentTab == 1,
-                        selectedColor: accentColor,
-                        checkmarkColor:
-                            isContrast ? backgroundColor : contrastColor,
-                        backgroundColor: backgroundAccent,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() {
-                              currentTab = 1;
-                            });
-                          }
-                        },
-                      ),
+                      )
                     ],
                   ),
                 ),
@@ -359,31 +435,6 @@ class _LibraryPageState extends State<LibraryPage>
                     ),
                   ),
                 ),
-                //
-                // Filters
-                //
-                Positioned(
-                  top: iconSize / 2,
-                  left: UIConsts.spacing + 5,
-                  child: FilterWidget(
-                    isSong: currentTab == 0,
-                    filterCallback: (v) {
-                      if (currentTab == 0) {
-                        _songFilter = v as SongFilter;
-                        loadSongs();
-                        return;
-                      }
-                      _playlistFilter = v as PlaylistFilter;
-                      loadPlaylists();
-                    },
-                    gridCallback: (v) {
-                      gridEnabled = v;
-                      if (mounted) {
-                        setState(() {});
-                      }
-                    },
-                  ),
-                )
               ],
             ),
           ),
