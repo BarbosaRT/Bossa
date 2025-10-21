@@ -181,6 +181,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       value: LightTheme(),
                       child: Text('light-theme'.i18n(), style: settingStyle),
                     ),
+                    DropdownMenuItem<AppColors>(
+                      value: CoffeeTheme(),
+                      child: Text('coffee-theme'.i18n(), style: settingStyle),
+                    ),
                   ],
                   onChanged: (v) async {
                     if (v == null) {
