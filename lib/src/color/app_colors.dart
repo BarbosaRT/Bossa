@@ -36,8 +36,22 @@ class LightTheme extends AppColors {
   get contrastAccent => const Color.fromRGBO(70, 70, 70, 1);
 }
 
+class CoffeeTheme extends AppColors {
+  @override
+  get backgroundColor => const Color.fromRGBO(255, 253, 208, 1); 
+
+  @override
+  get backgroundAccent => const Color.fromRGBO(245, 240, 200, 1); 
+
+  @override
+  get contrastColor => const Color.fromRGBO(60, 50, 30, 1);
+
+  @override
+  get contrastAccent => const Color.fromRGBO(90, 75, 45, 1);
+}
+
 class Themes {
-  List<AppColors> themes = [DarkTheme(), LightTheme()];
+  List<AppColors> themes = [DarkTheme(), LightTheme(), CoffeeTheme()];
 
   int indexOf(dynamic element) {
     int output = -1;
