@@ -13,8 +13,8 @@
 
 ## On Ubuntu/Debian:
 ```
-sudo apt-get install vlc
-sudo apt-get install libvlc-dev
+sudo apt install libmpv-dev mpv
+sudo apt install libmimalloc-dev libmimalloc2.0
 ```
 ## On Fedora:
 ```
