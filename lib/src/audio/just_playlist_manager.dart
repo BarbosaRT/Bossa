@@ -5,6 +5,8 @@ import 'package:bossa/src/audio/just_audio_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
 import 'package:bossa/src/data/youtube/piped_youtube_parser.dart';
+import 'package:bossa/src/data/youtube/youtube_explode_parser.dart';
+import 'package:bossa/src/data/youtube/youtube_invidious_parser.dart';
 import 'package:bossa/src/data/youtube/youtube_parser_interface.dart';
 import 'package:bossa/src/url/url_parser.dart';
 import 'package:just_audio/just_audio.dart';
@@ -18,7 +20,7 @@ class JustPlaylistManager implements PlaylistAudioManager {
     children: [],
   );
 
-  final YoutubeParserInterface _youtubeParser = PipedYoutubeParser();
+  final YoutubeParserInterface _youtubeParser = InvidiousYoutubeParser();
 
   @override
   Stream<int?> indexesStream() {
@@ -156,9 +158,9 @@ class JustPlaylistManager implements PlaylistAudioManager {
       {MediaItem? tag}) async {
     if (SongParser().isSongFromYoutube(string)) {
       final videoId = _youtubeParser.parseYoutubeSongUrl(string);
-      final audioUrl = await _youtubeParser.getHighestQualityAudioUrl(videoId);
+      final audioUri = await _youtubeParser.getHighestQualityAudioUrl(videoId);
       return LockCachingAudioSource(
-        Uri.parse(audioUrl),
+        audioUri,
         tag: tag,
       );
     }

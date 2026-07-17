@@ -126,7 +126,7 @@ class YoutubeExplodeParser implements YoutubeParserInterface {
   }
 
   @override
-  Future<String> getHighestQualityAudioUrl(String videoId) async {
+  Future<Uri> getHighestQualityAudioUrl(String videoId) async {
     var youtube = YoutubeExplode();
     String parsedUrl = SongParser().parseYoutubeSongUrl(videoId);
     var videoManifest =
@@ -135,9 +135,8 @@ class YoutubeExplodeParser implements YoutubeParserInterface {
     // var streamInfo = streamInf[streamInf.length - 1];
     // For Highest Bitrate
     var streamInfo = videoManifest.audioOnly.withHighestBitrate();
+    //youtube.close();
 
-    youtube.close();
-
-    return streamInfo.url.path;
+    return streamInfo.url;
   }
 }

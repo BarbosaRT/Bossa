@@ -7,10 +7,10 @@ import 'package:bossa/src/url/http_requester.dart';
 import 'package:invidious/invidious.dart' as invidious;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
-class YoutubeInvidiousParser implements YoutubeParserInterface {
+class InvidiousYoutubeParser implements YoutubeParserInterface {
   final invidious.InvidiousClient _invidious;
 
-  YoutubeInvidiousParser({String? serverUrl})
+  InvidiousYoutubeParser({String? serverUrl})
       : _invidious = invidious.InvidiousClient(
             server: serverUrl ?? 'https://inv.nadeko.net');
 
@@ -97,7 +97,7 @@ class YoutubeInvidiousParser implements YoutubeParserInterface {
   /// Gets the highest quality audio stream URL for a YouTube video
   /// Similar to YoutubeExplode's withHighestBitrate() functionality
   @override
-  Future<String> getHighestQualityAudioUrl(String videoId) async {
+  Future<Uri> getHighestQualityAudioUrl(String videoId) async {
     try {
       final video = await _invidious.videos.get(videoId);
 
@@ -112,7 +112,7 @@ class YoutubeInvidiousParser implements YoutubeParserInterface {
 
       if (audioFormats.isEmpty) {
         // If no audio streams found, try to use the first available format
-        return video.adaptiveFormats.first.url;
+        return Uri.parse(video.adaptiveFormats.first.url);
       }
 
       // Find the format with the highest bitrate
@@ -122,7 +122,7 @@ class YoutubeInvidiousParser implements YoutubeParserInterface {
         return aBitrate > bBitrate ? a : b;
       });
 
-      return highestBitrateFormat.url;
+      return Uri.parse(highestBitrateFormat.url);
     } catch (e) {
       throw Exception('Failed to get audio stream: $e');
     }
