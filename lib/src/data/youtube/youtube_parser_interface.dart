@@ -7,8 +7,8 @@ abstract class YoutubeParserInterface {
   String parseYoutubePlaylist(String url);
   String getYoutubeThumbnail(dynamic thumbnails);
   String parseYoutubeSongUrl(String url);
-  
+
   /// Gets the highest quality audio stream URL for a YouTube video
   /// Similar to YoutubeExplode's withHighestBitrate() functionality
-  Future<String> getHighestQualityAudioUrl(String videoId);
+  Future<Uri> getHighestQualityAudioUrl(String videoId);
 }

@@ -7,9 +7,10 @@ class PipedYoutubeParser implements YoutubeParserInterface {
   final PipedClient _pipedClient;
 
   PipedYoutubeParser({String? instanceUrl})
-      //: _pipedClient = PipedClient(instance: instanceUrl ?? 'https://pipedapi.kavin.rocks');
       : _pipedClient = PipedClient(
-            instance: instanceUrl ?? 'https://api.piped.private.coffee/');
+            instance: instanceUrl ?? 'https://pipedapi.kavin.rocks');
+  //: _pipedClient = PipedClient(
+  //      instance: instanceUrl ?? 'https://api.piped.private.coffee/');
 
   @override
   Future<SongModel> convertYoutubeSong(String url) async {
@@ -77,7 +78,7 @@ class PipedYoutubeParser implements YoutubeParserInterface {
   }
 
   @override
-  Future<String> getHighestQualityAudioUrl(String videoId) async {
+  Future<Uri> getHighestQualityAudioUrl(String videoId) async {
     try {
       // Get stream information from Piped API
       final streamInfo = await _pipedClient.streams(videoId);
@@ -93,12 +94,12 @@ class PipedYoutubeParser implements YoutubeParserInterface {
           }
         }
 
-        return highestQualityStream.url as String? ?? '';
+        return Uri.parse(highestQualityStream.url as String? ?? '');
       }
 
       //If no audio streams are available, return the first video stream as fallback
       if (streamInfo.videoStreams.isNotEmpty) {
-        return streamInfo.videoStreams.first.url as String? ?? '';
+        return Uri.parse(streamInfo.videoStreams.first.url as String? ?? '');
       }
       throw Exception('No audio streams available for this video');
     } catch (e) {

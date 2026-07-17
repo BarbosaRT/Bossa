@@ -3,7 +3,8 @@ import 'package:bossa/src/audio/just_audio_manager.dart';
 import 'package:bossa/src/audio/just_playlist_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/app_colors.dart';
-import 'package:bossa/src/data/youtube/piped_youtube_parser.dart';
+import 'package:bossa/src/data/youtube/youtube_explode_parser.dart';
+//import 'package:bossa/src/data/youtube/piped_youtube_parser.dart';
 import 'package:bossa/src/data/youtube/youtube_parser_interface.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
@@ -69,7 +70,7 @@ class AppModule extends Module {
     i.add(SongDataManager.new);
     i.add(PlaylistDataManager.new);
     // Switch between YoutubeExplodeParser and YoutubeInvidiousParser here
-    i.add<YoutubeParserInterface>(PipedYoutubeParser.new);
+    i.add<YoutubeParserInterface>(YoutubeExplodeParser.new);
   }
 
   @override
