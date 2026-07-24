@@ -64,5 +64,11 @@
     "dark-theme": "Tema Escuro",
     "app-language": "Idioma do Aplicativo",
     "language-change-restart": "Idioma alterado",
-    "coffee-theme": "Tema Café"
+    "coffee-theme": "Tema Café",
+    "youtube-provider": "Provedor do YouTube",
+    "youtube-provider-restart": "Reinício necessário para alterar o provedor",
+    "instance-url": "URL da Instância",
+    "youtube-explode": "YoutubeExplode (Direto)",
+    "invidious": "Invidious",
+    "piped": "Piped"
 }

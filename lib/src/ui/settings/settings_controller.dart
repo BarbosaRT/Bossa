@@ -7,11 +7,16 @@ class SettingsController extends ChangeNotifier {
   bool _gradient = true;
   String _selectedLanguageCode = 'en'; // Default to English
   String _selectedCountryCode = 'US'; // Default to US
+  String _youTubeProvider = 'youtube_explode';
+  String _providerInstanceUrl = '';
+  SharedPreferences? _prefs;
   bool get gradient => _gradient;
 
   String get selectedLanguageCode => _selectedLanguageCode;
   String get selectedCountryCode => _selectedCountryCode;
   String get selectedLocale => '${_selectedLanguageCode}_$_selectedCountryCode';
+  String get youTubeProvider => _youTubeProvider;
+  String get providerInstanceUrl => _providerInstanceUrl;
 
   void setGradientOnPlayer(bool newValue) {
     _gradient = newValue;
@@ -31,9 +36,30 @@ class SettingsController extends ChangeNotifier {
   }
 
   Future<void> loadLanguageSettings() async {
+    _prefs = await SharedPreferences.getInstance();
+    _selectedLanguageCode = _prefs!.getString('selectedLanguageCode') ?? 'en';
+    _selectedCountryCode = _prefs!.getString('selectedCountryCode') ?? 'US';
+    _youTubeProvider = _prefs!.getString('youTubeProvider') ?? 'youtube_explode';
+    _providerInstanceUrl = _prefs!.getString('providerInstanceUrl') ?? '';
+    notifyListeners();
+  }
+
+  Future<void> setYouTubeProvider(
+      String provider, String instanceUrl) async {
+    _youTubeProvider = provider;
+    _providerInstanceUrl = instanceUrl;
+
     final prefs = await SharedPreferences.getInstance();
-    _selectedLanguageCode = prefs.getString('selectedLanguageCode') ?? 'en';
-    _selectedCountryCode = prefs.getString('selectedCountryCode') ?? 'US';
+    await prefs.setString('youTubeProvider', provider);
+    await prefs.setString('providerInstanceUrl', instanceUrl);
+
+    notifyListeners();
+  }
+
+  Future<void> loadYouTubeProviderSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    _youTubeProvider = prefs.getString('youTubeProvider') ?? 'youtube_explode';
+    _providerInstanceUrl = prefs.getString('providerInstanceUrl') ?? '';
     notifyListeners();
   }
 

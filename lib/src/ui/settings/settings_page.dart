@@ -28,6 +28,14 @@ class _SettingsPageState extends State<SettingsPage> {
   static double x = UIConsts.spacing;
   bool gradient = false;
   String selectedLocale = 'en_US'; // Default
+  String selectedProvider = 'youtube_explode';
+  String providerInstanceUrl = '';
+  final TextEditingController _instanceUrlController = TextEditingController();
+
+  static const Map<String, String> providerDefaults = {
+    'invidious': 'https://inv.nadeko.net',
+    'piped': 'https://pipedapi.kavin.rocks',
+  };
 
   @override
   void initState() {
@@ -42,12 +50,21 @@ class _SettingsPageState extends State<SettingsPage> {
     final settingsController = Modular.get<SettingsController>();
     gradient = settingsController.gradient;
     selectedLocale = settingsController.selectedLocale;
+    selectedProvider = settingsController.youTubeProvider;
+    providerInstanceUrl = settingsController.providerInstanceUrl;
+    if (providerInstanceUrl.isNotEmpty) {
+      _instanceUrlController.text = providerInstanceUrl;
+    } else if (providerDefaults.containsKey(selectedProvider)) {
+      _instanceUrlController.text = providerDefaults[selectedProvider]!;
+    }
     settingsController.addListener(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {
             gradient = settingsController.gradient;
             selectedLocale = settingsController.selectedLocale;
+            selectedProvider = settingsController.youTubeProvider;
+            providerInstanceUrl = settingsController.providerInstanceUrl;
           });
         }
       });
@@ -55,8 +72,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<bool> saveDatabase() async {
-    await FilePicker.platform.clearTemporaryFiles();
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    await FilePicker.clearTemporaryFiles();
+    FilePickerResult? result = await FilePicker.pickFiles(
       type: FileType.any,
     );
 
@@ -222,6 +239,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       value: 'pt_BR',
                       child: Text('Português', style: settingStyle),
                     ),
+                    DropdownMenuItem<String>(
+                      value: 'fr_FR',
+                      child: Text('Français', style: settingStyle),
+                    ),
                   ],
                   onChanged: (String? newValue) async {
                     if (newValue == null) {
@@ -253,6 +274,107 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ],
             ),
+            //
+            // YouTube Provider
+            //
+            Row(
+              children: [
+                SizedBox(
+                  width: x / 2,
+                ),
+                Text('youtube-provider'.i18n(), style: settingStyle),
+                const Spacer(),
+                DropdownButton<String>(
+                  dropdownColor: backgroundColor,
+                  value: selectedProvider,
+                  items: [
+                    DropdownMenuItem<String>(
+                      value: 'youtube_explode',
+                      child:
+                          Text('youtube-explode'.i18n(), style: settingStyle),
+                    ),
+                    DropdownMenuItem<String>(
+                      value: 'invidious',
+                      child: Text('invidious'.i18n(), style: settingStyle),
+                    ),
+                    DropdownMenuItem<String>(
+                      value: 'piped',
+                      child: Text('piped'.i18n(), style: settingStyle),
+                    ),
+                  ],
+                  onChanged: (String? newValue) async {
+                    if (newValue == null) return;
+                    final settingsController =
+                        Modular.get<SettingsController>();
+
+                    String url = providerInstanceUrl;
+                    if (providerDefaults.containsKey(newValue)) {
+                      url = providerDefaults[newValue]!;
+                      _instanceUrlController.text = url;
+                    }
+
+                    await settingsController.setYouTubeProvider(newValue, url);
+                    setState(() {
+                      selectedProvider = newValue;
+                      providerInstanceUrl = url;
+                    });
+
+                    if (!mounted) return;
+                    ThemeAwareSnackbar.showWithContainer(
+                      context: context,
+                      message: 'youtube-provider-restart'.i18n(),
+                      width: size.width,
+                      height: 50,
+                      duration: const Duration(seconds: 3),
+                    );
+                  },
+                ),
+                SizedBox(
+                  width: x / 2,
+                ),
+              ],
+            ),
+            if (selectedProvider != 'youtube_explode')
+              Row(
+                children: [
+                  SizedBox(
+                    width: x / 2,
+                  ),
+                  Text('instance-url'.i18n(), style: settingStyle),
+                  const Spacer(),
+                  SizedBox(
+                    width: 200,
+                    child: TextField(
+                      controller: _instanceUrlController,
+                      style: settingStyle,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 8),
+                        border: const OutlineInputBorder(),
+                      ),
+                      onSubmitted: (value) async {
+                        final settingsController =
+                            Modular.get<SettingsController>();
+                        String url =
+                            value.trim().isNotEmpty ? value.trim() : '';
+                        if (url.isEmpty &&
+                            providerDefaults.containsKey(selectedProvider)) {
+                          url = providerDefaults[selectedProvider]!;
+                        }
+                        await settingsController.setYouTubeProvider(
+                            selectedProvider, url);
+                        setState(() {
+                          providerInstanceUrl = url;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: x / 2,
+                  ),
+                ],
+              ),
             //
             // Updates
             //
@@ -371,7 +493,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       externalDirectory =
                           await FilePathImpl().getExternalDirectory();
                     } else if (!Platform.isIOS) {
-                      String? outputFile = await FilePicker.platform.saveFile(
+                      String? outputFile = await FilePicker.saveFile(
                         dialogTitle: '${"select-dir".i18n()}:',
                         fileName: dataManagerInstance.databaseName,
                       );

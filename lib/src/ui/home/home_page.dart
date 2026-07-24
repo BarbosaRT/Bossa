@@ -210,7 +210,7 @@ class _HomePageState extends State<HomePage> {
       ),
     ];
 
-    final double leftBarWidth = 200;
+    final double leftBarWidth = 212;
     final double topPadding = 31;
 
     return Scaffold(

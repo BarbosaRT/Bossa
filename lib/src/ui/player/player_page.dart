@@ -1,3 +1,4 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bossa/models/playlist_model.dart';
 import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/audio_manager.dart';
@@ -6,6 +7,7 @@ import 'package:bossa/src/color/contrast_check.dart';
 import 'package:bossa/src/data/song_data_manager.dart';
 import 'package:bossa/src/styles/text_styles.dart';
 import 'package:bossa/src/styles/ui_consts.dart';
+import 'package:bossa/src/ui/home/components/window_buttons.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
 import 'package:bossa/src/ui/image/image_parser.dart';
@@ -215,10 +217,6 @@ class _PlayerPageState extends State<PlayerPage> {
             }
           }
         } else if (state != null) {
-          // Handle case where index is out of bounds
-          print(
-              'Warning: Audio manager index $state is out of bounds for playlist with ${playlist.songs.length} songs');
-
           // Clamp the index to valid bounds and use it
           int clampedIndex = state.clamp(0, playlist.songs.length - 1);
           if (playlist.songs.isNotEmpty) {
@@ -550,14 +548,28 @@ class _PlayerPageState extends State<PlayerPage> {
             height: x / 2,
           )
         ];
-        return isHorizontal
-            ? Column(
-                children: widgets,
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: widgets,
-              );
+        if (isHorizontal) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: imageWidth,
+                  child: widgets[0],
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: widgets[2],
+                ),
+              ],
+            ),
+          );
+        }
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: widgets,
+        );
       },
     );
   }
@@ -568,6 +580,7 @@ class _PlayerPageState extends State<PlayerPage> {
     final colorController = Modular.get<ColorController>();
     final contrastColor = colorController.currentTheme.contrastColor;
     final backgroundColor = colorController.currentTheme.backgroundColor;
+    const double topPadding = 31;
 
     final buttonStyle = ButtonStyle(
       padding: WidgetStateProperty.all(EdgeInsets.zero),
@@ -608,9 +621,16 @@ class _PlayerPageState extends State<PlayerPage> {
               ),
             ),
           ),
+          WindowTitleBarBox(
+            child: WindowButtons(),
+          ),
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: x - sliderSpacing),
+              padding: EdgeInsets.only(
+                top: topPadding,
+                left: x - sliderSpacing,
+                right: x - sliderSpacing,
+              ),
               child: Column(
                 children: [
                   SizedBox(

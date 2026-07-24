@@ -4,9 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_linux
-  irondash_engine_context
   media_kit_libs_linux
-  super_native_extensions
   url_launcher_linux
 )
 

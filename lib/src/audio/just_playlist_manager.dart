@@ -4,44 +4,38 @@ import 'package:bossa/models/song_model.dart';
 import 'package:bossa/src/audio/just_audio_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/data/song_parser.dart';
-import 'package:bossa/src/data/youtube/piped_youtube_parser.dart';
-import 'package:bossa/src/data/youtube/youtube_explode_parser.dart';
-import 'package:bossa/src/data/youtube/youtube_invidious_parser.dart';
 import 'package:bossa/src/data/youtube/youtube_parser_interface.dart';
 import 'package:bossa/src/url/url_parser.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
 class JustPlaylistManager implements PlaylistAudioManager {
   final player = justAudioManagerInstance.player;
-  ConcatenatingAudioSource playlistAudioSource = ConcatenatingAudioSource(
-    useLazyPreparation: true,
-    shuffleOrder: DefaultShuffleOrder(),
-    children: [],
-  );
 
-  final YoutubeParserInterface _youtubeParser = InvidiousYoutubeParser();
+  final YoutubeParserInterface _youtubeParser =
+      Modular.get<YoutubeParserInterface>();
 
   @override
   Stream<int?> indexesStream() {
-    return player.sequenceStateStream.map((event) => event?.currentIndex);
+    return player.sequenceStateStream.map((event) => event.currentIndex);
   }
 
   @override
   Future<void> add(String path, {MediaItem? tag}) async {
     final audioSource = await getAudioSourceFromString(path, tag: tag);
-    await playlistAudioSource.add(audioSource);
+    await player.addAudioSource(audioSource);
   }
 
   @override
   Future<void> insert(int index, String path) async {
     final audioSource = await getAudioSourceFromString(path);
-    await playlistAudioSource.insert(index, audioSource);
+    await player.insertAudioSource(index, audioSource);
   }
 
   @override
   Future<void> removeAt(int index) async {
-    await playlistAudioSource.removeAt(index);
+    await player.removeAudioSourceAt(index);
   }
 
   @override
@@ -106,14 +100,12 @@ class JustPlaylistManager implements PlaylistAudioManager {
       songAudioSources.add(audioSource);
     }
 
-    playlistAudioSource = ConcatenatingAudioSource(
-      useLazyPreparation: true,
+    await player.setAudioSources(
+      songAudioSources,
+      initialIndex: 0,
+      initialPosition: initialPosition,
       shuffleOrder: DefaultShuffleOrder(),
-      children: songAudioSources,
     );
-
-    await player.setAudioSource(playlistAudioSource,
-        initialPosition: initialPosition);
 
     // Loads the other part of the songs
     for (int index = initialIndex + length; index < songs.length; index++) {
@@ -154,15 +146,17 @@ class JustPlaylistManager implements PlaylistAudioManager {
     }
   }
 
+  static const _youtubeHeaders = {
+    'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
+  };
+
   Future<AudioSource> getAudioSourceFromString(String string,
       {MediaItem? tag}) async {
     if (SongParser().isSongFromYoutube(string)) {
       final videoId = _youtubeParser.parseYoutubeSongUrl(string);
       final audioUri = await _youtubeParser.getHighestQualityAudioUrl(videoId);
-      return LockCachingAudioSource(
-        audioUri,
-        tag: tag,
-      );
+      return AudioSource.uri(audioUri, headers: _youtubeHeaders, tag: tag);
     }
     return AudioSource.uri(getUriFromString(string), tag: tag);
   }

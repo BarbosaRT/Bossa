@@ -399,10 +399,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
-                                for (var song in songContainers) song,
-                                SizedBox(
-                                  width: x / 2,
-                                )
+                                for (var song in songContainers)
+                                  Padding(
+                                      padding: EdgeInsets.only(right: x / 2),
+                                      child: song),
                               ],
                             ),
                           ),
@@ -421,10 +421,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                             child: Row(
                               children: [
                                 for (var playlist in playlistContainers)
-                                  playlist,
-                                SizedBox(
-                                  width: x / 2,
-                                ),
+                                  Padding(
+                                    padding: EdgeInsets.only(right: x / 2),
+                                    child: playlist,
+                                  ),
                               ],
                             ),
                           ),
@@ -447,10 +447,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                             child: Row(
                               children: [
                                 for (var songSorted in songsSortedWidgets)
-                                  songSorted,
-                                SizedBox(
-                                  width: x / 2,
-                                ),
+                                  Padding(
+                                    padding: EdgeInsets.only(right: x / 2),
+                                    child: songSorted,
+                                  ),
                               ],
                             ),
                           ),

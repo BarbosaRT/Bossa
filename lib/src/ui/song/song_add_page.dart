@@ -73,7 +73,7 @@ class _SongAddPageState extends State<SongAddPage> {
   }
 
   void saveIcon() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.pickFiles(
       type: FileType.image,
     );
 
@@ -86,7 +86,7 @@ class _SongAddPageState extends State<SongAddPage> {
   }
 
   void saveSong() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['mp4', 'mp3', 'flac', 'wav', 'm4a']);
 

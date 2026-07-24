@@ -4,7 +4,8 @@ import 'package:bossa/src/audio/just_playlist_manager.dart';
 import 'package:bossa/src/audio/playlist_audio_manager.dart';
 import 'package:bossa/src/color/app_colors.dart';
 import 'package:bossa/src/data/youtube/youtube_explode_parser.dart';
-//import 'package:bossa/src/data/youtube/piped_youtube_parser.dart';
+import 'package:bossa/src/data/youtube/piped_youtube_parser.dart';
+import 'package:bossa/src/data/youtube/youtube_invidious_parser.dart';
 import 'package:bossa/src/data/youtube/youtube_parser_interface.dart';
 import 'package:bossa/src/ui/playlist/playlist_ui_controller.dart';
 import 'package:bossa/src/color/color_controller.dart';
@@ -26,36 +27,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:localization/localization.dart';
 
 class AppModule extends Module {
-  // @override
-  // List<Bind> get bindo => [
-  //       Bind((i) => ColorController()),
-  //       Bind((i) => SettingsController()),
-  //       Bind((i) => PlaylistUIController()),
-  //       Bind((i) => HomeController()),
-  //       Bind(
-  //         (i) => JustPlaylistManager(),
-  //       ),
-  //       Bind(
-  //         (i) => justAudioManagerInstance,
-  //       ),
-  //       Bind((i) => FilePathImpl()),
-  //       Bind(
-  //         (i) => HttpDownloadService(
-  //           filePath: i(),
-  //         ),
-  //       ),
-  //       Bind(
-  //         (i) => SongDataManager(
-  //           localDataManagerInstance: dataManagerInstance,
-  //           downloadService: i(),
-  //         ),
-  //       ),
-  //       Bind(
-  //         (i) => PlaylistDataManager(
-  //           localDataManagerInstance: dataManagerInstance,
-  //         ),
-  //       ),
-  //     ];
   @override
   void binds(i) {
     i.addSingleton(ColorController.new);
@@ -69,8 +40,21 @@ class AppModule extends Module {
     i.add<DownloadService>(() => HttpDownloadService(filePath: i<FilePath>()));
     i.add(SongDataManager.new);
     i.add(PlaylistDataManager.new);
-    // Switch between YoutubeExplodeParser and YoutubeInvidiousParser here
-    i.add<YoutubeParserInterface>(YoutubeExplodeParser.new);
+    i.add<YoutubeParserInterface>(() {
+      final settingsController = Modular.get<SettingsController>();
+      final provider = settingsController.youTubeProvider;
+      final instanceUrl = settingsController.providerInstanceUrl;
+      switch (provider) {
+        case 'invidious':
+          return InvidiousYoutubeParser(
+              serverUrl: instanceUrl.isNotEmpty ? instanceUrl : null);
+        case 'piped':
+          return PipedYoutubeParser(
+              instanceUrl: instanceUrl.isNotEmpty ? instanceUrl : null);
+        default:
+          return YoutubeExplodeParser();
+      }
+    });
   }
 
   @override
@@ -91,6 +75,7 @@ class _AppWidgetState extends State<AppWidget> {
   @override
   void initState() {
     super.initState();
+    LocalJsonLocalization.delegate.directories = ['assets/i18n'];
     final colorController = Modular.get<ColorController>();
     final settingsController = Modular.get<SettingsController>();
     colorController.changeAccentColor(AccentColors.blueAccent);
@@ -136,7 +121,6 @@ class _AppWidgetState extends State<AppWidget> {
   Widget build(BuildContext context) {
     //final colorController = Modular.get<ColorController>();
     final settingsController = Modular.get<SettingsController>();
-    LocalJsonLocalization.delegate.directories = ['assets/i18n'];
 
     // Get the selected locale from settings
     Locale? selectedLocale;
@@ -148,7 +132,7 @@ class _AppWidgetState extends State<AppWidget> {
 
     return ShadcnAnimatedTheme(
       data: ThemeData(
-        colorScheme: ColorSchemes.darkDefaultColor,
+        colorScheme: ColorSchemes.darkSlate,
       ),
       duration: Duration(milliseconds: 300),
       child: MaterialApp.router(
@@ -164,6 +148,7 @@ class _AppWidgetState extends State<AppWidget> {
         supportedLocales: const [
           Locale('en', 'US'),
           Locale('pt', 'BR'),
+          Locale('fr', 'FR'),
         ],
         localeResolutionCallback: (locale, supportedLocales) {
           if (supportedLocales.contains(locale)) {

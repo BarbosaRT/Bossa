@@ -38,16 +38,16 @@ class LightTheme extends AppColors {
 
 class CoffeeTheme extends AppColors {
   @override
-  get backgroundColor => const Color.fromRGBO(255, 253, 208, 1); 
+  get backgroundColor => const Color(0xFFF6F1EA);
 
   @override
-  get backgroundAccent => const Color.fromRGBO(245, 240, 200, 1); 
+  get backgroundAccent => const Color(0xFFFFFDFA);
 
   @override
-  get contrastColor => const Color.fromRGBO(60, 50, 30, 1);
+  get contrastColor => const Color(0xFF2A2420);
 
   @override
-  get contrastAccent => const Color.fromRGBO(90, 75, 45, 1);
+  get contrastAccent => const Color(0xFF6E645C);
 }
 
 class Themes {
